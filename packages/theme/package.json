@@ -1,0 +1,13 @@
+{
+  "name": "@ui8kit/theme",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --import ../../scripts/ts-ext-register.mjs --test src/*.test.ts"
+  }
+}

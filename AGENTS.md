@@ -10,7 +10,8 @@ Wireframe constructor on top of `ui8kit/contract`. Copy `.cursor/rules` and `.cu
 - **Blocks:** `packages/blocks`. Layout shells wrap kit `Box` because UI8Kit v3 has no `Block` / `Container` / `Stack` / `Grid` primitives. Semantic `tag`, `gap`, `align`, `justify`, `cols`, `py` live on those shells.
 - **Utilities:** `packages/blocks/src/classes.ts` is the only home for raw Tailwind strings in the constructor. `scripts/check-blocks.py` fails a block `.svelte` file that embeds more than **0** utility tokens.
 - **Shapes:** `TextLine`, `Heading`, `CtaShape`, `Media`, `Dot`, `Avatar`. Organisms import these and the layout shells only.
-- **App:** `apps/blocks` mounts the organisms and owns the theme toggle.
+- **App:** `apps/blocks` mounts the organisms, the theme constructor panel, dual light/dark previews, and the theme toggle. Fonts are not part of the constructor.
+- **Theme:** `packages/theme` (palette, skins, density, CSS/JSON). Details: `docs/theme.md`. Density remaps existing 8+4 utilities; it must not change `--spacing`.
 
 ## Checks (zero baseline)
 
@@ -18,6 +19,7 @@ Wireframe constructor on top of `ui8kit/contract`. Copy `.cursor/rules` and `.cu
 | --- | --- |
 | `python3 scripts/check-blocks.py` | Block root, no nested/looped Block, no bare HTML, no literal copy, no inline style, forbidden radius/shadow/palette, max raw utilities = 0 |
 | `node scripts/ui8px-gate.mjs` | Extract class maps from `classes.ts`, `ui8px lint`, `validate grid`, `validate patterns`, `validate aria`. Gate `max: 0`, blocking `UI8PX001`, `UI8PX003`, `UI8PX005`, `GRID` |
+| `node --experimental-strip-types --test packages/theme/src/*.test.ts` | Palette WCAG, density 8+4, CSS/JSON export |
 | `vitest run` | Organism structure, token classes, empty text content |
 
 Kit sources are not extracted: control recipes (`size-3`, `pr-2`) would trip layout 8+4.

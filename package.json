@@ -13,7 +13,8 @@
     "extract:px": "python3 scripts/ui8px-extract.py",
     "lint:px": "node scripts/ui8px-gate.mjs",
     "kit:install": "python3 scripts/install-kit.py",
-    "verify": "python3 scripts/check-blocks.py && node scripts/ui8px-gate.mjs && vitest run"
+    "test:theme": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/theme/src/*.test.ts",
+    "verify": "python3 scripts/check-blocks.py && node scripts/ui8px-gate.mjs && node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/theme/src/*.test.ts && vitest run"
   },
   "ui8kit": {
     "runtime": "svelte",

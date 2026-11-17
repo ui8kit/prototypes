@@ -14,7 +14,8 @@
     "paths": {
       "@ui8kit/kit": ["./packages/kit/src/index.ts"],
       "@ui8kit/kit/*": ["./packages/kit/src/*"],
-      "@ui8kit/blocks": ["./packages/blocks/src/index.ts"]
+      "@ui8kit/blocks": ["./packages/blocks/src/index.ts"],
+      "@ui8kit/theme": ["./packages/theme/src/index.ts"]
     }
   },
   "include": [

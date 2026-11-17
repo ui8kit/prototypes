@@ -17,6 +17,7 @@
   "dependencies": {
     "@ui8kit/blocks": "workspace:*",
     "@ui8kit/kit": "workspace:*",
+    "@ui8kit/theme": "workspace:*",
     "svelte": "^5.39.6"
   },
   "devDependencies": {

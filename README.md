@@ -10,7 +10,8 @@ This is not a marketing site and not an idea dump. Blocks are organisms of recta
 | --- | --- |
 | `packages/kit` | Official UI8Kit Svelte primitives (CLI/registry). Do not edit by hand. |
 | `packages/blocks` | Layout shells, placeholder shapes, and organism blocks. |
-| `apps/blocks` | Showcase. Theme toggle lives here, not in blocks. |
+| `packages/theme` | Palette, skins, density, radius, CSS/JSON. No fonts. |
+| `apps/blocks` | Showcase, theme constructor panel, dual light/dark block preview. |
 
 ## Constructor rules
 
@@ -34,4 +35,6 @@ bun run kit:install     # reinstall primitives (CLI, else GitHub registry)
 
 ## Theme
 
-`apps/blocks` toggles `dark` on `html` and stores `ui8kit-theme` in `localStorage`. Placeholder `Media` swaps light/dark hatches with `dark:` utilities from the shared class map.
+The constructor in `apps/blocks` live-previews both blocks in light and dark. Skins, a colour wheel (9 harmonies, 16 presets, AA/AAA), radius (0–16px), and density (`compact` / `default` / `comfortable` on the 8+4 grid) live in `packages/theme`. Export JSON (`prototypes-theme` v1) or CSS variables. Fonts are excluded.
+
+Storage: `prototypes:v1:theme` and `ui8kit-theme` (chrome mode). `Media` swaps hatches with `dark:` utilities scoped to `[data-mode="dark"]` on each preview frame. See `docs/theme.md`.
