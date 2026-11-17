@@ -1,0 +1,64 @@
+{
+  "utilities": {
+    "rounded-sm": {
+      "reason": "Wireframes use only rounded and rounded-full.",
+      "suggest": ["rounded"]
+    },
+    "rounded-md": {
+      "reason": "Wireframes use only rounded and rounded-full.",
+      "suggest": ["rounded"]
+    },
+    "rounded-lg": {
+      "reason": "Wireframes use only rounded and rounded-full.",
+      "suggest": ["rounded"]
+    },
+    "rounded-xl": {
+      "reason": "Wireframes use only rounded and rounded-full.",
+      "suggest": ["rounded"]
+    },
+    "rounded-2xl": {
+      "reason": "Wireframes use only rounded and rounded-full.",
+      "suggest": ["rounded"]
+    },
+    "rounded-3xl": {
+      "reason": "Wireframes use only rounded and rounded-full.",
+      "suggest": ["rounded"]
+    },
+    "shadow": {
+      "reason": "Wireframes have no elevation.",
+      "suggest": ["shadow-none"]
+    },
+    "shadow-sm": {
+      "reason": "Wireframes have no elevation.",
+      "suggest": ["shadow-none"]
+    },
+    "shadow-md": {
+      "reason": "Wireframes have no elevation.",
+      "suggest": ["shadow-none"]
+    },
+    "shadow-lg": {
+      "reason": "Wireframes have no elevation.",
+      "suggest": ["shadow-none"]
+    },
+    "shadow-xl": {
+      "reason": "Wireframes have no elevation.",
+      "suggest": ["shadow-none"]
+    },
+    "bg-red-500": {
+      "reason": "Use semantic color tokens instead of raw palette colors.",
+      "suggest": ["bg-destructive"]
+    },
+    "text-red-500": {
+      "reason": "Use semantic color tokens instead of raw palette colors.",
+      "suggest": ["text-destructive"]
+    },
+    "bg-blue-500": {
+      "reason": "Use semantic color tokens instead of raw palette colors.",
+      "suggest": ["bg-primary"]
+    },
+    "bg-gradient-to-r": {
+      "reason": "Gradients are not part of the wireframe constructor.",
+      "suggest": ["bg-muted"]
+    }
+  }
+}

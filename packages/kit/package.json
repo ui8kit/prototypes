@@ -1,0 +1,25 @@
+{
+  "name": "@ui8kit/kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "svelte": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./utils": "./src/utils/index.ts",
+    "./ui/*": "./src/ui/*"
+  },
+  "ui8kit": {
+    "runtime": "svelte",
+    "kit": ["src/ui", "src/utils"],
+    "composition": [],
+    "blockRoot": []
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1"
+  }
+}

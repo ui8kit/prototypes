@@ -1,0 +1,6 @@
+/** Hatched placeholder frames as data URIs. Used only as Image `src`. */
+export const MEDIA_LIGHT =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjZTRlNGU3Ii8+PHBhdGggZD0iTS04IDE2TDE2IC04TTAgNjRMNjQgME00OCA3Mkw3MiA0OCIgc3Ryb2tlPSIjYTFhMWFhIiBzdHJva2Utd2lkdGg9IjgiLz48L3N2Zz4=";
+
+export const MEDIA_DARK =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjMjcyNzJhIi8+PHBhdGggZD0iTS04IDE2TDE2IC04TTAgNjRMNjQgME00OCA3Mkw3MiA0OCIgc3Ryb2tlPSIjNTI1MjViIiBzdHJva2Utd2lkdGg9IjgiLz48L3N2Zz4=";

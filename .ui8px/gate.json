@@ -1,0 +1,5 @@
+{
+  "max": 0,
+  "blocking": ["UI8PX001", "UI8PX003", "UI8PX005", "GRID"],
+  "why": "8+4 for organisms and blocks; new constructor starts at zero"
+}

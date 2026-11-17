@@ -1,0 +1,14 @@
+{
+  "defaultScope": "layout",
+  "scopes": [
+    {
+      "name": "layout",
+      "files": [
+        "packages/blocks/**",
+        ".ui8px/extract/**",
+        ".ui8px/extract/*.html"
+      ],
+      "spacing": "layout"
+    }
+  ]
+}

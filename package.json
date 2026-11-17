@@ -1,0 +1,35 @@
+{
+  "name": "prototypes",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*", "apps/*"],
+  "packageManager": "bun@1.2.21",
+  "scripts": {
+    "dev": "bun run --filter @ui8kit/blocks-app dev",
+    "build": "bun run --filter @ui8kit/blocks-app build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "check:blocks": "python3 scripts/check-blocks.py",
+    "extract:px": "python3 scripts/ui8px-extract.py",
+    "lint:px": "node scripts/ui8px-gate.mjs",
+    "kit:install": "python3 scripts/install-kit.py",
+    "verify": "python3 scripts/check-blocks.py && node scripts/ui8px-gate.mjs && vitest run"
+  },
+  "ui8kit": {
+    "runtime": "svelte",
+    "aria": {
+      "mode": "full",
+      "patterns": []
+    }
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "@testing-library/svelte": "^5.2.8",
+    "@types/node": "^22.10.0",
+    "jsdom": "^26.1.0",
+    "svelte": "^5.39.6",
+    "typescript": "^5.8.3",
+    "ui8px": "0.2.5",
+    "vitest": "^3.2.4"
+  }
+}

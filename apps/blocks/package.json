@@ -1,0 +1,28 @@
+{
+  "name": "@ui8kit/blocks-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "ui8kit": {
+    "runtime": "svelte",
+    "kit": [],
+    "composition": ["src"],
+    "blockRoot": ["src"]
+  },
+  "dependencies": {
+    "@ui8kit/blocks": "workspace:*",
+    "@ui8kit/kit": "workspace:*",
+    "svelte": "^5.39.6"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "@tailwindcss/vite": "^4.1.13",
+    "tailwindcss": "^4.1.13",
+    "vite": "^7.1.7"
+  }
+}

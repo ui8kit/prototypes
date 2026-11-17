@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+"""Structural discipline for packages/blocks.
+
+Fails when a block file leaks raw utility classes, bare HTML, nested Block,
+literal copy, or forbidden style tokens. Layout and shape files may compose
+kit primitives; they still must not embed Tailwind string literals.
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+BLOCKS = ROOT / "packages" / "blocks" / "src"
+MAX_RAW_UTILITIES = 0
+
+ORGANISM_DIRS = {"features-team", "hero-split"}
+LAYOUT_DIRS = {"layout"}
+SHAPE_DIRS = {"shapes"}
+
+UTILITY_TOKEN = re.compile(
+    r"(?:[a-z0-9-]+:)*"
+    r"(?:flex|inline-flex|grid|block|hidden|contents|sr-only|"
+    r"items-|justify-|content-|self-|"
+    r"gap-|p[trblxy]?-|m[trblxy]?-|"
+    r"w-|h-|min-w-|min-h-|max-w-|max-h-|"
+    r"text-|font-|leading-|tracking-|"
+    r"bg-|border|rounded|shadow|object-|aspect-|overflow-|"
+    r"relative|absolute|fixed|sticky|static|inset-|"
+    r"col-span-|row-span-|order-|basis-|grow|shrink|"
+    r"container|mx-auto)"
+)
+
+CLASS_LITERAL = re.compile(
+    r"""class\s*=\s*(?:"([^"]*)"|'([^']*)'|{\s*"([^"]*)"\s*}|{\s*'([^']*)'\s*})"""
+)
+CN_STRING = re.compile(r"""\bcn\s*\((.*?)\)""", re.S)
+QUOTED = re.compile(r"""["'`]([^"'`]+)["'`]""")
+LOWER_TAG = re.compile(r"<(?P<tag>[a-z][a-z0-9]*)\b")
+BLOCK_OPEN = re.compile(r"<Block\b")
+EACH_BLOCK = re.compile(r"\{#each\b[\s\S]*?<Block\b", re.M)
+STYLE_ATTR = re.compile(r"\bstyle\s*=")
+FORBIDDEN_CLASS = re.compile(
+    r"\b(?:rounded-(?:sm|md|lg|xl|2xl|3xl)|shadow(?:-sm|-md|-lg|-xl)?|"
+    r"bg-gradient-|from-|via-|to-(?:r|l|t|b|tr|tl|br|bl)\b|"
+    r"bg-(?:red|blue|green|yellow|purple|pink|orange|zinc|slate|gray|neutral|stone)-\d+|"
+    r"text-(?:red|blue|green|yellow|purple|pink|orange)-\d+)\b"
+)
+LITERAL_TEXT = re.compile(r">([^<{]*[A-Za-z][^<{]*)<")
+LITERAL_ATTR = re.compile(
+    r"""\b(?:aria-label|alt|title|placeholder|label)\s*=\s*["']([^"']*[A-Za-z][^"']*)["']"""
+)
+ALLOWED_TAGS = {
+    "script",
+    "style",
+}
+
+ALLOWED_SHAPE_IMPORTS = {
+    "Avatar",
+    "CtaShape",
+    "Dot",
+    "Heading",
+    "Media",
+    "TextLine",
+}
+ALLOWED_LAYOUT_IMPORTS = {"Block", "Container", "Grid", "Group", "Stack"}
+
+
+def strip_comments(source: str) -> str:
+    source = re.sub(r"<!--.*?-->", "", source, flags=re.S)
+    source = re.sub(r"<script[\s\S]*?</script>", " ", source)
+    return source
+
+
+def tokens_in(value: str) -> list[str]:
+    return [part for part in value.split() if UTILITY_TOKEN.match(part)]
+
+
+def count_raw_utilities(source: str) -> tuple[int, list[str]]:
+    found: list[str] = []
+    for match in CLASS_LITERAL.finditer(source):
+        raw = next((group for group in match.groups() if group is not None), "")
+        found.extend(tokens_in(raw))
+    for match in CN_STRING.finditer(source):
+        for quoted in QUOTED.findall(match.group(1)):
+            found.extend(tokens_in(quoted))
+    return len(found), found
+
+
+def kind_for(path: Path) -> str:
+    rel = path.relative_to(BLOCKS)
+    top = rel.parts[0]
+    if top in ORGANISM_DIRS:
+        return "organism"
+    if top in LAYOUT_DIRS:
+        return "layout"
+    if top in SHAPE_DIRS:
+        return "shape"
+    return "other"
+
+
+def check_file(path: Path) -> list[str]:
+    errors: list[str] = []
+    source = path.read_text(encoding="utf-8")
+    markup = strip_comments(source)
+    kind = kind_for(path)
+    rel = path.relative_to(ROOT).as_posix()
+
+    count, found = count_raw_utilities(source)
+    print(f"raw-utilities {rel}: {count} (budget {MAX_RAW_UTILITIES})")
+    if count > MAX_RAW_UTILITIES:
+        errors.append(
+            f"{rel}: {count} raw utility classes {found}; budget is {MAX_RAW_UTILITIES}. "
+            "Move them to packages/blocks/src/classes.ts and consume layout/shape props."
+        )
+
+    if STYLE_ATTR.search(markup):
+        errors.append(f"{rel}: inline style is not allowed")
+
+    forbidden = FORBIDDEN_CLASS.findall(source)
+    if forbidden:
+        errors.append(f"{rel}: forbidden classes {forbidden}")
+
+    if kind == "organism":
+        opens = BLOCK_OPEN.findall(source)
+        if len(opens) != 1:
+            errors.append(f"{rel}: expected exactly one Block root, found {len(opens)}")
+        if EACH_BLOCK.search(source):
+            errors.append(f"{rel}: Block inside {{#each}} is not allowed")
+        for match in LOWER_TAG.finditer(markup):
+            tag = match.group("tag")
+            if tag not in ALLOWED_TAGS:
+                errors.append(f"{rel}: bare HTML <{tag}>")
+        for match in LITERAL_TEXT.finditer(markup):
+            text = match.group(1).strip()
+            if text:
+                errors.append(f"{rel}: literal text {text!r}")
+        for match in LITERAL_ATTR.finditer(source):
+            errors.append(f"{rel}: literal naming text {match.group(1)!r}")
+
+    return errors
+
+
+def main() -> int:
+    files = sorted(BLOCKS.rglob("*.svelte"))
+    if not files:
+        print("no block svelte files", file=sys.stderr)
+        return 1
+
+    errors: list[str] = []
+    print(f"max raw utility classes per block file: {MAX_RAW_UTILITIES}")
+    print(
+        "budget justification: remaining utilities live in classes.ts; "
+        "organisms pass Block/Container/Stack/Grid/shape props only."
+    )
+    for path in files:
+        errors.extend(check_file(path))
+
+    if errors:
+        print("check-blocks failed:", file=sys.stderr)
+        for error in errors:
+            print(f"  {error}", file=sys.stderr)
+        return 1
+
+    print("check-blocks: ok")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

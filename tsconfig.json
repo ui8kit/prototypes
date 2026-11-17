@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@ui8kit/kit": ["./packages/kit/src/index.ts"],
+      "@ui8kit/kit/*": ["./packages/kit/src/*"],
+      "@ui8kit/blocks": ["./packages/blocks/src/index.ts"]
+    }
+  },
+  "include": [
+    "apps/**/*.ts",
+    "apps/**/*.svelte",
+    "packages/**/*.ts",
+    "packages/**/*.svelte",
+    "scripts/**/*.mjs"
+  ]
+}
