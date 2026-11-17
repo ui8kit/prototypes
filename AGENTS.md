@@ -11,7 +11,7 @@ Wireframe constructor on top of `ui8kit/contract`. Copy `.cursor/rules` and `.cu
 - **Utilities:** `packages/blocks/src/classes.ts` is the only home for raw Tailwind strings in the constructor. `scripts/check-blocks.py` fails a block `.svelte` file that embeds more than **0** utility tokens.
 - **Shapes:** `TextLine`, `Heading`, `CtaShape`, `Media`, `Dot`, `Avatar`. Organisms import these and the layout shells only.
 - **App:** `apps/blocks` mounts the organisms, the theme constructor panel, dual light/dark previews, and the theme toggle. Fonts are not part of the constructor.
-- **Theme:** `packages/theme` (palette, skins, density, CSS/JSON). Details: `docs/theme.md`. Density remaps existing 8+4 utilities; it must not change `--spacing`.
+- **Theme:** `packages/theme` (palette, skins, density, section padding, CSS/JSON). Details: `docs/theme.md`. Density and section padding remap existing 8+4 utilities; they must not change `--spacing`. Section padding steps are multiples of 8px.
 
 ## Checks (zero baseline)
 

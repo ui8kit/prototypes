@@ -8,7 +8,7 @@
   const style = $derived(previewStyle(theme, mode));
 </script>
 
-<Box class="ui8-preview" data-mode={mode} data-density={theme.density} {style} data-testid={"preview-" + mode}>
+<Box class="ui8-preview" data-mode={mode} data-density={theme.density} data-section-padding={theme.sectionPadding} {style} data-testid={"preview-" + mode}>
   <Text tag="h2" class="ui8-preview-label">{label}</Text>
   <FeaturesTeam />
   <HeroSplit />

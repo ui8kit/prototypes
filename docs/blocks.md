@@ -49,4 +49,4 @@ Absorbed as:
 
 All raw class strings: `packages/blocks/src/classes.ts`. Layout/shape components read maps. Organism files must report **0** raw utilities (`scripts/check-blocks.py`).
 
-Density in `apps/blocks` remaps `py-16`, `gap-8`, `h-10`, `w-24`, and `h-4` under `[data-density]`. Block class names do not change. See `docs/theme.md`.
+Density in `apps/blocks` remaps `gap-8`, `h-10`, `w-24`, and `h-4` under `[data-density]`. Section padding remaps Block `py-16` via `--theme-section-py` / `--theme-section-py-lg` (compact 32/64, default 64/128, spacious 96/160). Block class names do not change. See `docs/theme.md`.

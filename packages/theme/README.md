@@ -10,6 +10,7 @@ Ported from [codegen-x/ui8kit](https://github.com/codegen-x/ui8kit) `packages/th
 - **Skins:** 16 named skins. Without a custom palette, OKLab swatches become HSL for primary/accent and the neutrals stay the skin's lightness.
 - **Radius:** `0 | 4 | 8 | 12 | 16` px, written to `--radius`.
 - **Density:** `compact | default | comfortable`. Emits `--theme-*` px values on the 8+4 grid. Does not change Tailwind `--spacing`.
-- **Export:** JSON (`prototypes-theme` v1) and a CSS file (`:root` + `.dark` + `[data-density]`).
+- **Section padding:** `compact | default | spacious` (32/64, 64/128, 96/160 px). Independent of density. Block class stays `py-16`.
+- **Export:** JSON (`prototypes-theme` v1) and a CSS file (`:root` + `.dark` + `[data-density]` + `[data-section-padding]`).
 
 See `docs/theme.md` in the repo root for the token-role table and how `apps/stock` maps onto this package.

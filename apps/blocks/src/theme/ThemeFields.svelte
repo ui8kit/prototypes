@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Box, Button, Label, Radio, Select, Text } from "@ui8kit/kit";
   import { Stack } from "@ui8kit/blocks";
-  import { DENSITIES, RADII, SKIN_IDS } from "@ui8kit/theme";
+  import { DENSITIES, RADII, SECTION_PADDINGS, SKIN_IDS } from "@ui8kit/theme";
   import { paletteText, skinLabels, themeText } from "../content/theme";
   import { appTheme, themeCtl } from "./ctl.svelte";
 
@@ -12,6 +12,11 @@
     compact: "Compact",
     default: "Default",
     comfortable: "Comfortable",
+  };
+  const sectionPaddingLabels: Record<string, string> = {
+    compact: "Compact · 32 / 64 px",
+    default: "Default · 64 / 128 px",
+    spacious: "Spacious · 96 / 160 px",
   };
 
   function onSkin(raw: string): void {
@@ -89,6 +94,22 @@
             onchange={() => themeCtl.setField("density", d)}
           />
           <Text tag="span">{densityLabels[d]}</Text>
+        </Label>
+      {/each}
+    </Box>
+  </Box>
+  <Box class="ui8-theme-field">
+    <Text tag="span" class="ui8-palette-label" id="theme-section-padding-legend">{themeText.sectionPadding}</Text>
+    <Box class="ui8-palette-contrast-row" role="radiogroup" aria-labelledby="theme-section-padding-legend" data-testid="theme-section-padding">
+      {#each SECTION_PADDINGS as p (p)}
+        <Label class="ui8-palette-choice">
+          <Radio
+            name="theme-section-padding"
+            value={p}
+            checked={t.sectionPadding === p}
+            onchange={() => themeCtl.setField("sectionPadding", p)}
+          />
+          <Text tag="span">{sectionPaddingLabels[p]}</Text>
         </Label>
       {/each}
     </Box>

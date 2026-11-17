@@ -1,5 +1,6 @@
 import { css as hslCss, paletteTokens, withForeground, type Mode } from "./palette";
 import { densityVars } from "./density";
+import { sectionPaddingVars } from "./section-padding";
 import { labToHsl, SKIN_COLORS, type SkinId } from "./skins";
 import { NEUTRAL_TOKENS } from "./neutral-tokens";
 import { SKIN_NEUTRALS } from "./skin-neutrals";
@@ -109,7 +110,10 @@ export function colorVars(theme: GlobalTheme, mode: Mode): Record<string, string
 }
 
 export function layoutVars(theme: GlobalTheme): Record<string, string> {
-  const out: Record<string, string> = { ...densityVars(theme.density) };
+  const out: Record<string, string> = {
+    ...densityVars(theme.density),
+    ...sectionPaddingVars(theme.sectionPadding),
+  };
   if (theme.radius !== null) out["--radius"] = `${theme.radius}px`;
   return out;
 }
@@ -127,19 +131,23 @@ function decls(vars: Record<string, string>, indent = "  "): string {
     .join("\n");
 }
 
-/** CSS file with `:root` (light) and `.dark` (dark), plus density/radius. */
+/** CSS file with `:root` (light) and `.dark` (dark), plus density / section padding / radius. */
 export function exportCss(theme: GlobalTheme): string {
   const light = cssProperties(theme, "light");
   const darkColors = colorVars(theme, "dark");
   const dark: Record<string, string> = {};
   for (const [k, v] of Object.entries(darkColors)) dark[`--${k}`] = v;
   const density = theme.density !== "default" ? `[data-density="${theme.density}"]` : null;
+  const section = theme.sectionPadding !== "default" ? `[data-section-padding="${theme.sectionPadding}"]` : null;
   const parts = [`/* prototypes-theme v1 */`, `:root {`, decls(light), `}`];
   if (Object.keys(dark).length) {
     parts.push(``, `.dark {`, decls(dark), `}`);
   }
   if (density) {
     parts.push(``, `${density} {`, decls(densityVars(theme.density)), `}`);
+  }
+  if (section) {
+    parts.push(``, `${section} {`, decls(sectionPaddingVars(theme.sectionPadding)), `}`);
   }
   return parts.join("\n") + "\n";
 }

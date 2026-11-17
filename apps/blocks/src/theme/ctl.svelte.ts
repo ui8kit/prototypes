@@ -49,6 +49,7 @@ export function applyTheme(): void {
   const root = document.documentElement;
   const { theme, mode } = appTheme.state;
   root.setAttribute("data-density", theme.density);
+  root.setAttribute("data-section-padding", theme.sectionPadding);
   applied = applyVars(root, cssProperties(theme, mode), applied);
   writeTheme(STORAGE_KEY, theme);
   try {

@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { DENSITIES, DENSITY_SCALE, densityVars, onGrid } from "./density";
+import { SECTION_PADDINGS, SECTION_PADDING_SCALE, sectionPaddingVars } from "./section-padding";
 import { RADII, SKIN_IDS, labToHsl } from "./skins";
 import { SKIN_COLORS } from "./skins";
 import {
@@ -24,7 +25,6 @@ describe("density stays on the 8+4 grid", () => {
         assert.equal(onGrid(px), true, `${d} ${px}`);
         assert.equal(px % 4, 0);
       }
-      assert.equal(s.blockPy % 8, 0);
       assert.equal(s.gap % 8, 0);
       assert.equal(s.ctaW % 8, 0);
       assert.equal(s.headingH % 8, 0);
@@ -37,16 +37,43 @@ describe("density stays on the 8+4 grid", () => {
 
   it("emits CSS variables for the app remap", () => {
     const v = densityVars("compact");
-    assert.equal(v["--theme-block-py"], "32px");
     assert.equal(v["--theme-gap"], "16px");
     assert.equal(v["--theme-cta-h"], "32px");
+    assert.equal(v["--theme-block-py"], undefined);
+  });
+});
+
+describe("section padding stays on the even 8px scale", () => {
+  it("three levels, every step a multiple of 8, matching py-8/16/24 and lg:py-16/32/40", () => {
+    assert.deepEqual([...SECTION_PADDINGS], ["compact", "default", "spacious"]);
+    assert.deepEqual(SECTION_PADDING_SCALE.compact, { py: 32, pyLg: 64 });
+    assert.deepEqual(SECTION_PADDING_SCALE.default, { py: 64, pyLg: 128 });
+    assert.deepEqual(SECTION_PADDING_SCALE.spacious, { py: 96, pyLg: 160 });
+    for (const id of SECTION_PADDINGS) {
+      const s = SECTION_PADDING_SCALE[id];
+      assert.equal(s.py % 8, 0, `${id} py`);
+      assert.equal(s.pyLg % 8, 0, `${id} pyLg`);
+      assert.ok(s.pyLg > s.py);
+    }
+  });
+
+  it("emits CSS variables and is independent of density", () => {
+    const v = sectionPaddingVars("spacious");
+    assert.equal(v["--theme-section-py"], "96px");
+    assert.equal(v["--theme-section-py-lg"], "160px");
+    const mixed = layoutVars(cleanTheme({ density: "compact", sectionPadding: "spacious" }));
+    assert.equal(mixed["--theme-gap"], "16px");
+    assert.equal(mixed["--theme-section-py"], "96px");
+    assert.equal(mixed["--theme-section-py-lg"], "160px");
   });
 });
 
 describe("theme model", () => {
   it("cleans unknown skins, radii, density, and palettes", () => {
     assert.deepEqual(cleanTheme({ skin: "nope", radius: 3, density: "huge", palette: { harmony: "x" } }), NO_THEME);
+    assert.equal(cleanTheme({ skin: "nope", sectionPadding: "huge" }).sectionPadding, "default");
     assert.equal(cleanTheme({ skin: "claude", radius: 8, density: "compact" }).skin, "claude");
+    assert.equal(cleanTheme({ sectionPadding: "spacious" }).sectionPadding, "spacious");
     assert.equal(cleanTheme({ radius: 12 }).radius, 12);
     assert.ok(RADII.includes(0) && RADII.includes(16));
     assert.equal(SKIN_IDS.length, 16);
@@ -61,7 +88,7 @@ describe("theme model", () => {
   });
 
   it("round-trips JSON config; magazine-theme is accepted; unknown format is not", () => {
-    const state = { mode: "dark" as const, theme: cleanTheme({ skin: "rose", radius: 8, density: "comfortable", palette: DEFAULT_PALETTE }) };
+    const state = { mode: "dark" as const, theme: cleanTheme({ skin: "rose", radius: 8, density: "comfortable", sectionPadding: "spacious", palette: DEFAULT_PALETTE }) };
     const cfg = toConfig(state);
     assert.equal(cfg.format, CONFIG_FORMAT);
     assert.equal(cfg.version, 1);
@@ -71,6 +98,7 @@ describe("theme model", () => {
       assert.equal(back.mode, "dark");
       assert.equal(back.theme.skin, "rose");
       assert.equal(back.theme.density, "comfortable");
+      assert.equal(back.theme.sectionPadding, "spacious");
       assert.deepEqual(back.theme.palette, DEFAULT_PALETTE);
     }
     const mag = fromConfig({ format: "magazine-theme", version: 2, mode: "light", skin: "sky" });
@@ -91,6 +119,8 @@ describe("theme model", () => {
     assert.equal(setThemeField(t, "radius", 4).radius, 4);
     assert.equal(setThemeField(t, "skin", "notebook").skin, "notebook");
     assert.equal(setThemeField(t, "mode", "dark").density, "compact");
+    assert.equal(setThemeField(NO_THEME, "sectionPadding", "compact").sectionPadding, "compact");
+    assert.equal(isDefault(setThemeField(NO_THEME, "sectionPadding", "spacious")), false);
   });
 });
 
@@ -103,14 +133,14 @@ describe("CSS generation", () => {
       assert.match(dark[name], /^hsl\(/);
     }
     assert.notEqual(light.primary, dark.primary);
-    const vars = colorVars({ skin: null, radius: null, density: "default", palette: DEFAULT_PALETTE }, "light");
+    const vars = colorVars({ ...NO_THEME, palette: DEFAULT_PALETTE }, "light");
     assert.equal(vars.primary, light.primary);
     assert.equal(vars.background, light.background);
   });
 
   it("a named skin without a palette still paints primary, accent, and neutrals", () => {
-    const light = colorVars({ skin: "sky", radius: 8, density: "default" }, "light");
-    const dark = colorVars({ skin: "sky", radius: 8, density: "default" }, "dark");
+    const light = colorVars({ ...NO_THEME, skin: "sky", radius: 8 }, "light");
+    const dark = colorVars({ ...NO_THEME, skin: "sky", radius: 8 }, "dark");
     assert.match(light.primary, /^hsl\(/);
     assert.match(light.background, /^hsl\(/);
     assert.match(dark.primary, /^hsl\(/);
@@ -131,18 +161,23 @@ describe("CSS generation", () => {
 
   it("exportCss writes :root, .dark, and density", () => {
     const css = exportCss({
+      ...NO_THEME,
       skin: "claude",
       radius: 8,
       density: "comfortable",
+      sectionPadding: "spacious",
       palette: DEFAULT_PALETTE,
     });
     assert.match(css, /prototypes-theme v1/);
     assert.match(css, /:root \{/);
     assert.match(css, /\.dark \{/);
     assert.match(css, /\[data-density="comfortable"\]/);
+    assert.match(css, /\[data-section-padding="spacious"\]/);
+    assert.match(css, /--theme-section-py: 96px/);
+    assert.match(css, /--theme-section-py-lg: 160px/);
     assert.match(css, /--primary:/);
     assert.match(css, /--radius: 8px/);
-    const props = cssProperties({ skin: null, radius: 4, density: "default", palette: DEFAULT_PALETTE }, "light");
+    const props = cssProperties({ ...NO_THEME, radius: 4, palette: DEFAULT_PALETTE }, "light");
     assert.equal(props["--radius"], "4px");
     assert.ok(props["--primary"]);
   });

@@ -61,8 +61,8 @@ Stock density is per-element (`data-density-*` + `--pad-*` in kit.css). Radii ma
 | Stock | Prototypes |
 | --- | --- |
 | Fonts, heading fonts, type scale, width, tracking | **Excluded** |
-| Per-element radius / density / shadow | One global radius and density |
-| Density via kit `--pad-*` | App CSS remaps `py-16` / `gap-8` / `h-10` / `w-24` / `h-4` under `[data-density]` to 8+4 px (see table). `--spacing` stays 4px |
+| Per-element radius / density / shadow | One global radius, density, and section padding |
+| Density via kit `--pad-*` | App CSS remaps `gap-8` / `h-10` / `w-24` / `h-4` under `[data-density]`. Section padding is a separate token. `--spacing` stays 4px |
 | `magazine-theme` v2 | `prototypes-theme` v1 (still **reads** magazine-theme and `{ v:1, theme }`) |
 | `stock:v1:theme` | `prototypes:v1:theme` |
 | Apply `dark` / `data-theme` on `<html>` | Chrome vars on `<html>`; each preview is `[data-mode=light\|dark]` so `dark:` Media hatches do not leak |
@@ -73,7 +73,6 @@ Stock density is per-element (`data-density-*` + `--pad-*` in kit.css). Radii ma
 
 | Token in blocks | compact | default | comfortable |
 | --- | --- | --- | --- |
-| section `py-16` | 32px | 64px | 96px |
 | `gap-8` | 16px | 32px | 48px |
 | CTA `h-10` | 32px | 40px | 48px |
 | CTA `w-24` | 64px | 96px | 96px |
@@ -81,6 +80,16 @@ Stock density is per-element (`data-density-*` + `--pad-*` in kit.css). Radii ma
 | text line `h-2` | 8px | 8px | 8px |
 
 40px CTA height is the control step (4×10). Everything else is a multiple of 8.
+
+### Section padding (even 8px, independent of density)
+
+Block keeps the class `py-16`. Theme writes `--theme-section-py` and `--theme-section-py-lg` (lg = 1024px). Tailwind steps 32 and 40 are not extracted (ui8px layout list stops at 24); the px values still match `py-8` / `lg:py-16`, `py-16` / `lg:py-32`, `py-24` / `lg:py-40`.
+
+| Preset | Base | lg (1024px+) | Tailwind pair |
+| --- | --- | --- | --- |
+| compact | 32px | 64px | `py-8` / `lg:py-16` |
+| default | 64px | 128px | `py-16` / `lg:py-32` |
+| spacious | 96px | 160px | `py-24` / `lg:py-40` |
 
 ## UI
 

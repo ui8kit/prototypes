@@ -37,6 +37,13 @@ export {
 } from "./palette";
 export { formatHsl, hslToHex, parseColour, parseHex, parseHsl, rgbToHsl } from "./colour-input";
 export { DENSITIES, DENSITY_SCALE, densityVars, onGrid, type Density, type DensityScale } from "./density";
+export {
+  SECTION_PADDINGS,
+  SECTION_PADDING_SCALE,
+  sectionPaddingVars,
+  type SectionPadding,
+  type SectionPaddingScale,
+} from "./section-padding";
 export { RADII, SKIN_COLORS, SKIN_IDS, labToHsl, labToRgb, type Radius, type SkinId } from "./skins";
 export {
   CONFIG_FORMAT,

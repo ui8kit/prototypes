@@ -50,6 +50,7 @@ export type ThemeText = {
   radius: string;
   resetRadius: string;
   density: string;
+  sectionPadding: string;
   resetAll: string;
   back: string;
   previewLight: string;
@@ -59,7 +60,7 @@ export type ThemeText = {
 
 export const themeText: ThemeText = {
   title: "Theme",
-  note: "Both block previews follow these settings: mode of the chrome, skin, radius, density, and a custom palette. Fonts are not part of this constructor.",
+  note: "Both block previews follow these settings: mode of the chrome, skin, radius, density, section padding, and a custom palette. Fonts are not part of this constructor.",
   mode: "Chrome mode",
   light: "Light",
   dark: "Dark",
@@ -68,6 +69,7 @@ export const themeText: ThemeText = {
   radius: "Radius",
   resetRadius: "Reset radius",
   density: "Density",
+  sectionPadding: "Section padding",
   resetAll: "Reset theme",
   back: "Back",
   previewLight: "Light preview",
