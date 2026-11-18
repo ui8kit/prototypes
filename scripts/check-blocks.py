@@ -6,8 +6,11 @@ literal copy, or forbidden style tokens. Layout and shape files may compose
 kit primitives; they still must not embed Tailwind string literals.
 
 Interactive kit widgets (Button, Dialog, Select, accordion/tabs/carousel, …)
-are forbidden in packages/blocks except Button on CtaShape. Image/Picture/Source
-belong only in Media.svelte. Organisms never import @ui8kit/kit.
+are forbidden in packages/blocks. Exceptions are the page-mode places
+(packages/blocks/src/places): Text in every place, Button (rendered as <a href>)
+only in ActionPlace. Image/Picture/Source belong only in Media.svelte (wireframe
+placeholder) and places/ThemedImage.svelte (page images). Organisms never import
+@ui8kit/kit; they bind places directly.
 """
 
 from __future__ import annotations
@@ -22,7 +25,9 @@ BLOCKS = ROOT / "packages" / "blocks" / "src"
 BLOCKS_PKG = ROOT / "packages" / "blocks" / "package.json"
 MAX_RAW_UTILITIES = 0
 
-SKIP_TOP = {"layout", "shapes", "content", "manifest"}
+SKIP_TOP = {"layout", "shapes", "content", "manifest", "places", "model", "models", "fixtures"}
+PLACE_DIRS = {"places"}
+MEDIA_FILES = {"Media.svelte", "ThemedImage.svelte"}
 LAYOUT_DIRS = {"layout"}
 SHAPE_DIRS = {"shapes"}
 
@@ -167,6 +172,8 @@ def kind_for(path: Path, organisms: set[str]) -> str:
         return "layout"
     if top in SHAPE_DIRS:
         return "shape"
+    if top in PLACE_DIRS:
+        return "place"
     return "other"
 
 
@@ -198,6 +205,7 @@ def check_file(path: Path, organisms: set[str]) -> list[str]:
             errors.append(f"{rel}: expected exactly one Block root, found {len(opens)}")
         if EACH_BLOCK.search(source):
             errors.append(f"{rel}: Block inside {{#each}} is not allowed")
+    if kind in ("organism", "place"):
         for match in LOWER_TAG.finditer(markup):
             tag = match.group("tag")
             if tag not in ALLOWED_TAGS:
@@ -212,32 +220,39 @@ def check_file(path: Path, organisms: set[str]) -> list[str]:
     kit_names = imported_kit_names(source)
     interactive = [name for name in kit_names if name in KIT_INTERACTIVE]
     media_names = [name for name in kit_names if name in KIT_MEDIA]
-    cta_file = path.name == "CtaShape.svelte"
-    media_file = path.name == "Media.svelte"
+    media_file = path.name in MEDIA_FILES
+    allowed_interactive: set[str] = set()
+    if kind == "place":
+        allowed_interactive = {"Text", "Button"} if path.name == "ActionPlace.svelte" else {"Text"}
 
     if kind == "organism" and kit_names:
         errors.append(
             f"{rel}: organisms must not import @ui8kit/kit; use layout shells and shapes"
         )
 
-    if interactive and not (cta_file and set(interactive) <= {"Button"}):
+    if set(interactive) - allowed_interactive:
         errors.append(
-            f"{rel}: interactive kit {interactive}; only CtaShape may use Button. "
+            f"{rel}: interactive kit {interactive}; only places may use Text, only ActionPlace may use Button. "
             "Accordion, tabs, carousel and other widgets are stacks/groups of rectangles."
         )
 
     if media_names and not media_file:
-        errors.append(f"{rel}: Image/Picture/Source belong only in Media.svelte (media in a rectangle)")
+        errors.append(f"{rel}: Image/Picture/Source belong only in Media.svelte and places/ThemedImage.svelte")
 
     tags = interactive_markup(markup)
     bad_tags = {name for name in tags if name in KIT_INTERACTIVE}
-    if cta_file:
-        bad_tags.discard("Button")
+    bad_tags -= allowed_interactive
     if bad_tags:
         errors.append(f"{rel}: interactive markup {sorted(bad_tags)}")
     media_tags = {name for name in tags if name in KIT_MEDIA}
     if media_tags and not media_file:
-        errors.append(f"{rel}: media markup {sorted(media_tags)} outside Media.svelte")
+        errors.append(f"{rel}: media markup {sorted(media_tags)} outside Media.svelte / ThemedImage.svelte")
+
+    if kind == "place" and path.name.endswith("Place.svelte"):
+        if 'mode === "wireframe"' not in markup:
+            errors.append(f"{rel}: a place draws the wireframe shape first ({{#if mode === \"wireframe\"}})")
+        if "data-field={field}" not in markup and "{field}" not in markup:
+            errors.append(f"{rel}: a place carries data-place / data-field on its page element")
 
     return errors
 
@@ -282,7 +297,7 @@ def main() -> int:
         "organisms pass Block/Container/Stack/Grid/shape props only."
     )
     print(f"organism dirs: {', '.join(sorted(organisms)) or '(none)'}")
-    print("interactive kit: Button allowed only in CtaShape.svelte")
+    print("interactive kit: Text in places, Button (link) only in places/ActionPlace.svelte")
     errors.extend(check_manifests(organisms))
     for path in files:
         errors.extend(check_file(path, organisms))

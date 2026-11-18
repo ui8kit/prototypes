@@ -63,8 +63,8 @@ describe("semantic roles", () => {
   });
 
   it("media keeps its ratio from a prop (4:3 default, 21:9 for full-width rows)", () => {
-    expect(first(render(Media).container, "figure").classList.contains("aspect-4/3")).toBe(true);
-    expect(first(render(Media, { props: { ratio: "21/9" } }).container, "figure").classList.contains("aspect-21/9")).toBe(true);
+    expect(first(render(Media).container, "[data-shape=media]").classList.contains("aspect-4/3")).toBe(true);
+    expect(first(render(Media, { props: { ratio: "21/9" } }).container, "[data-shape=media]").classList.contains("aspect-21/9")).toBe(true);
   });
 
   it("media shows the light image by default and the dark one only under .dark", () => {

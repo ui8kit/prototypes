@@ -1,16 +1,16 @@
 /**
- * One content schema per block: the typed contract a real site constructor
- * would bind. Layout differences are variants of that same contract.
+ * Block manifest: the machine-readable contract of one block type (item) for a catalog and a page builder.
  *
- * Rules (docs/content-contract.md):
- * - Simple content: named fields (title, description, image, actionLabel, …).
- *   Repeated content is a named record type, not a universal item.
- * - Field budget 5–10: every path counts as 1; a record is 1 plus its item
- *   fields; cardinality does not multiply.
- * - Interchangeable variants: layout only. A variant never adds required
- *   fields, changes types, or drops/transforms content.
- * - Full rendering: every filled field has a DOM rendering in every variant.
+ *   item      stable block type id (`hero-split`); a saved block is `{ id, item, variant, props }`
+ *   model     the content model of `props` (`hero@1`), shared by every variant and by other blocks with the same content
+ *   places    where each value is drawn: a place binds one or more JSON-pointer templates to one spot of the composition
+ *   variants  layout-only alternatives; any valid `props` renders fully in every variant
+ *
+ * Rules (docs/content-contract.md): simple content (5–10 fields), interchangeable variants, full rendering, one composition
+ * for the wireframe feed and the finished page (mode), no second render mechanism.
  */
+import { modelPaths, type ContentModel } from "../model/types";
+import { resolvePointer } from "../model/pointer";
 
 export const BLOCK_CATEGORIES = [
   "hero",
@@ -27,189 +27,76 @@ export const BLOCK_CATEGORIES = [
 ] as const;
 export type BlockCategory = (typeof BLOCK_CATEGORIES)[number];
 
-/** Content kinds. Distinct entities (price vs duration) get their own kind later — never a universal field. */
-export const CONTENT_KINDS = ["badge", "title", "description", "image", "actionLabel", "actionHref", "avatar"] as const;
-export type ContentKind = (typeof CONTENT_KINDS)[number];
+/** How a block draws: `wireframe` = shapes only (the search feed), `page` = real content from `props`. */
+export const MODES = ["wireframe", "page"] as const;
+export type Mode = (typeof MODES)[number];
 
-/** Kinds that render as `[data-shape=…]`. `dot` is a small avatar. */
-export const SHAPE_KINDS = ["badge", "heading", "text-line", "avatar", "cta", "media", "dot"] as const;
-export type ShapeKind = (typeof SHAPE_KINDS)[number];
+/** What a place is in the composition (wireframe shape / page element). */
+export const PLACE_ROLES = ["badge", "heading", "text", "action", "media", "avatar", "item"] as const;
+export type PlaceRole = (typeof PLACE_ROLES)[number];
 
-/** Exact count, or a range with the default the organism renders. */
-export type SlotCount = number | { min: number; max: number; default: number };
-
-export type ContentScalar = {
+export type Place = {
+  /** unique within the block (`action`, `member.title`) */
   id: string;
-  kind: ContentKind;
-  count: SlotCount;
+  role: PlaceRole;
+  /** JSON-pointer templates of the values drawn here; `*` is the list index of the instance */
+  fields: string[];
+  /** a place repeated per list item: the list it repeats over (`/members`) */
+  each?: string;
+  /** how many list items the wireframe draws (the page draws one per array item) */
+  wireframe?: number;
 };
-
-export type ContentRecord = {
-  id: string;
-  kind: "record";
-  /** Named entity (`teamMember`, later `priceTier`). Never a generic "item". */
-  record: string;
-  count: SlotCount;
-  fields: ContentField[];
-};
-
-export type ContentField = ContentScalar | ContentRecord;
 
 export type BlockVariant = {
   id: string;
-  /** Layout axes only (media side, column count). Never content. */
+  /** Layout axes only (media side, column count, card style). Never content. */
   layout: Record<string, string | number | boolean>;
   default?: boolean;
 };
 
-export type BlockManifest = {
+export type BlockManifest<M extends ContentModel = ContentModel> = {
+  /** stable block type id = `item` of a saved block */
   id: string;
   category: BlockCategory;
   /** Region name from the dictionary (aria-label). */
   label: string;
-  /** One content schema shared by every variant. */
-  content: ContentField[];
+  model: M;
+  places: Place[];
   variants: BlockVariant[];
 };
 
-export function resolveCount(count: SlotCount): number {
-  return typeof count === "number" ? count : count.default;
-}
+/** A block as a builder saves it on a page. `id` is the instance, `item` the block type, `props` the content. */
+export type BlockInstance<P = Record<string, unknown>> = { id: string; item: string; variant: string; props: P };
 
 export function defaultVariant(block: BlockManifest): BlockVariant {
-  const marked = block.variants.filter((variant) => variant.default);
-  return marked[0] ?? block.variants[0];
+  return block.variants.find((v) => v.default) ?? block.variants[0]!;
 }
-
-export function defaultVariantId(block: BlockManifest): string {
-  return defaultVariant(block).id;
-}
-
+export const defaultVariantId = (block: BlockManifest): string => defaultVariant(block).id;
 export function resolveVariant(block: BlockManifest, id: string | undefined): BlockVariant {
-  return block.variants.find((variant) => variant.id === id) ?? defaultVariant(block);
+  return block.variants.find((v) => v.id === id) ?? defaultVariant(block);
 }
 
-export function emptyShapeCounts(): Record<ShapeKind, number> {
-  return { badge: 0, heading: 0, "text-line": 0, avatar: 0, cta: 0, media: 0, dot: 0 };
+export function placeOf(block: BlockManifest, id: string): Place {
+  const p = block.places.find((x) => x.id === id);
+  if (!p) throw new Error(`${block.id}: no place ${id}`);
+  return p;
 }
 
-/** Content kind → placeholder shape. `actionHref` rides on the same CTA as `actionLabel`. */
-export function shapeForContent(kind: ContentKind): ShapeKind | null {
-  if (kind === "badge") return "badge";
-  if (kind === "title") return "heading";
-  if (kind === "description") return "text-line";
-  if (kind === "image") return "media";
-  if (kind === "actionLabel") return "cta";
-  if (kind === "actionHref") return null;
-  if (kind === "avatar") return "avatar";
-  return null;
+/** The attributes a place instance carries in the DOM: `data-place` (place id) and `data-field` (concrete pointers). */
+export type PlaceBinding = { place: string; field: string };
+
+/** Bind a place for one instance: `bind(team, "member.title", 1)` → `{ place: "member.title", field: "/members/1/title" }`. */
+export function bind(block: BlockManifest, id: string, ...indices: number[]): PlaceBinding {
+  const p = placeOf(block, id);
+  return { place: p.id, field: p.fields.map((f) => resolvePointer(f, ...indices)).join(" ") };
 }
 
-/** Flatten content into rendered shape totals (records multiply nested fields). */
-export function shapeCounts(fields: ContentField[], repeats = 1): Record<ShapeKind, number> {
-  const out = emptyShapeCounts();
-  for (const field of fields) {
-    const n = resolveCount(field.count) * repeats;
-    if (field.kind === "record") {
-      const nested = shapeCounts(field.fields, n);
-      for (const kind of SHAPE_KINDS) out[kind] += nested[kind];
-    } else {
-      const shape = shapeForContent(field.kind);
-      if (shape) out[shape] += n;
-    }
-  }
-  return out;
-}
-
-/** `dot` is implemented as Avatar, so it matches `[data-shape=avatar]`. */
-export function attrForKind(kind: ShapeKind): string {
-  return kind === "dot" ? "avatar" : kind;
-}
-
-export function countsByAttr(counts: Record<ShapeKind, number>): Record<string, number> {
-  const out: Record<string, number> = {};
-  for (const kind of SHAPE_KINDS) {
-    const attr = attrForKind(kind);
-    out[attr] = (out[attr] ?? 0) + counts[kind];
-  }
-  return out;
-}
-
-export type FieldPath = {
-  path: string;
-  kind: ContentKind | "record";
-  count: SlotCount;
-  record?: string;
-};
-
-/** Inclusive field-budget bounds. Tests fail outside this range. */
+/** Field budget: every model path counts once (a list counts 1 plus its item fields); bars and cardinality do not multiply. */
 export const FIELD_BUDGET_MIN = 5;
 export const FIELD_BUDGET_MAX = 10;
+export const fieldBudget = (block: BlockManifest): number => modelPaths(block.model.fields).length;
 
-/** Dot-path of every content field, including nested record fields (`members.avatar`). */
-export function fieldPaths(fields: ContentField[], prefix = ""): FieldPath[] {
-  const out: FieldPath[] = [];
-  for (const field of fields) {
-    const path = prefix ? `${prefix}.${field.id}` : field.id;
-    if (field.kind === "record") {
-      out.push({ path, kind: "record", count: field.count, record: field.record });
-      out.push(...fieldPaths(field.fields, path));
-    } else {
-      out.push({ path, kind: field.kind, count: field.count });
-    }
-  }
-  return out;
-}
-
-/** How many `[data-field~=path]` nodes the default fill must render. */
-export function fieldRenderCounts(fields: ContentField[], prefix = "", repeats = 1): Record<string, number> {
-  const out: Record<string, number> = {};
-  for (const field of fields) {
-    const path = prefix ? `${prefix}.${field.id}` : field.id;
-    const n = resolveCount(field.count) * repeats;
-    if (field.kind === "record") Object.assign(out, fieldRenderCounts(field.fields, path, n));
-    else out[path] = (out[path] ?? 0) + n;
-  }
-  return out;
-}
-
-export function fieldSelector(path: string): string {
-  return `[data-field~="${path}"]`;
-}
-
-export function formatCount(count: SlotCount): string {
-  if (typeof count === "number") return String(count);
-  return `${count.min}–${count.max} (default ${count.default})`;
-}
-
-export type RecordTypeInfo = {
-  name: string;
-  path: string;
-  fields: { id: string; kind: ContentKind | "record" }[];
-};
-
-/**
- * Field budget: every declared path counts as 1.
- * Cardinality does not multiply (`description` × 2 is still one field).
- * A record (array) counts as 1, plus each field of its item type (recursive).
- * `actionLabel` and `actionHref` are two fields even on one CTA.
- */
-export function fieldBudget(fields: ContentField[]): number {
-  return fieldPaths(fields).length;
-}
-
-export function recordTypes(fields: ContentField[], prefix = ""): RecordTypeInfo[] {
-  const out: RecordTypeInfo[] = [];
-  for (const field of fields) {
-    const path = prefix ? `${prefix}.${field.id}` : field.id;
-    if (field.kind === "record") {
-      out.push({
-        name: field.record,
-        path,
-        fields: field.fields.map((inner) => ({ id: inner.id, kind: inner.kind })),
-      });
-      out.push(...recordTypes(field.fields, path));
-    }
-  }
-  return out;
+/** Which places draw a value (inspector: from a clicked or edited pointer back to its spots). */
+export function placesFor(block: BlockManifest, pointerTemplate: string): Place[] {
+  return block.places.filter((p) => p.fields.includes(pointerTemplate));
 }

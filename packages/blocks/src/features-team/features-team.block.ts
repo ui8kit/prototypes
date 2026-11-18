@@ -1,24 +1,19 @@
 import { ui } from "../content/en";
+import { teamModel } from "../models/team";
 import type { BlockManifest } from "../manifest/types";
 
-export const featuresTeam: BlockManifest = {
+export const featuresTeam: BlockManifest<typeof teamModel> = {
   id: "features-team",
   category: "team",
   label: ui.featuresTeam.label,
-  content: [
-    { id: "title", kind: "title", count: 1 },
-    { id: "description", kind: "description", count: 2 },
-    {
-      id: "members",
-      kind: "record",
-      record: "teamMember",
-      count: { min: 1, max: 6, default: 3 },
-      fields: [
-        { id: "avatar", kind: "avatar", count: 1 },
-        { id: "title", kind: "title", count: 1 },
-        { id: "description", kind: "description", count: 2 },
-      ],
-    },
+  model: teamModel,
+  places: [
+    { id: "title", role: "heading", fields: ["/title"] },
+    { id: "description", role: "text", fields: ["/description"] },
+    { id: "member", role: "item", fields: ["/members/*"], each: "/members", wireframe: 3 },
+    { id: "member.avatar", role: "avatar", fields: ["/members/*/avatar"], each: "/members" },
+    { id: "member.title", role: "heading", fields: ["/members/*/title"], each: "/members" },
+    { id: "member.description", role: "text", fields: ["/members/*/description"], each: "/members" },
   ],
   variants: [
     { id: "columns-2", layout: { columns: 2 } },

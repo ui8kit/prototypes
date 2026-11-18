@@ -90,6 +90,27 @@ export const shape = {
   surface: `${role.surface} p-6`,
 } as const;
 
+/**
+ * Page mode: the same places drawn as real content (`mode="page"`). Tokens only, 8+4 at the block layer; heights instead of
+ * vertical padding on inline controls (badge h-8, action h-10).
+ */
+export const page = {
+  badge: "inline-flex items-center rounded-full bg-accent text-accent-foreground text-sm font-medium h-8 px-4",
+  titleLg: "text-4xl font-bold leading-tight tracking-tight text-foreground",
+  title: "text-xl font-semibold leading-tight text-foreground",
+  lead: "text-lg leading-relaxed text-muted-foreground",
+  text: "text-base leading-relaxed text-muted-foreground",
+  center: "text-center",
+  fill: "w-full",
+  action: "inline-flex items-center justify-center rounded bg-primary text-primary-foreground font-medium h-10 px-6",
+  actionText: "text-base font-medium text-foreground",
+  media: "relative overflow-hidden rounded bg-muted w-full",
+  image: "h-full w-full object-cover",
+  imageLight: "h-full w-full object-cover dark:hidden",
+  imageDark: "hidden h-full w-full object-cover dark:block",
+  avatar: "relative overflow-hidden rounded-full bg-muted shrink-0",
+} as const;
+
 export const width = {
   "1/4": "w-1/4",
   "1/3": "w-1/3",
@@ -116,3 +137,4 @@ export type Width = keyof typeof width;
 export type GridColumns = keyof typeof layout.gridMd;
 export type Role = keyof typeof role;
 export type AvatarSize = "sm" | "md" | "lg";
+export type HeadingLevel = 2 | 3;

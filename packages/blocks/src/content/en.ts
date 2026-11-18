@@ -1,17 +1,27 @@
-/** UI dictionary. Interface text (including aria-label) comes from here or from props. */
+/** UI dictionary. Interface text (aria-label, inspector field labels) comes from here or from props; content comes from `props`. */
 export const ui = {
   featuresTeam: {
     label: "Team",
   },
   heroSplit: {
     label: "Hero",
-    cta: "Get started",
-    href: "#",
   },
-  media: {
-    alt: "",
+  /** Inspector labels of content-model fields (`label` in models/*.ts is a key of this map). */
+  fields: {
+    badge: "Badge",
+    title: "Title",
+    description: "Description",
+    image: "Image",
+    actionLabel: "Button label",
+    actionHref: "Button link",
+    members: "Members",
+    avatar: "Photo",
+    memberTitle: "Name",
+    memberDescription: "Role",
   },
   themeToggle: {
     label: "Toggle color theme",
   },
 } as const;
+
+export type FieldLabelKey = keyof typeof ui.fields;

@@ -1,37 +1,36 @@
 # Adding a block
 
-This repo is a visual prototype constructor. Each organism is a wireframe of
-placeholder shapes, plus a typed **content contract** (the manifest). The
-library grows so later we can unify typical fields for a real site constructor.
+A block is a layout of **places** over a **content model**. The same component draws the wireframe (feed) and the page.
+Rules: [content-contract.md](./content-contract.md). Directory name = item id (`hero-split`).
 
-Follow `.cursor/skills/ui8kit-new-block`, adapted here (no Codex records yet).
-Contract rules: `docs/content-contract.md`.
+## 1. Content model (reuse first)
 
-Directory name is the block `id` (`hero-split`, `features-team`).
+Reuse an existing model when the content is the same (a new hero layout is a variant or a new item over `hero@1`). A new
+model only for new content: `packages/blocks/src/models/<id>.ts` with `defineModel({ id, version: 1, fields })`, add it to
+`MODELS` in `models/index.ts`, and add every field `label` key to `ui.fields` in `content/en.ts`. Lists are named records
+(`teamMember`), never a universal `item`. Keep 5–10 model paths.
 
-## 1. Dictionary
+## 2. Dictionary
 
-Add `aria-label` (and any CTA name / href) to `packages/blocks/src/content/en.ts`.
-Templates must not contain letters.
+Region `aria-label` and any other interface text in `packages/blocks/src/content/en.ts`. Content (titles, names, links)
+never lives in code; sample content lives in `src/fixtures/samples.ts`.
 
-## 2. Manifest = content contract
+## 3. Manifest
 
-Create `packages/blocks/src/<id>/<id>.block.ts` next to the organism:
+`packages/blocks/src/<item>/<item>.block.ts`:
 
 ```ts
-import { ui } from "../content/en";
-import type { BlockManifest } from "../manifest/types";
-
-export const heroSplit: BlockManifest = {
+export const heroSplit: BlockManifest<typeof heroModel> = {
   id: "hero-split",
   category: "hero",
   label: ui.heroSplit.label,
-  content: [
-    { id: "title", kind: "title", count: 1 },
-    { id: "description", kind: "description", count: 2 },
-    { id: "image", kind: "image", count: 1 },
-    { id: "actionLabel", kind: "actionLabel", count: 1 },
-    { id: "actionHref", kind: "actionHref", count: 1 },
+  model: heroModel,
+  places: [
+    { id: "badge", role: "badge", fields: ["/badge"] },
+    { id: "title", role: "heading", fields: ["/title"] },
+    { id: "description", role: "text", fields: ["/description"] },
+    { id: "media", role: "media", fields: ["/image"] },
+    { id: "action", role: "action", fields: ["/actionLabel", "/actionHref"] },
   ],
   variants: [
     { id: "media-left", layout: { media: "left" } },
@@ -41,94 +40,38 @@ export const heroSplit: BlockManifest = {
 };
 ```
 
-- `id` equals the directory name.
-- `category` is one of `hero`, `features`, `team`, `cta`, `pricing`, `content`,
-  `media`, `nav`, `footer`, `form`, `social`.
-- **One `content` schema.** Named fields (`title`, `description`, `image`,
-  `actionLabel`, `actionHref`, `avatar`). Repeating groups are `kind: "record"`
-  with a named `record` type (`teamMember`, later `priceTier`) and nested
-  fields. Do not invent a universal item.
-- **Variants are layout.** Image left/right/top, column count, etc. live under
-  `layout`. Exactly one variant is `default: true`. A variant must not add
-  required fields, change types, or drop content.
-- Mark each rendered slot with `data-field` matching the content path
-  (`title`, `members.avatar`). One node may carry two fields
-  (`actionLabel actionHref` on the CTA).
-- **Field budget 5–10.** Every declared path counts as 1. An array counts as
-  one field plus its item fields. Cardinality does not multiply. Tests fail
-  above 10 or below 5.
+- Every model path needs a place; a list item place has `each: "/members"` and `wireframe: <placeholder count>`.
+- Variants are layout only, exactly one `default: true`.
 
-Register it:
+Register: `BLOCKS` in `manifest/registry.ts`, `CATALOG` in `catalog.ts`, export in `index.ts`, `src/<item>` in
+`packages/blocks/package.json` → `ui8kit.blockRoot`.
 
-1. Import the manifest into `packages/blocks/src/manifest/registry.ts` and
-   append it to `BLOCKS`.
-2. Map `id` → component in `packages/blocks/src/catalog.ts`.
-3. Re-export the component from `packages/blocks/src/index.ts` if it is new.
-4. Add `src/<id>` to `packages/blocks/package.json` → `ui8kit.blockRoot`.
+## 4. Organism
 
-The feed renders every registered block in every variant automatically.
-Do not hardcode organisms in the app.
+One file, one `Block tag="section" aria-label={label} data-variant data-mode`. Props: `{ variant?, mode?, content?, label? }`.
 
-## 3. Test first
+- Draw every place with a place component from `src/places` and spread its binding from the manifest:
+  `<HeadingPlace {mode} value={c.title} size="lg" width="3/4" {...bind(heroSplit, "title")} />`.
+  In a list: `{...bind(featuresTeam, "member.title", row.index)}`.
+- Place components: `BadgePlace`, `HeadingPlace` (h2 / h3 via `level`), `TextPlace` (`bars` = wireframe widths),
+  `ActionPlace`, `MediaPlace` (`ratio`), `AvatarPlace`. They draw the shape in the wireframe and the kit element on the page.
+- `const c = $derived(mode === "wireframe" ? {} : (content ?? {}))`; wrap groups in `{#if}` so empty wrappers vanish, and
+  let the remaining side take the row when a column is empty.
+- No kit imports, no class strings, no literal text; `{#each}` may wrap places, never `Block`.
 
-Create `packages/blocks/src/<id>/<Name>.test.ts`:
+## 5. Tests
 
-- named `region` (section + `aria-label`)
-- default variant id on `data-variant`
-- counts of `[data-shape=…]` and `[data-field~=…]`
-- token classes present (`bg-muted`, `rounded`, `rounded-full`, …)
-- `textContent` with whitespace stripped is `""`
-- switching variant keeps the same content counts (layout class may change)
+The shared tests pick the block up from the registry and fixtures: add filled and minimal content for the new item to
+`src/fixtures/samples.ts` (`SAMPLES`). They check, for every variant: each filled value in its place (text, href, src,
+alt), cleared optional values leave no element or empty wrapper, the wireframe of the same input is geometry only, and
+the place counts. Add block-specific edge cases next to the existing ones in `manifest/render.test.ts`.
 
-The shared tests already:
-
-- flatten default content → `[data-shape]` (`render.test.ts`)
-- **completeness:** every block × every variant renders every contract field
-- every organism directory has a registered `*.block.ts`; variants are
-  layout-only; field budget is 5–10 (`registry.node.test.ts`)
-
-## 4. Markup
-
-One file, one `Block tag="section"` with `aria-label={label}`.
-
-Inside, only rectangles and text bars:
-
-- `Container`, `Stack`, `Group`, `Grid` (`tag`, `gap`, `align`, `justify`, `cols`, `py`)
-- `TextLine`, `Heading`, `CtaShape`, `Media`, `Dot`, `Avatar`
-
-Do not import kit `Dialog`, `Select`, `Disclosure`, accordion, tabs, or carousel.
-Those patterns are stacks/groups of the shapes above. The only kit control in
-`packages/blocks` is `Button` inside `CtaShape`. Media is an `Image` inside a
-rectangle. Avatars are squares (`h-N w-N`) with `rounded-full`.
-
-Pass `field="…"` on every shape. Read the active variant with
-`resolveVariant(manifest, variant)` and branch **presentation only**.
-
-No `class="…"` on the organism. If a shell is missing a prop, add a map entry in
-`classes.ts` and a prop on the shell — do not leak utilities into the block file.
-
-Repeated landmarks go in their own file. `{#each}` may wrap shapes, never `Block`.
-
-Default rendered shape counts **must** match `shapeCounts(manifest.content)`.
-
-## 5. Field summary
+## 6. Generate and verify
 
 ```sh
-bun run fields:summary
-```
-
-Rewrites `docs/fields.json` and `docs/fields.md`: which **content** kinds,
-paths, and record types repeat, plus the 5–10 field-budget count per block
-(variants are listed as layout, not as fields). Commit the generated files.
-`bun run verify` regenerates them.
-
-## 6. Checks
-
-```sh
+bun run contract   # schemas/*.schema.json, contract.json, docs/fields.json, docs/fields.md
 bun run verify
 ```
 
-`check-blocks` must print `raw-utilities …: 0` for the new file, require the
-sibling manifest, keep `blockRoot` in sync, and reject interactive kit widgets
-(accordion, tabs, carousel, Dialog, Select, …). Only `CtaShape` may use `Button`.
-ui8px extract picks up new strings from `classes.ts` only.
+`check-blocks` rejects raw utilities, bare HTML, literal text, interactive kit outside places (Text in places, Button only
+in `ActionPlace`), Image outside `Media.svelte` / `places/ThemedImage.svelte`, and places that do not branch on the mode.

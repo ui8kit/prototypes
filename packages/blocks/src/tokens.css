@@ -15,7 +15,7 @@
  * skin's own scale, per mode) or none. Unset: no shadow. Only the constructor's shapes (data-shape / data-role), never app chrome.
  */
 [data-role="surface"][data-slot="card"] { box-shadow: var(--shadow-card, 0 0 #0000); }
-[data-shape="media"][data-slot="media-frame"] { box-shadow: var(--shadow-media, 0 0 #0000); }
+[data-role="media"][data-slot="media-frame"] { box-shadow: var(--shadow-media, 0 0 #0000); }
 
 /*
  * Density per element (codegen-x density-badge / -button / -card): the step writes --h-button / --w-button, --h-badge /
@@ -25,3 +25,5 @@
 [data-shape="cta"][data-slot="button"] { height: var(--h-button, 40px); width: var(--w-button, 96px); }
 [data-shape="badge"][data-slot="badge"] { height: var(--h-badge, 24px); width: var(--w-badge, 64px); }
 [data-role="surface"][data-slot="card"] { padding: var(--pad-card, 24px); }
+/* Page mode (no data-shape): the real link keeps the button height step; its width follows the label. */
+[data-role="cta-primary"][data-slot="button"]:not([data-shape]) { height: var(--h-button, 40px); }

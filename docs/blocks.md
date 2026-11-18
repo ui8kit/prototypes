@@ -1,20 +1,35 @@
 # Blocks
 
-Organisms in `packages/blocks`. Each file opens on one `Block`. Inside: layout shells + placeholder shapes. No copy.
+Organisms in `packages/blocks`. Each file opens on one `Block`. Inside: layout shells + **places** (`src/places`). One
+composition, two modes: `mode="wireframe"` (the feed) draws every place as a shape; `mode="page"` draws the same places from
+`content` (the saved block's `props`). Data contract: [content-contract.md](./content-contract.md).
 
-## Rectangles and text
+## Places
 
-Everything in a block is a **rectangle** or **text**. Text is a placeholder bar (`Heading`, `TextLine`), not kit `Text` with copy.
+| Place component | Wireframe | Page (filled) | Page (empty) |
+| --- | --- | --- | --- |
+| `BadgePlace` | `Badge` | `<span>` pill (`data-slot="badge"`) | nothing |
+| `HeadingPlace` | `Heading` (`size`, `width`) | `<h2>` / `<h3>` (`level`) | nothing |
+| `TextPlace` | `TextLine` bars (`bars`) in one `aria-hidden` stack | one `<p>` | nothing |
+| `ActionPlace` | `CtaShape` (a bar, not a link) | `<a href>` (kit `Button`, `data-slot="button"`); label only → text | nothing |
+| `MediaPlace` | `Media` (`ratio`) | `<figure data-slot="media-frame">` + image(s) | nothing |
+| `AvatarPlace` | `Avatar` | round photo | nothing |
+
+Each place carries `data-place` and `data-field` (concrete JSON pointers) from `bind(manifest, placeId, index?)`.
+
+## Rectangles and text (wireframe)
+
+In the wireframe everything is a **rectangle** or a **text bar** (`Heading`, `TextLine`), `aria-hidden`, without words.
 
 | What | How |
 | --- | --- |
 | Copy | `Heading` / `TextLine` rectangles |
 | Image or video | `Media`: hatched `Image` **inside** a muted rectangle |
 | Avatar | Square (`h-N w-N` equal sides) with `rounded-full` |
-| CTA | The only interactive kit widget: `CtaShape` (`Button`) |
+| CTA | `CtaShape`: a bar (`data-slot="button"`), not interactive; the page draws the link |
 | Accordion, tabs, carousel, dialog, form, select, … | **Not implemented.** Draw them as `Stack` / `Group` / `Grid` of rectangles |
 
-`scripts/check-blocks.py` forbids interactive kit primitives in `packages/blocks` except `Button` on `CtaShape.svelte`. Organisms never import `@ui8kit/kit`.
+`scripts/check-blocks.py` forbids interactive kit primitives in `packages/blocks` except in places: `Text` in every place, `Button` (as `<a href>`) only in `ActionPlace`; `Image` only in `Media.svelte` and `places/ThemedImage.svelte`. Organisms never import `@ui8kit/kit`.
 
 ## Sketch mapping
 
@@ -46,8 +61,8 @@ Absorbed as:
 
 | Sketch | Block | Content contract | Variants (layout) | Structure |
 | --- | --- | --- | --- | --- |
-| Team / features row | `FeaturesTeam` | title, description × 2 + `teamMember[]` (avatar, title, description × 2) | `columns-2` / `columns-3` / `columns-4` / `cards-3` (members on `Surface`) | `Block` → `Container` → `Stack` → centred intro (`Heading` lg + two lead `TextLine`s) + `Grid` of centred `Avatar` + `Heading` + two `TextLine`s |
-| Split hero | `HeroSplit` | badge, title, description × 2, image, actionLabel, actionHref | `media-left` / `media-right` / `media-top` | `Block` → `Container` → `Grid` (2 cols, vertically centred) or `Stack` of copy (`Heading` lg, two lead `TextLine`s, gap, `CtaShape`) and `Media` (4:3 with a centred circle) |
+| Team / features row | `FeaturesTeam` | `team@1`: title, description, `members: teamMember[]` (avatar, title, description) | `columns-2` / `columns-3` / `columns-4` / `cards-3` (members on `Surface`) | `Block` → `Container` → `Stack` → centred intro (`Heading` lg + two lead `TextLine`s) + `Grid` of centred `Avatar` + `Heading` + two `TextLine`s |
+| Split hero | `HeroSplit` | `hero@1`: badge, title, description, image, actionLabel, actionHref | `media-left` / `media-right` / `media-top` | `Block` → `Container` → `Grid` (2 cols, vertically centred) or `Stack` of copy (`Heading` lg, two lead `TextLine`s, gap, `CtaShape`) and `Media` (4:3 with a centred circle) |
 
 The registry (`packages/blocks/src/manifest/registry.ts`) is the gallery source. Content contract: `docs/content-contract.md`. Field budget (5–10) and repetition: `docs/fields.md`. Adding a block: `docs/adding-a-block.md`.
 
@@ -61,7 +76,7 @@ A wireframe has no words, so meaning is carried by **token + height**. Every rol
 | Lead / subtitle | `lead` | `TextLine size="lead"` | `bg-muted` | `h-2` (8px) | `h-3` is off the 8+4 layout grid (ui8px UI8PX001), so a lead is the same bar drawn **wider** (`full`, `2/3`, `1/2`) under a heading |
 | Heading | `heading` | `Heading` | `bg-secondary` | `h-4` (16px) | card / item titles |
 | Large heading (H1/H2) | `heading-lg` | `Heading size="lg"` | `bg-secondary` | `h-6` (24px) | section titles |
-| Primary CTA | `cta-primary` | `CtaShape` (`data-slot="button"`) | `bg-primary` | `h-10` (40px, control step) | `w-24`, no text, `aria-label` from `content/en.ts` |
+| Primary CTA | `cta-primary` | `CtaShape` (`data-slot="button"`) | `bg-primary` | `h-10` (40px, control step) | `w-24`, no text, `aria-hidden` (page mode: the real link) |
 | Secondary CTA | `cta-secondary` | `CtaShape tone="secondary"` | `bg-secondary` | `h-10` | `w-24`, no text |
 | Accent / emphasis | `accent` | `Avatar` / `Dot` | `bg-accent` | square `h-8`/`h-12`/`h-16` + `rounded-full` | accent only for emphasis (avatar, badge, highlighted item) |
 | Badge | `badge` | `Badge` | `bg-accent` | `h-6` (24px), `w-16` | eyebrow / tag; `rounded-full` + `data-slot="badge"` (theme badge radius, unset: pill) |
@@ -69,6 +84,13 @@ A wireframe has no words, so meaning is carried by **token + height**. Every rol
 | Card surface | `surface` | `Surface` (`data-slot="card"`) | `bg-card` + `border border-border` | content | `p-8`; wraps other shapes, not a content field |
 
 Default tokens (no skin, no palette) are wireframe-tuned in `packages/theme/src/css.ts` (`FALLBACK`): light muted 0.955 / secondary 0.90 / accent oklch(0.82 0.08 255) / primary 0.205; dark muted 0.25 / secondary 0.38 / accent oklch(0.45 0.09 255) / primary 0.922. Skins and custom palettes bring their own values.
+
+## Page mode classes
+
+`page` in `classes.ts`: badge `h-8 px-4 rounded-full bg-accent`, block title `text-4xl font-bold`, item title `text-xl
+font-semibold`, lead `text-lg` / text `text-base` in `text-muted-foreground`, action `h-10 px-6 rounded bg-primary`
+(its height follows the theme's button density via `tokens.css`), media `rounded overflow-hidden` + ratio, avatar
+`rounded-full` square. Radius and shadow follow the theme through the same `data-slot` / `data-role` hooks as the shapes.
 
 ## Utilities
 

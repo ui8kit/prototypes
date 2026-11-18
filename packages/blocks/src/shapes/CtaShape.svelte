@@ -1,19 +1,17 @@
 <script lang="ts">
-  import { Button } from "@ui8kit/kit";
+  import { Box } from "@ui8kit/kit";
   import { shape } from "../classes";
-  import { ui } from "../content/en";
 
-  let {
-    label = ui.heroSplit.cta,
-    href = ui.heroSplit.href,
-    tone = "primary",
-    field,
-  }: {
-    tone?: "primary" | "secondary";
-    label?: string;
-    href?: string;
-    field?: string;
-  } = $props();
+  /** Call-to-action bar (wireframe): geometry only, not a link; the page mode draws the real link (ActionPlace). */
+  let { tone = "primary", place, field }: { tone?: "primary" | "secondary"; place?: string; field?: string } = $props();
 </script>
 
-<Button class={tone === "secondary" ? shape.ctaSecondary : shape.cta} aria-label={label} {href} data-shape="cta" data-role={"cta-" + tone} data-slot="button" data-field={field}></Button>
+<Box
+  class={tone === "secondary" ? shape.ctaSecondary : shape.cta}
+  aria-hidden="true"
+  data-shape="cta"
+  data-role={"cta-" + tone}
+  data-slot="button"
+  data-place={place}
+  data-field={field}
+></Box>

@@ -1,17 +1,18 @@
 import { ui } from "../content/en";
+import { heroModel } from "../models/hero";
 import type { BlockManifest } from "../manifest/types";
 
-export const heroSplit: BlockManifest = {
+export const heroSplit: BlockManifest<typeof heroModel> = {
   id: "hero-split",
   category: "hero",
   label: ui.heroSplit.label,
-  content: [
-    { id: "badge", kind: "badge", count: 1 },
-    { id: "title", kind: "title", count: 1 },
-    { id: "description", kind: "description", count: 2 },
-    { id: "image", kind: "image", count: 1 },
-    { id: "actionLabel", kind: "actionLabel", count: 1 },
-    { id: "actionHref", kind: "actionHref", count: 1 },
+  model: heroModel,
+  places: [
+    { id: "badge", role: "badge", fields: ["/badge"] },
+    { id: "title", role: "heading", fields: ["/title"] },
+    { id: "description", role: "text", fields: ["/description"] },
+    { id: "media", role: "media", fields: ["/image"] },
+    { id: "action", role: "action", fields: ["/actionLabel", "/actionHref"] },
   ],
   variants: [
     { id: "media-left", layout: { media: "left" } },

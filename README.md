@@ -28,7 +28,7 @@ This is not a marketing site and not an idea dump. Blocks are organisms of recta
 ```sh
 bun install
 bun run verify          # check-blocks + ui8px gate + tests + field summary
-bun run fields:summary  # rewrite docs/fields.md from manifests
+bun run contract        # schemas, contract.json, docs/fields.* from manifests
 bun run dev             # gallery + theme constructor
 bun run kit:install     # npx ui8kit@3 add --all (Svelte; CDN fallback in docs/kit.md)
 ```
@@ -37,6 +37,6 @@ bun run kit:install     # npx ui8kit@3 add --all (Svelte; CDN fallback in docs/k
 
 ## Theme
 
-The constructor in `apps/blocks` renders every block from the registry in every layout variant, one after another, full width. Each organism has one content schema and interchangeable layout variants (`docs/content-contract.md`). Later unification reads which fields repeat (`docs/fields.md`, `bun run fields:summary`). Skins (exact codegen-x tokens, picked from 4:3 cards drawn in their own skin), brand presets (taste-data row 1), a colour wheel (9 harmonies, 16 presets, AA/AAA), radius (0–16px) and radius / density / shadow per element (badge, button, card, media), section padding (`compact` / `default` / `spacious`, even 8px including the lg step) and a design-system specimen live in `packages/theme` and the Theme sheet. Export / import JSON in the codegen-x/ui8kit format (`magazine-theme` v2: made in apps/stock, applied here, and back) or CSS variables. Fonts are carried in the config but not drawn.
+The constructor in `apps/blocks` renders every block from the registry in every layout variant, one after another, full width. Each block type (item) has one content model (`hero@1`, `team@1`, shared by every variant), places bound to JSON pointers, and interchangeable layout variants; the same component draws the wireframe feed and the filled page (header switch Wireframe | Page). A builder saves `{ id, item, variant, props }`; the machine-readable contract is `packages/blocks/contract.json` + `packages/blocks/schemas/` (`docs/content-contract.md`, `docs/fields.md`, `bun run contract`). Skins (exact codegen-x tokens, picked from 4:3 cards drawn in their own skin), brand presets (taste-data row 1), a colour wheel (9 harmonies, 16 presets, AA/AAA), radius (0–16px) and radius / density / shadow per element (badge, button, card, media), section padding (`compact` / `default` / `spacious`, even 8px including the lg step) and a design-system specimen live in `packages/theme` and the Theme sheet. Export / import JSON in the codegen-x/ui8kit format (`magazine-theme` v2: made in apps/stock, applied here, and back) or CSS variables. Fonts are carried in the config but not drawn.
 
 Storage: `prototypes:v1:theme` and `ui8kit-theme` (light/dark). Dark mode is the `dark` class on `<html>`; `Media` swaps its light/dark hatch with `dark:hidden` / `dark:block`. Semantic roles (token + height): `docs/blocks.md`. See `docs/theme.md`.

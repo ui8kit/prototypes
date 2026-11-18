@@ -1,24 +1,32 @@
 import { featuresTeam } from "../features-team/features-team.block";
 import { heroSplit } from "../hero-split/hero-split.block";
-import type { BlockCategory, BlockManifest } from "./types";
+import { modelKey } from "../models/index";
+import { validate, type Issue } from "../model/validate";
+import type { BlockCategory, BlockInstance, BlockManifest } from "./types";
 
 export const BLOCKS: readonly BlockManifest[] = [heroSplit, featuresTeam];
 
-export const BLOCK_BY_ID: Readonly<Record<string, BlockManifest>> = Object.fromEntries(
-  BLOCKS.map((block) => [block.id, block]),
-);
+/** Registry keyed by the stable item id. */
+export const BLOCK_BY_ID: Readonly<Record<string, BlockManifest>> = Object.fromEntries(BLOCKS.map((b) => [b.id, b]));
 
 export function blocksIn(category: BlockCategory): BlockManifest[] {
-  return BLOCKS.filter((block) => block.category === category);
+  return BLOCKS.filter((b) => b.category === category);
 }
 
 export function categoriesPresent(): BlockCategory[] {
-  const seen = new Set<BlockCategory>();
-  const order: BlockCategory[] = [];
-  for (const block of BLOCKS) {
-    if (seen.has(block.category)) continue;
-    seen.add(block.category);
-    order.push(block.category);
-  }
-  return order;
+  return [...new Set(BLOCKS.map((b) => b.category))];
 }
+
+export type InstanceCheck = { ok: boolean; issues: Array<Issue | { path: "/item" | "/variant"; code: "unknownItem" | "unknownVariant" }> };
+
+/** Check a saved block `{ id, item, variant, props }`: known item, known variant, props valid for the item's model. */
+export function validateInstance(instance: BlockInstance<unknown>): InstanceCheck {
+  const block = BLOCK_BY_ID[instance.item];
+  if (!block) return { ok: false, issues: [{ path: "/item", code: "unknownItem" }] };
+  const issues: InstanceCheck["issues"] = [];
+  if (!block.variants.some((v) => v.id === instance.variant)) issues.push({ path: "/variant", code: "unknownVariant" });
+  issues.push(...validate(block.model, instance.props).issues.map((i) => ({ ...i, path: i.path })));
+  return { ok: issues.length === 0, issues };
+}
+
+export const blockModelKey = (block: BlockManifest): string => modelKey(block.model);
