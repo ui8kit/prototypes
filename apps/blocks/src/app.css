@@ -9,55 +9,58 @@
 /* Standard dark mode: the `dark` class on <html> (ThemeToggle, stored in localStorage). */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * First paint: the default skin (shadcn neutral, codegen-x default.css) with the wireframe legibility floor, as the theme
+ * controller writes it. index.html sets the `dark` class before the app loads; the controller then writes the theme on <html>.
+ */
 :root {
+  color-scheme: light;
   --radius: 0.25rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.9 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.955 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.82 0.08 255);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(0 0% 4%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 4%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 4%);
+  --primary: hsl(0 0% 9%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(0 0% 88%);
+  --secondary-foreground: hsl(0 0% 9%);
+  --muted: hsl(0 0% 94%);
+  --muted-foreground: hsl(0 0% 43.5%);
+  --accent: hsl(0 0% 82%);
+  --accent-foreground: hsl(0 0% 9%);
+  --destructive: hsl(0.6 88.4% 48%);
+  --border: hsl(0 0% 90%);
+  --input: hsl(0 0% 90%);
+  --ring: hsl(0 0% 63%);
   --chart-1: var(--primary);
   --chart-2: var(--accent);
   --chart-3: var(--secondary);
   --chart-4: var(--muted);
   --chart-5: var(--ring);
-  --theme-gap: 32px;
-  --theme-cta-h: 40px;
-  --theme-cta-w: 96px;
-  --theme-heading-h: 16px;
-  --theme-line-h: 8px;
 }
 
-/* First paint before the theme script runs; the theme controller then writes the same tokens on <html>. */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.38 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.25 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.45 0.09 255);
-  --accent-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  color-scheme: dark;
+  --background: hsl(0 0% 4%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(0 0% 9%);
+  --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(0 0% 9%);
+  --popover-foreground: hsl(0 0% 98%);
+  --primary: hsl(0 0% 90%);
+  --primary-foreground: hsl(0 0% 9%);
+  --secondary: hsl(0 0% 21%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(0 0% 15%);
+  --muted-foreground: hsl(0 0% 63%);
+  --accent: hsl(0 0% 27%);
+  --accent-foreground: hsl(0 0% 98%);
+  --destructive: hsl(356.1 62.4% 52%);
+  --border: hsl(0 0% 100% / 10%);
+  --input: hsl(0 0% 100% / 15%);
+  --ring: hsl(0 0% 45%);
 }
 
 @theme inline {
@@ -98,6 +101,19 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* Native form controls follow the tokens: Tailwind preflight makes them transparent, and a native <select> list then opens
+   white (with light text in dark mode). In the base layer, so a utility on a control still wins. */
+@layer base {
+  select,
+  option,
+  optgroup,
+  input,
+  textarea {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
 }
 
 /*

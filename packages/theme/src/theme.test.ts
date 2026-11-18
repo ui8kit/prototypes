@@ -2,8 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { DENSITIES, DENSITY_SCALE, densityVars, onGrid } from "./density";
 import { SECTION_PADDINGS, SECTION_PADDING_SCALE, sectionPaddingVars } from "./section-padding";
-import { RADII, SKIN_IDS, labToHsl } from "./skins";
-import { SKIN_COLORS } from "./skins";
+import { RADII, SKIN_IDS } from "./skins";
 import {
   CONFIG_FORMAT,
   NO_THEME,
@@ -145,15 +144,13 @@ describe("CSS generation", () => {
     assert.match(light.background, /^hsl\(/);
     assert.match(dark.primary, /^hsl\(/);
     assert.notEqual(light.background, dark.background);
-    const hsl = labToHsl(SKIN_COLORS.sky.light.primary);
-    assert.ok(hsl.s >= 0 && hsl.l >= 0);
   });
 
-  it("no skin and no palette uses the kit fallback so light and dark previews still differ", () => {
+  it("no skin and no palette uses the shadcn neutral default skin so light and dark previews still differ", () => {
     const light = colorVars(NO_THEME, "light");
     const dark = colorVars(NO_THEME, "dark");
-    assert.equal(light.background, "oklch(1 0 0)");
-    assert.equal(dark.background, "oklch(0.145 0 0)");
+    assert.equal(light.background, "hsl(0 0% 100%)");
+    assert.equal(dark.background, "hsl(0 0% 4%)");
     const layout = layoutVars({ ...NO_THEME, density: "compact", radius: 16 });
     assert.equal(layout["--radius"], "16px");
     assert.equal(layout["--theme-gap"], "16px");

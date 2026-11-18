@@ -53,7 +53,8 @@ export function applyTheme(): void {
   root.style.colorScheme = mode;
   root.setAttribute("data-density", theme.density);
   root.setAttribute("data-section-padding", theme.sectionPadding);
-  applied = applyVars(root, cssProperties(theme, mode), applied);
+  // the wireframe legibility floor keeps text, heading and accent bars apart in every skin (exports stay exact)
+  applied = applyVars(root, cssProperties(theme, mode, { legible: true }), applied);
   writeTheme(STORAGE_KEY, theme);
   try {
     localStorage.setItem(MODE_KEY, mode);

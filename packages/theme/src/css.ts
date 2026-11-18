@@ -1,116 +1,84 @@
-import { css as hslCss, paletteTokens, withForeground, type Mode } from "./palette";
+import { paletteTokens, type Mode } from "./palette";
 import { densityVars } from "./density";
 import { sectionPaddingVars } from "./section-padding";
 import { radiusVars } from "./radii";
-import { labToHsl, SKIN_COLORS, type SkinId } from "./skins";
-import { NEUTRAL_TOKENS } from "./neutral-tokens";
-import { SKIN_NEUTRALS } from "./skin-neutrals";
+import { type SkinId } from "./skins";
+import { SKIN_TOKENS } from "./skin-tokens";
 import type { GlobalTheme } from "./theme";
 
-const round1 = (v: number): number => Math.round(v * 10) / 10;
-
-function skinChromatic(skin: SkinId, mode: Mode): Record<string, string> {
-  const row = SKIN_COLORS[skin][mode];
-  const primary = labToHsl(row.primary);
-  const accent = labToHsl(row.accent);
-  const ratio = 4.5;
-  const p = withForeground(primary, ratio);
-  const a = withForeground(accent, ratio);
-  const secondary = withForeground({ h: accent.h, s: Math.min(accent.s, 40), l: mode === "dark" ? 22 : 92 }, ratio);
-  const mid = mode === "dark" ? 62 : 52;
-  const chart = (h: number, s: number, d: number): string =>
-    hslCss({ h, s: Math.min(s, 80), l: Math.min(88, Math.max(12, mid + d)) });
-  return {
-    primary: hslCss(p.bg),
-    "primary-foreground": hslCss(p.fg),
-    accent: hslCss(a.bg),
-    "accent-foreground": hslCss(a.fg),
-    secondary: hslCss(secondary.bg),
-    "secondary-foreground": hslCss(secondary.fg),
-    ring: hslCss(p.bg),
-    "chart-1": chart(primary.h, primary.s, 0),
-    "chart-2": chart(accent.h, accent.s, -8),
-    "chart-3": chart((primary.h + 120) % 360, primary.s, 8),
-    "chart-4": chart((primary.h + 180) % 360, primary.s, -14),
-    "chart-5": chart((accent.h + 30) % 360, accent.s, 14),
-    "sidebar-primary": hslCss(p.bg),
-    "sidebar-primary-foreground": hslCss(p.fg),
-    "sidebar-accent": hslCss(a.bg),
-    "sidebar-accent-foreground": hslCss(a.fg),
-    "sidebar-ring": hslCss(p.bg),
-  };
-}
-
-function skinNeutrals(skin: SkinId | null, mode: Mode): Record<string, string> {
-  const row = SKIN_NEUTRALS[skin ?? "default"];
-  if (!row) return {};
+/** Colour tokens of a skin, verbatim from codegen-x (skin-tokens.ts); `null` is the shadcn neutral default. */
+export function skinColors(skin: SkinId | null, mode: Mode): Record<string, string> {
+  const row = SKIN_TOKENS[skin ?? "default"]?.[mode] ?? SKIN_TOKENS.default![mode];
   const out: Record<string, string> = {};
-  NEUTRAL_TOKENS.forEach((name, i) => {
-    const v = row[mode][i];
-    if (!v) return;
-    const [l, alpha] = v;
-    const body = `hsl(0 0% ${round1(l)}%`;
-    out[name] = alpha === undefined ? `${body})` : `${body} / ${alpha})`;
-  });
+  for (const [k, v] of Object.entries(row)) if (!SKIN_EXTRAS.has(k)) out[k] = v;
   return out;
 }
 
-/**
- * Wireframe defaults (oklch) when no skin and no palette. shadcn neutral, except that muted, secondary and accent
- * are pulled apart (text bars, headings, emphasis) so every role reads distinctly in light and dark.
- */
-export const FALLBACK: Record<Mode, Record<string, string>> = {
-  light: {
-    background: "oklch(1 0 0)",
-    foreground: "oklch(0.145 0 0)",
-    card: "oklch(1 0 0)",
-    "card-foreground": "oklch(0.145 0 0)",
-    popover: "oklch(1 0 0)",
-    "popover-foreground": "oklch(0.145 0 0)",
-    primary: "oklch(0.205 0 0)",
-    "primary-foreground": "oklch(0.985 0 0)",
-    secondary: "oklch(0.9 0 0)",
-    "secondary-foreground": "oklch(0.205 0 0)",
-    muted: "oklch(0.955 0 0)",
-    "muted-foreground": "oklch(0.556 0 0)",
-    accent: "oklch(0.82 0.08 255)",
-    "accent-foreground": "oklch(0.205 0 0)",
-    destructive: "oklch(0.577 0.245 27.325)",
-    border: "oklch(0.922 0 0)",
-    input: "oklch(0.922 0 0)",
-    ring: "oklch(0.708 0 0)",
-  },
-  dark: {
-    background: "oklch(0.145 0 0)",
-    foreground: "oklch(0.985 0 0)",
-    card: "oklch(0.205 0 0)",
-    "card-foreground": "oklch(0.985 0 0)",
-    popover: "oklch(0.205 0 0)",
-    "popover-foreground": "oklch(0.985 0 0)",
-    primary: "oklch(0.922 0 0)",
-    "primary-foreground": "oklch(0.205 0 0)",
-    secondary: "oklch(0.38 0 0)",
-    "secondary-foreground": "oklch(0.985 0 0)",
-    muted: "oklch(0.25 0 0)",
-    "muted-foreground": "oklch(0.708 0 0)",
-    accent: "oklch(0.45 0.09 255)",
-    "accent-foreground": "oklch(0.985 0 0)",
-    destructive: "oklch(0.704 0.191 22.216)",
-    border: "oklch(1 0 0 / 10%)",
-    input: "oklch(1 0 0 / 15%)",
-    ring: "oklch(0.556 0 0)",
-  },
-};
+const SKIN_EXTRAS = new Set(["radius", "shadow-sm", "shadow-md"]);
 
-/** Colour tokens for one mode: custom palette wins; else the named skin; else the kit fallback. */
+/** The skin's own radius (`null`: none, the app default stays) and shadow steps for one mode. */
+export function skinExtras(skin: SkinId | null, mode: Mode): { radius: string | null; shadowSm: string; shadowMd: string } {
+  const row = SKIN_TOKENS[skin ?? "default"]?.[mode] ?? SKIN_TOKENS.default![mode];
+  const base = SKIN_TOKENS.default![mode];
+  return { radius: skin ? (row.radius ?? null) : null, shadowSm: row["shadow-sm"] ?? base["shadow-sm"]!, shadowMd: row["shadow-md"] ?? base["shadow-md"]! };
+}
+
+/** Colour tokens for one mode: a custom palette wins; else the skin's own tokens (light ones in light, dark ones in dark). */
 export function colorVars(theme: GlobalTheme, mode: Mode): Record<string, string> {
-  if (theme.palette) {
-    return paletteTokens(theme.palette, mode, theme.skin);
+  if (theme.palette) return { ...skinColors(theme.skin, mode), ...paletteTokens(theme.palette, mode, theme.skin) };
+  return skinColors(theme.skin, mode);
+}
+
+// ---- wireframe legibility floor ----
+// A wireframe has no words: text bars (muted), headings (secondary) and emphasis (accent) only read when they stand apart from the
+// page. Many skins keep muted / secondary / accent within 2-4% lightness of the background (amber-minimal light: 98 / 96 / 96 on
+// 100). The floor moves only their lightness (hue and saturation stay the skin's), away from the background, and only when they
+// are too close. Exported CSS and the JSON config keep the skin's exact values.
+
+export const FLOOR = { muted: 6, secondary: 6, accent: 10, apart: 4 } as const;
+
+type Hsla = { h: number; s: number; l: number; a?: string };
+export function parseHslToken(v: string): Hsla | null {
+  const m = /^hsl\(\s*(-?[\d.]+)(?:deg)?\s+([\d.]+)%\s+([\d.]+)%\s*(?:\/\s*([^)]+))?\)$/.exec(v.trim());
+  return m ? { h: Number(m[1]), s: Number(m[2]), l: Number(m[3]), ...(m[4] ? { a: m[4].trim() } : {}) } : null;
+}
+const fmt = (c: Hsla): string => `hsl(${round1(c.h)} ${round1(c.s)}% ${round1(c.l)}%${c.a ? ` / ${c.a}` : ""})`;
+const round1 = (v: number): number => Math.round(v * 10) / 10;
+
+/** Muted, secondary and accent pushed apart from the background (light: darker, dark: lighter) when a skin keeps them too close. */
+export function legibleRoles(colors: Record<string, string>, mode: Mode): Record<string, string> {
+  const bg = colors.background ? parseHslToken(colors.background) : null;
+  if (!bg) return colors;
+  const dir = mode === "dark" ? 1 : -1;
+  const away = (from: number, step: number, c: Hsla): Hsla => {
+    if (dir * (c.l - from) >= step) return c;
+    return { ...c, l: Math.min(100, Math.max(0, from + dir * step)) };
+  };
+  const out = { ...colors };
+  const muted = colors.muted ? parseHslToken(colors.muted) : null;
+  let mutedL = bg.l;
+  if (muted) {
+    const m = away(bg.l, FLOOR.muted, muted);
+    out.muted = fmt(m);
+    mutedL = m.l;
   }
-  if (theme.skin) {
-    return { ...skinNeutrals(theme.skin, mode), ...skinChromatic(theme.skin, mode) };
+  const secondary = colors.secondary ? parseHslToken(colors.secondary) : null;
+  let secondaryL = mutedL + dir * FLOOR.secondary;
+  if (secondary) {
+    const sc = away(mutedL, FLOOR.secondary, away(bg.l, FLOOR.muted + FLOOR.secondary, secondary));
+    out.secondary = fmt(sc);
+    secondaryL = sc.l;
   }
-  return { ...FALLBACK[mode] };
+  const accent = colors.accent ? parseHslToken(colors.accent) : null;
+  if (accent) {
+    let ac = away(bg.l, FLOOR.accent, accent);
+    // a grey accent equal to the text bar or the heading would hide emphasis: step it past the heading
+    if (Math.abs(ac.l - mutedL) < FLOOR.apart || Math.abs(ac.l - secondaryL) < FLOOR.apart) {
+      ac = { ...ac, l: Math.min(100, Math.max(0, secondaryL + dir * FLOOR.secondary)) };
+    }
+    out.accent = fmt(ac);
+  }
+  return out;
 }
 
 export function layoutVars(theme: GlobalTheme): Record<string, string> {
@@ -123,10 +91,16 @@ export function layoutVars(theme: GlobalTheme): Record<string, string> {
   return out;
 }
 
-export function cssProperties(theme: GlobalTheme, mode: Mode): Record<string, string> {
-  const colors = colorVars(theme, mode);
+/** Every CSS variable of the theme for one mode. `legible`: apply the wireframe legibility floor (the app does; exports do not). */
+export function cssProperties(theme: GlobalTheme, mode: Mode, opts: { legible?: boolean } = {}): Record<string, string> {
+  const raw = colorVars(theme, mode);
+  const colors = opts.legible ? legibleRoles(raw, mode) : raw;
+  const extras = skinExtras(theme.skin, mode);
   const mapped: Record<string, string> = {};
   for (const [k, v] of Object.entries(colors)) mapped[`--${k}`] = v;
+  mapped["--shadow-sm"] = extras.shadowSm;
+  mapped["--shadow-md"] = extras.shadowMd;
+  if (extras.radius) mapped["--radius"] = extras.radius;
   return { ...mapped, ...layoutVars(theme) };
 }
 

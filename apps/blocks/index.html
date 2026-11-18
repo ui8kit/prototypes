@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UI8Kit prototypes</title>
+    <script>
+      // Light / dark before the first paint (the ThemeToggle writes "ui8kit-theme"); the theme controller takes over on mount.
+      (function () {
+        try {
+          var m = localStorage.getItem("ui8kit-theme");
+          if (m !== "light" && m !== "dark") m = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          document.documentElement.classList.toggle("dark", m === "dark");
+          document.documentElement.style.colorScheme = m;
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>
