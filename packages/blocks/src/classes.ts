@@ -5,10 +5,11 @@
 
 export const layout = {
   block: "w-full",
-  py: {
-    "8": "py-8",
-    "16": "py-16",
-    "24": "py-24",
+  /** Section padding (theme setting, `Block`): every step a multiple of 8px. */
+  section: {
+    compact: "py-8 lg:py-16",
+    default: "py-16 lg:py-32",
+    spacious: "py-24 lg:py-40",
   },
   container: "mx-auto w-full max-w-6xl px-8",
   stack: "flex flex-col",
@@ -58,6 +59,8 @@ export const role = {
   ctaPrimary: "bg-primary rounded h-10",
   ctaSecondary: "bg-secondary rounded h-10",
   accent: "bg-accent",
+  /** accent pill; its corner follows `--radius-badge` (unset: the pill) */
+  badge: "bg-accent rounded-full h-6",
   media: "bg-muted rounded",
   surface: "bg-card border border-border rounded",
 } as const;
@@ -73,9 +76,15 @@ export const shape = {
   avatarSm: "h-8 w-8",
   avatarMd: "h-12 w-12",
   avatarLg: "h-16 w-16",
-  media: `relative flex items-center justify-center overflow-hidden ${role.media} w-full aspect-4/3`,
-  mediaLight: "h-full w-full rounded object-cover dark:hidden",
-  mediaDark: "hidden h-full w-full rounded object-cover dark:block",
+  badge: `${role.badge} w-16 shrink-0`,
+  media: `relative flex items-center justify-center overflow-hidden ${role.media} w-full`,
+  mediaRatio: {
+    "4/3": "aspect-4/3",
+    video: "aspect-video",
+    "21/9": "aspect-21/9",
+  },
+  mediaLight: "h-full w-full object-cover dark:hidden",
+  mediaDark: "hidden h-full w-full object-cover dark:block",
   mediaOverlay: "absolute inset-0 flex items-center justify-center",
   mediaMark: "rounded-full bg-background h-16 w-16",
   surface: `${role.surface} p-8`,
@@ -101,7 +110,8 @@ export const app = {
 export type Space = keyof typeof layout.gap;
 export type Align = keyof typeof layout.align;
 export type Justify = keyof typeof layout.justify;
-export type Py = keyof typeof layout.py;
+export type SectionPadding = keyof typeof layout.section;
+export type MediaRatio = keyof typeof shape.mediaRatio;
 export type Width = keyof typeof width;
 export type GridColumns = keyof typeof layout.gridMd;
 export type Role = keyof typeof role;

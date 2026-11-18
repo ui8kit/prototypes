@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Block, Container, Grid, Stack } from "../layout";
-  import { CtaShape, Heading, Media, TextLine } from "../shapes";
+  import { Badge, CtaShape, Heading, Media, TextLine } from "../shapes";
   import { ui } from "../content/en";
   import { resolveVariant } from "../manifest/types";
   import { heroSplit } from "./hero-split.block";
@@ -23,7 +23,8 @@
 
 {#snippet copy()}
   <Stack gap="8">
-    <Stack gap="4">
+    <Stack gap="4" align="start">
+      <Badge field="badge" />
       <Heading field="title" width="3/4" size="lg" />
       <TextLine field="description" size="lead" width="full" />
       <TextLine field="description" size="lead" width="2/3" />
@@ -32,11 +33,11 @@
   </Stack>
 {/snippet}
 
-<Block tag="section" py="16" aria-label={label} data-variant={resolved.id}>
+<Block tag="section" aria-label={label} data-variant={resolved.id}>
   <Container>
     {#if layout === "top"}
       <Stack gap="8">
-        <Media field="image" />
+        <Media field="image" ratio="21/9" />
         {@render copy()}
       </Stack>
     {:else if layout === "left"}

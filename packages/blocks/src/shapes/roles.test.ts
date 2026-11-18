@@ -2,6 +2,7 @@ import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 import { role } from "../classes";
 import Avatar from "./Avatar.svelte";
+import Badge from "./Badge.svelte";
 import CtaShape from "./CtaShape.svelte";
 import Heading from "./Heading.svelte";
 import Media from "./Media.svelte";
@@ -51,6 +52,19 @@ describe("semantic roles", () => {
     hasAll(avatar, `${role.accent} rounded-full`);
     hasAll(first(render(Media).container, '[data-role="media"]'), role.media);
     hasAll(first(render(Surface).container, '[data-role="surface"]'), role.surface);
+  });
+
+  it("radius-themed shapes carry their data-slot (badge, button, card, media-frame)", () => {
+    expect(first(render(Badge).container, '[data-role="badge"]').getAttribute("data-slot")).toBe("badge");
+    hasAll(first(render(Badge).container, '[data-role="badge"]'), role.badge);
+    expect(first(render(CtaShape).container, "[data-shape=cta]").getAttribute("data-slot")).toBe("button");
+    expect(first(render(Surface).container, "[data-role=surface]").getAttribute("data-slot")).toBe("card");
+    expect(first(render(Media).container, "[data-shape=media]").getAttribute("data-slot")).toBe("media-frame");
+  });
+
+  it("media keeps its ratio from a prop (4:3 default, 21:9 for full-width rows)", () => {
+    expect(first(render(Media).container, "figure").classList.contains("aspect-4/3")).toBe(true);
+    expect(first(render(Media, { props: { ratio: "21/9" } }).container, "figure").classList.contains("aspect-21/9")).toBe(true);
   });
 
   it("media shows the light image by default and the dark one only under .dark", () => {

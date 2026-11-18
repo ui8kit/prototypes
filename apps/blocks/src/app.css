@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Radius per element: [data-slot] shapes read --radius-badge|button|card|media (packages/theme radii.ts). */
+@import "../../../packages/blocks/src/radius.css";
 
 /* Tailwind does not scan node_modules: blocks and kit are workspace links, so name their sources. */
 @source "../../../packages/blocks/src";
@@ -33,8 +35,6 @@
   --chart-4: var(--muted);
   --chart-5: var(--ring);
   --theme-gap: 32px;
-  --theme-section-py: 64px;
-  --theme-section-py-lg: 128px;
   --theme-cta-h: 40px;
   --theme-cta-w: 96px;
   --theme-heading-h: 16px;
@@ -122,20 +122,6 @@ body {
 }
 [data-density="comfortable"] .h-4 {
   height: var(--theme-heading-h, 24px);
-}
-
-/*
- * Section padding (Block py-16): compact 32/64, default 64/128, spacious 96/160.
- * lg step is 1024px. Values are even 8px; the class name stays py-16 so ui8px
- * does not need layout steps 32 and 40.
- */
-.py-16 {
-  padding-block: var(--theme-section-py, 64px);
-}
-@media (min-width: 1024px) {
-  .py-16 {
-    padding-block: var(--theme-section-py-lg, 128px);
-  }
 }
 
 /* Constructor chrome (app-level). Sizes on the 8+4 grid. */
@@ -255,6 +241,12 @@ body {
 }
 .ui8-theme-btn:disabled {
   opacity: 0.5;
+}
+.ui8-theme-subfield {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
 }
 .ui8-theme-fields-palette,
 .ui8-theme-panel-radius {

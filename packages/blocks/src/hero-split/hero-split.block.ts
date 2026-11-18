@@ -6,6 +6,7 @@ export const heroSplit: BlockManifest = {
   category: "hero",
   label: ui.heroSplit.label,
   content: [
+    { id: "badge", kind: "badge", count: 1 },
     { id: "title", kind: "title", count: 1 },
     { id: "description", kind: "description", count: 2 },
     { id: "image", kind: "image", count: 1 },

@@ -54,6 +54,7 @@ describe("block manifests", () => {
 
   it("flattens default content counts for the current library", () => {
     assert.deepEqual(shapeCounts(BLOCK_BY_ID["features-team"].content), {
+      badge: 0,
       heading: 4,
       "text-line": 8,
       avatar: 3,
@@ -62,6 +63,7 @@ describe("block manifests", () => {
       dot: 0,
     });
     assert.deepEqual(shapeCounts(BLOCK_BY_ID["hero-split"].content), {
+      badge: 1,
       heading: 1,
       "text-line": 2,
       avatar: 0,

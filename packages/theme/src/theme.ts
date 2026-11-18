@@ -5,6 +5,7 @@ import { cleanPalette, type Palette } from "./palette";
 import { RADII, SKIN_IDS, type Radius, type SkinId } from "./skins";
 import { DENSITIES, type Density } from "./density";
 import { SECTION_PADDINGS, type SectionPadding } from "./section-padding";
+import { cleanRadii, RADIUS_ELEMENTS, setRadius, type Radii, type RadiusElement } from "./radii";
 
 export type { SectionPadding };
 
@@ -14,12 +15,14 @@ export const MODES = ["light", "dark"] as const;
 export type GlobalTheme = {
   skin: SkinId | null;
   radius: Radius | null;
+  /** per element (badge, button, card, media); absent = follow `radius` (badge: pill) */
+  radii: Radii;
   density: Density;
   sectionPadding: SectionPadding;
   palette?: Palette;
 };
 
-export const NO_THEME: GlobalTheme = { skin: null, radius: null, density: "default", sectionPadding: "default" };
+export const NO_THEME: GlobalTheme = { skin: null, radius: null, radii: {}, density: "default", sectionPadding: "default" };
 
 export function cleanTheme(v: unknown): GlobalTheme {
   const o = (v && typeof v === "object" ? v : {}) as Record<string, unknown>;
@@ -31,7 +34,8 @@ export function cleanTheme(v: unknown): GlobalTheme {
       ? (o.sectionPadding as SectionPadding)
       : "default";
   const palette = cleanPalette(o.palette);
-  return { skin, radius, density, sectionPadding, ...(palette ? { palette } : {}) };
+  const radii = cleanRadii(o.radii);
+  return { skin, radius, radii, density, sectionPadding, ...(palette ? { palette } : {}) };
 }
 
 export function patchTheme(t: GlobalTheme, patch: Partial<GlobalTheme>): GlobalTheme {
@@ -42,7 +46,7 @@ export function patchTheme(t: GlobalTheme, patch: Partial<GlobalTheme>): GlobalT
 }
 
 export const isDefault = (t: GlobalTheme): boolean =>
-  t.skin === null && t.radius === null && t.density === "default" && t.sectionPadding === "default" && !t.palette;
+  t.skin === null && t.radius === null && Object.keys(t.radii ?? {}).length === 0 && t.density === "default" && t.sectionPadding === "default" && !t.palette;
 
 const local = (): Storage | null => {
   try {
@@ -80,6 +84,7 @@ export type ThemeConfig = {
   mode: Mode;
   skin: SkinId | null;
   radius: Radius | null;
+  radii: Radii;
   density: Density;
   sectionPadding: SectionPadding;
   palette: Palette | null;
@@ -95,6 +100,7 @@ export function toConfig(s: ThemeState): ThemeConfig {
     mode: s.mode,
     skin: t.skin,
     radius: t.radius,
+    radii: t.radii,
     density: t.density,
     sectionPadding: t.sectionPadding,
     palette: t.palette ?? null,
@@ -121,6 +127,9 @@ export function fromConfig(input: unknown): ImportResult {
   const dropped: string[] = [];
   if (o.skin !== undefined && o.skin !== null && theme.skin === null) dropped.push("skin");
   if (o.radius !== undefined && o.radius !== null && theme.radius === null) dropped.push("radius");
+  if (o.radii && typeof o.radii === "object") {
+    for (const k of Object.keys(o.radii as object)) if (!(k in theme.radii)) dropped.push("radii." + k);
+  }
   if (o.density !== undefined && o.density !== "default" && theme.density === "default") {
     dropped.push("density");
   }
@@ -133,7 +142,7 @@ export function fromConfig(input: unknown): ImportResult {
 }
 
 export type FieldValue = string | number;
-export type FieldId = "mode" | "skin" | "radius" | "density" | "sectionPadding";
+export type FieldId = "mode" | "skin" | "radius" | `radius-${RadiusElement}` | "density" | "sectionPadding";
 
 export function setThemeField(t: GlobalTheme, id: FieldId, v: FieldValue | null): GlobalTheme {
   if (id === "mode") return t;
@@ -144,6 +153,12 @@ export function setThemeField(t: GlobalTheme, id: FieldId, v: FieldValue | null)
   if (id === "radius") {
     const radius = typeof v === "number" && (RADII as readonly number[]).includes(v) ? (v as Radius) : null;
     return { ...t, radius };
+  }
+  if (id.startsWith("radius-")) {
+    const e = id.slice("radius-".length) as RadiusElement;
+    if (!(RADIUS_ELEMENTS as readonly string[]).includes(e)) return t;
+    const r = typeof v === "number" && (RADII as readonly number[]).includes(v) ? (v as Radius) : null;
+    return { ...t, radii: setRadius(t.radii, e, r) };
   }
   if (id === "density") {
     const density = typeof v === "string" && (DENSITIES as readonly string[]).includes(v) ? (v as Density) : "default";

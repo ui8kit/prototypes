@@ -42,12 +42,12 @@ Absorbed as:
 </Block>
 ```
 
-`lg:py-32` is dropped (`32` is off the layout scale). Container padding is `px-8` (even step). `text-center` is unnecessary: there is no text.
+`py-16 lg:py-32` is the theme's section padding (Standard); `Block` gets the step from the theme, organisms pass no padding. Container padding is `px-8` (even step). `text-center` is unnecessary: there is no text.
 
 | Sketch | Block | Content contract | Variants (layout) | Structure |
 | --- | --- | --- | --- | --- |
-| Team / features row | `FeaturesTeam` | title, description × 2 + `teamMember[]` (avatar, title, description × 2) | `columns-2` / `columns-3` / `columns-4` | `Block` → `Container` → `Stack` → centred intro (`Heading` lg + two lead `TextLine`s) + `Grid` of centred `Avatar` + `Heading` + two `TextLine`s |
-| Split hero | `HeroSplit` | title, description × 2, image, actionLabel, actionHref | `media-left` / `media-right` / `media-top` | `Block` → `Container` → `Grid` (2 cols, vertically centred) or `Stack` of copy (`Heading` lg, two lead `TextLine`s, gap, `CtaShape`) and `Media` (4:3 with a centred circle) |
+| Team / features row | `FeaturesTeam` | title, description × 2 + `teamMember[]` (avatar, title, description × 2) | `columns-2` / `columns-3` / `columns-4` / `cards-3` (members on `Surface`) | `Block` → `Container` → `Stack` → centred intro (`Heading` lg + two lead `TextLine`s) + `Grid` of centred `Avatar` + `Heading` + two `TextLine`s |
+| Split hero | `HeroSplit` | badge, title, description × 2, image, actionLabel, actionHref | `media-left` / `media-right` / `media-top` | `Block` → `Container` → `Grid` (2 cols, vertically centred) or `Stack` of copy (`Heading` lg, two lead `TextLine`s, gap, `CtaShape`) and `Media` (4:3 with a centred circle) |
 
 The registry (`packages/blocks/src/manifest/registry.ts`) is the gallery source. Content contract: `docs/content-contract.md`. Field budget (5–10) and repetition: `docs/fields.md`. Adding a block: `docs/adding-a-block.md`.
 
@@ -61,11 +61,12 @@ A wireframe has no words, so meaning is carried by **token + height**. Every rol
 | Lead / subtitle | `lead` | `TextLine size="lead"` | `bg-muted` | `h-2` (8px) | `h-3` is off the 8+4 layout grid (ui8px UI8PX001), so a lead is the same bar drawn **wider** (`full`, `2/3`, `1/2`) under a heading |
 | Heading | `heading` | `Heading` | `bg-secondary` | `h-4` (16px) | card / item titles |
 | Large heading (H1/H2) | `heading-lg` | `Heading size="lg"` | `bg-secondary` | `h-6` (24px) | section titles |
-| Primary CTA | `cta-primary` | `CtaShape` | `bg-primary` | `h-10` (40px, control step) | `w-24`, no text, `aria-label` from `content/en.ts` |
+| Primary CTA | `cta-primary` | `CtaShape` (`data-slot="button"`) | `bg-primary` | `h-10` (40px, control step) | `w-24`, no text, `aria-label` from `content/en.ts` |
 | Secondary CTA | `cta-secondary` | `CtaShape tone="secondary"` | `bg-secondary` | `h-10` | `w-24`, no text |
 | Accent / emphasis | `accent` | `Avatar` / `Dot` | `bg-accent` | square `h-8`/`h-12`/`h-16` + `rounded-full` | accent only for emphasis (avatar, badge, highlighted item) |
-| Media | `media` | `Media` | `bg-muted` | `aspect-4/3`, `w-full` | base64 light / dark hatch, switched by `dark:hidden` / `dark:block`; centred `bg-background` circle |
-| Card surface | `surface` | `Surface` | `bg-card` + `border border-border` | content | `p-8`; wraps other shapes, not a content field |
+| Badge | `badge` | `Badge` | `bg-accent` | `h-6` (24px), `w-16` | eyebrow / tag; `rounded-full` + `data-slot="badge"` (theme badge radius, unset: pill) |
+| Media | `media` | `Media` | `bg-muted` | `ratio`: `4/3` (default), `video`, `21/9` (full-width rows, e.g. hero media-top) | base64 light / dark hatch (16px diagonal tiles, no stretching at any size), switched by `dark:hidden` / `dark:block`; centred `bg-background` circle; `data-slot="media-frame"` |
+| Card surface | `surface` | `Surface` (`data-slot="card"`) | `bg-card` + `border border-border` | content | `p-8`; wraps other shapes, not a content field |
 
 Default tokens (no skin, no palette) are wireframe-tuned in `packages/theme/src/css.ts` (`FALLBACK`): light muted 0.955 / secondary 0.90 / accent oklch(0.82 0.08 255) / primary 0.205; dark muted 0.25 / secondary 0.38 / accent oklch(0.45 0.09 255) / primary 0.922. Skins and custom palettes bring their own values.
 
@@ -73,4 +74,4 @@ Default tokens (no skin, no palette) are wireframe-tuned in `packages/theme/src/
 
 All raw class strings: `packages/blocks/src/classes.ts`. Layout/shape components read maps. Organism files must report **0** raw utilities (`scripts/check-blocks.py`).
 
-Density in `apps/blocks` remaps `gap-8`, `h-10`, `w-24`, and `h-4` under `[data-density]`. Section padding remaps Block `py-16` via `--theme-section-py` / `--theme-section-py-lg` (compact 32/64, default 64/128, spacious 96/160). Block class names do not change. See `docs/theme.md`.
+Density in `apps/blocks` remaps `gap-8`, `h-10`, `w-24`, and `h-4` under `[data-density]`. Section padding is a real class pair on `Block` from the theme: compact `py-8 lg:py-16` (32/64), standard `py-16 lg:py-32` (64/128), spacious `py-24 lg:py-40` (96/160). Radius per element (badge, button, card, media) rides on `data-slot` + `radius.css`. See `docs/theme.md`.

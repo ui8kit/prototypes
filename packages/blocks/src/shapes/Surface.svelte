@@ -7,6 +7,6 @@
   let { children }: { children?: Snippet } = $props();
 </script>
 
-<Box class={shape.surface} data-role="surface">
+<Box class={shape.surface} data-role="surface" data-slot="card">
   {@render children?.()}
 </Box>

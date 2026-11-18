@@ -1,16 +1,14 @@
 /**
  * Section padding (vertical rhythm of Block / section), independent of density.
+ * Three steps, every value a multiple of 8px (`--spacing` stays 4px):
  *
- * Suggested Tailwind pairs, all even 8px steps (`--spacing` stays 4px):
+ *   compact    py-8  lg:py-16   →  32px / 64px
+ *   default    py-16 lg:py-32   →  64px / 128px
+ *   spacious   py-24 lg:py-40   →  96px / 160px
  *
- *   compact    py-8  / lg:py-16   →  32px / 64px
- *   default    py-16 / lg:py-32   →  64px / 128px
- *   spacious   py-24 / lg:py-40   →  96px / 160px
- *
- * `lg:py-32` and `lg:py-40` are not extracted class names (32 and 40 sit
- * past the ui8px layout list 0–24). The Block class stays `py-16`; app CSS
- * writes the two px values onto `--theme-section-py` and
- * `--theme-section-py-lg`, then remaps `.py-16` (base + 1024px).
+ * Blocks render these real class pairs (`layout.section` in packages/blocks/src/classes.ts; the app provides the
+ * theme's step to every Block). ui8px layout spacing is widened to 32 and 40 in `.ui8px/policy/allowed.json`.
+ * `sectionPaddingVars` stays for exported CSS (`--theme-section-py`, `--theme-section-py-lg`).
  */
 
 export const SECTION_PADDINGS = ["compact", "default", "spacious"] as const;

@@ -1,4 +1,5 @@
 export { default as Avatar } from "./Avatar.svelte";
+export { default as Badge } from "./Badge.svelte";
 export { default as CtaShape } from "./CtaShape.svelte";
 export { default as Dot } from "./Dot.svelte";
 export { default as Heading } from "./Heading.svelte";

@@ -44,6 +44,16 @@ export {
   type SectionPadding,
   type SectionPaddingScale,
 } from "./section-padding";
+export {
+  RADIUS_ELEMENTS,
+  RADIUS_SLOT,
+  cleanRadii,
+  radiusVar,
+  radiusVars,
+  setRadius,
+  type Radii,
+  type RadiusElement,
+} from "./radii";
 export { RADII, SKIN_COLORS, SKIN_IDS, labToHsl, labToRgb, type Radius, type SkinId } from "./skins";
 export {
   CONFIG_FORMAT,

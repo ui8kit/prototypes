@@ -24,5 +24,6 @@ export const featuresTeam: BlockManifest = {
     { id: "columns-2", layout: { columns: 2 } },
     { id: "columns-3", layout: { columns: 3 }, default: true },
     { id: "columns-4", layout: { columns: 4 } },
+    { id: "cards-3", layout: { columns: 3, cards: true } },
   ],
 };

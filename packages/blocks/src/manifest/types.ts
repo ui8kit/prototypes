@@ -28,11 +28,11 @@ export const BLOCK_CATEGORIES = [
 export type BlockCategory = (typeof BLOCK_CATEGORIES)[number];
 
 /** Content kinds. Distinct entities (price vs duration) get their own kind later — never a universal field. */
-export const CONTENT_KINDS = ["title", "description", "image", "actionLabel", "actionHref", "avatar"] as const;
+export const CONTENT_KINDS = ["badge", "title", "description", "image", "actionLabel", "actionHref", "avatar"] as const;
 export type ContentKind = (typeof CONTENT_KINDS)[number];
 
 /** Kinds that render as `[data-shape=…]`. `dot` is a small avatar. */
-export const SHAPE_KINDS = ["heading", "text-line", "avatar", "cta", "media", "dot"] as const;
+export const SHAPE_KINDS = ["badge", "heading", "text-line", "avatar", "cta", "media", "dot"] as const;
 export type ShapeKind = (typeof SHAPE_KINDS)[number];
 
 /** Exact count, or a range with the default the organism renders. */
@@ -90,11 +90,12 @@ export function resolveVariant(block: BlockManifest, id: string | undefined): Bl
 }
 
 export function emptyShapeCounts(): Record<ShapeKind, number> {
-  return { heading: 0, "text-line": 0, avatar: 0, cta: 0, media: 0, dot: 0 };
+  return { badge: 0, heading: 0, "text-line": 0, avatar: 0, cta: 0, media: 0, dot: 0 };
 }
 
 /** Content kind → placeholder shape. `actionHref` rides on the same CTA as `actionLabel`. */
 export function shapeForContent(kind: ContentKind): ShapeKind | null {
+  if (kind === "badge") return "badge";
   if (kind === "title") return "heading";
   if (kind === "description") return "text-line";
   if (kind === "image") return "media";

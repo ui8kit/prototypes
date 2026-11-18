@@ -11,6 +11,11 @@
       "label": "Hero",
       "content": [
         {
+          "id": "badge",
+          "kind": "badge",
+          "count": 1
+        },
+        {
           "id": "title",
           "kind": "title",
           "count": 1
@@ -58,8 +63,9 @@
         }
       ],
       "defaultVariant": "media-right",
-      "fieldBudget": 5,
+      "fieldBudget": 6,
       "shapeCounts": {
+        "badge": 1,
         "heading": 1,
         "text-line": 2,
         "avatar": 0,
@@ -130,11 +136,19 @@
           "layout": {
             "columns": 4
           }
+        },
+        {
+          "id": "cards-3",
+          "layout": {
+            "columns": 3,
+            "cards": true
+          }
         }
       ],
       "defaultVariant": "columns-3",
       "fieldBudget": 6,
       "shapeCounts": {
+        "badge": 0,
         "heading": 4,
         "text-line": 8,
         "avatar": 3,
@@ -153,6 +167,12 @@
     ]
   },
   "kinds": {
+    "badge": {
+      "blocks": [
+        "hero-split"
+      ],
+      "totalDefault": 1
+    },
     "title": {
       "blocks": [
         "features-team",
@@ -199,6 +219,19 @@
     }
   },
   "paths": {
+    "badge": {
+      "kind": "badge",
+      "blocks": [
+        "hero-split"
+      ],
+      "counts": [
+        {
+          "id": "hero-split",
+          "count": 1,
+          "default": 1
+        }
+      ]
+    },
     "title": {
       "kind": "title",
       "blocks": [

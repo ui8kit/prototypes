@@ -6,13 +6,19 @@
   "svelte": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./manifest": "./src/manifest/index.ts"
+    "./manifest": "./src/manifest/index.ts",
+    "./radius.css": "./src/radius.css"
   },
   "ui8kit": {
     "runtime": "svelte",
     "kit": [],
-    "composition": ["src"],
-    "blockRoot": ["src/features-team", "src/hero-split"]
+    "composition": [
+      "src"
+    ],
+    "blockRoot": [
+      "src/features-team",
+      "src/hero-split"
+    ]
   },
   "peerDependencies": {
     "svelte": "^5.0.0"

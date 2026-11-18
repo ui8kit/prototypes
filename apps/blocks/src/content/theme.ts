@@ -51,6 +51,11 @@ export type ThemeText = {
   resetAll: string;
   back: string;
   close: string;
+  elementRadius: string;
+  elementRadiusNote: string;
+  elements: Record<"badge" | "button" | "card" | "media", string>;
+  follow: string;
+  pill: string;
   io: ThemeIoText;
 };
 
@@ -66,6 +71,11 @@ export const themeText: ThemeText = {
   resetAll: "Reset theme",
   back: "Back",
   close: "Close",
+  elementRadius: "Radius per element",
+  elementRadiusNote: "Badges, buttons, cards and media each take their own corner; unset follows the radius above (badges: the pill).",
+  elements: { badge: "Badges", button: "Buttons", card: "Cards", media: "Media" },
+  follow: "Follow",
+  pill: "Pill",
   io: {
     title: "Export / import",
     note: "The whole theme as one JSON config (format prototypes-theme, version 1), or the generated CSS variables. Import replaces the theme. Fonts are never stored.",

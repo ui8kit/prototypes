@@ -21,7 +21,7 @@ Each contract is **5–10** fields. Counting rule:
 
 | Block | Fields | Budget | Paths |
 | --- | --- | --- | --- |
-| hero-split | 5 | 5–10 | `title`, `description`, `image`, `actionLabel`, `actionHref` |
+| hero-split | 6 | 5–10 | `badge`, `title`, `description`, `image`, `actionLabel`, `actionHref` |
 | features-team | 6 | 5–10 | `title`, `description`, `members`, `members.avatar`, `members.title`, `members.description` |
 
 ## Content kinds
@@ -31,6 +31,7 @@ counts across the library.
 
 | Kind | Blocks | Ids | totalDefault |
 | --- | --- | --- | --- |
+| badge | 1 | hero-split | 1 |
 | title | 2 | features-team, hero-split | 3 |
 | description | 2 | features-team, hero-split | 6 |
 | image | 1 | hero-split | 1 |
@@ -49,6 +50,7 @@ separate record types, not a universal item.
 | --- | --- | --- | --- | --- |
 | actionHref | actionHref | 1 | hero-split | 1 |
 | actionLabel | actionLabel | 1 | hero-split | 1 |
+| badge | badge | 1 | hero-split | 1 |
 | description | description | 2 | hero-split, features-team | 2 |
 | image | image | 1 | hero-split | 1 |
 | members | record (teamMember) | 1 | features-team | 1–6 (default 3) |
@@ -69,11 +71,12 @@ separate record types, not a universal item.
 
 - Category: `hero`
 - Label: Hero
-- Field budget: 5 / 10
+- Field budget: 6 / 10
 - Variants (layout only): `media-left`, `media-right` (default), `media-top`
 - Layout axes: media=left; media=right; media=top
-- Flattened shapes: heading × 1, text-line × 2, cta × 1, media × 1
+- Flattened shapes: badge × 1, heading × 1, text-line × 2, cta × 1, media × 1
 
+- `badge` (badge, 1)
 - `title` (title, 1)
 - `description` (description, 2)
 - `image` (image, 1)
@@ -85,8 +88,8 @@ separate record types, not a universal item.
 - Category: `team`
 - Label: Team
 - Field budget: 6 / 10
-- Variants (layout only): `columns-2`, `columns-3` (default), `columns-4`
-- Layout axes: columns=2; columns=3; columns=4
+- Variants (layout only): `columns-2`, `columns-3` (default), `columns-4`, `cards-3`
+- Layout axes: columns=2; columns=3; columns=4; columns=3, cards=true
 - Flattened shapes: heading × 4, text-line × 8, avatar × 3
 
 - `title` (title, 1)

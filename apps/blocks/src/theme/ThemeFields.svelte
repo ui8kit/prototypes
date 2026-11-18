@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Box, Button, Label, Radio, Select, Text } from "@ui8kit/kit";
   import { Stack } from "@ui8kit/blocks";
-  import { DENSITIES, RADII, SECTION_PADDINGS, SKIN_IDS } from "@ui8kit/theme";
+  import { DENSITIES, RADII, RADIUS_ELEMENTS, SECTION_PADDINGS, SKIN_IDS } from "@ui8kit/theme";
   import { paletteText, skinLabels, themeText } from "../content/theme";
   import { appTheme, themeCtl } from "./ctl.svelte";
 
@@ -14,9 +14,9 @@
     comfortable: "Comfortable",
   };
   const sectionPaddingLabels: Record<string, string> = {
-    compact: "Compact · 32 / 64 px",
-    default: "Default · 64 / 128 px",
-    spacious: "Spacious · 96 / 160 px",
+    compact: "Compact · py-8 lg:py-16 · 32 / 64 px",
+    default: "Standard · py-16 lg:py-32 · 64 / 128 px",
+    spacious: "Spacious · py-24 lg:py-40 · 96 / 160 px",
   };
 
   function onSkin(raw: string): void {
@@ -70,6 +70,28 @@
       </Button>
     </Box>
   {/if}
+  <Box class="ui8-theme-field" role="group" aria-labelledby="theme-element-radius-legend" data-testid="theme-element-radius">
+    <Text tag="span" class="ui8-palette-label" id="theme-element-radius-legend">{themeText.elementRadius}</Text>
+    <Text class="ui8-theme-note">{themeText.elementRadiusNote}</Text>
+    {#each RADIUS_ELEMENTS as e (e)}
+      <Box class="ui8-theme-subfield">
+        <Label for={"theme-radius-" + e}>{themeText.elements[e]}</Label>
+        <Select
+          id={"theme-radius-" + e}
+          value={t.radii[e] === undefined ? "" : String(t.radii[e])}
+          onchange={(ev: Event) => {
+            const raw = (ev.currentTarget as HTMLSelectElement).value;
+            themeCtl.setField(`radius-${e}`, raw === "" ? null : Number(raw));
+          }}
+          options={[
+            { value: "", label: e === "badge" ? themeText.pill : `${themeText.follow} (${t.radius ?? 4} px)` },
+            ...RADII.map((r) => ({ value: String(r), label: `${r} px` })),
+          ]}
+          data-testid={"theme-radius-" + e}
+        />
+      </Box>
+    {/each}
+  </Box>
   <Box class="ui8-theme-field">
     <Text tag="span" class="ui8-palette-label" id="theme-density-legend">{themeText.density}</Text>
     <Box class="ui8-palette-contrast-row" role="radiogroup" aria-labelledby="theme-density-legend">

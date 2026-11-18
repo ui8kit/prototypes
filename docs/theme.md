@@ -12,7 +12,8 @@ Stock keeps a global theme under `stock:v1:theme` as `{ v: 1, theme }`. The mode
 | `skin` | 16 ids from `taste-data` |
 | `font` / `headingFont` | **not ported** |
 | `radius` | 0, 4, 8, 12, 16 px → `--radius` |
-| per-element radius / density / shadow | **not ported** (this constructor is global only; no shadows on wireframes) |
+| per-element radius (`radius-badge` / `-button` / `-card` / `-media`) | **ported** as `radii` → `--radius-badge|button|card|media` (`radii.ts`); alert is not ported (no alert shape) |
+| per-element density / shadow | **not ported** (one global density; no shadows on wireframes) |
 | `palette` | optional custom wheel |
 
 A custom palette (`palette.ts`) is one base colour `{ harmony, h, s, l, contrast? }` plus a harmony. Harmonies and their hue offsets:
@@ -61,7 +62,7 @@ Stock density is per-element (`data-density-*` + `--pad-*` in kit.css). Radii ma
 | Stock | Prototypes |
 | --- | --- |
 | Fonts, heading fonts, type scale, width, tracking | **Excluded** |
-| Per-element radius / density / shadow | One global radius, density, and section padding |
+| Per-element radius / density / shadow | Global radius + per-element radius (badge, button, card, media); one global density and section padding |
 | Density via kit `--pad-*` | App CSS remaps `gap-8` / `h-10` / `w-24` / `h-4` under `[data-density]`. Section padding is a separate token. `--spacing` stays 4px |
 | `magazine-theme` v2 | `prototypes-theme` v1 (still **reads** magazine-theme and `{ v:1, theme }`) |
 | `stock:v1:theme` | `prototypes:v1:theme` |
@@ -83,13 +84,26 @@ Stock density is per-element (`data-density-*` + `--pad-*` in kit.css). Radii ma
 
 ### Section padding (even 8px, independent of density)
 
-Block keeps the class `py-16`. Theme writes `--theme-section-py` and `--theme-section-py-lg` (lg = 1024px). Tailwind steps 32 and 40 are not extracted (ui8px layout list stops at 24); the px values still match `py-8` / `lg:py-16`, `py-16` / `lg:py-32`, `py-24` / `lg:py-40`.
+Blocks render the real class pair. `layout.section` in `packages/blocks/src/classes.ts` maps the step to classes; `Block` reads the step from the app (`provideSectionPadding(() => theme.sectionPadding)` or `<SectionScope padding>`), default `default`, and writes `data-section-padding`. Steps 32 and 40 are even 8px steps, so the project ui8px policy (`.ui8px/policy/allowed.json`, `spacing.layout`) lists them after 24. `--theme-section-py` / `--theme-section-py-lg` stay in exported CSS only.
 
 | Preset | Base | lg (1024px+) | Tailwind pair |
 | --- | --- | --- | --- |
 | compact | 32px | 64px | `py-8` / `lg:py-16` |
-| default | 64px | 128px | `py-16` / `lg:py-32` |
+| default (Standard) | 64px | 128px | `py-16` / `lg:py-32` |
 | spacious | 96px | 160px | `py-24` / `lg:py-40` |
+
+### Radius per element
+
+Ported from `codegen-x/ui8kit` (`packages/theme-model/src/design.ts` `ELEMENTS`, `packages/kit-compose/*/src/styles/kit.css` §11). A shape keeps plain `rounded` (badge: `rounded-full`) and carries a `data-slot`; `packages/blocks/src/radius.css` points that slot at a CSS variable, the theme writes the variable on `<html>`. No new utility class, so ui8px sees only `rounded` / `rounded-full`.
+
+| Element | Shape | `data-slot` | Variable | Unset |
+| --- | --- | --- | --- | --- |
+| badge | `Badge` | `badge` | `--radius-badge` | the pill |
+| button | `CtaShape` | `button` | `--radius-button` | `--radius` |
+| card | `Surface` | `card` | `--radius-card` | `--radius` |
+| media | `Media` | `media-frame` | `--radius-media` | `--radius` |
+
+Text bars and headings follow `--radius`; the avatar stays `rounded-full`. Values: `RADII` (0, 4, 8, 12, 16 px). Stored in `theme.radii`, exported in the JSON config (`radii`) and CSS.
 
 ## UI
 

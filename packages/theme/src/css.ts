@@ -1,6 +1,7 @@
 import { css as hslCss, paletteTokens, withForeground, type Mode } from "./palette";
 import { densityVars } from "./density";
 import { sectionPaddingVars } from "./section-padding";
+import { radiusVars } from "./radii";
 import { labToHsl, SKIN_COLORS, type SkinId } from "./skins";
 import { NEUTRAL_TOKENS } from "./neutral-tokens";
 import { SKIN_NEUTRALS } from "./skin-neutrals";
@@ -118,6 +119,7 @@ export function layoutVars(theme: GlobalTheme): Record<string, string> {
     ...sectionPaddingVars(theme.sectionPadding),
   };
   if (theme.radius !== null) out["--radius"] = `${theme.radius}px`;
+  Object.assign(out, radiusVars(theme.radii ?? {}));
   return out;
 }
 
