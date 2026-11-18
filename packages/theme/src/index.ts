@@ -36,7 +36,6 @@ export {
   type PaletteToken,
 } from "./palette";
 export { formatHsl, hslToHex, parseColour, parseHex, parseHsl, rgbToHsl } from "./colour-input";
-export { DENSITIES, DENSITY_SCALE, densityVars, onGrid, type Density, type DensityScale } from "./density";
 export {
   SECTION_PADDINGS,
   SECTION_PADDING_SCALE,
@@ -45,30 +44,54 @@ export {
   type SectionPaddingScale,
 } from "./section-padding";
 export {
-  RADIUS_ELEMENTS,
-  RADIUS_SLOT,
-  cleanRadii,
-  radiusVar,
-  radiusVars,
-  setRadius,
-  type Radii,
-  type RadiusElement,
-} from "./radii";
+  DENSITIES,
+  DENSITY_ELEMENTS,
+  DENSITY_KEYS,
+  DENSITY_PX,
+  ELEMENTS,
+  ELEMENT_SLOT,
+  RADIUS_KEYS,
+  SHADOWS,
+  SHADOW_ELEMENTS,
+  SHADOW_KEYS,
+  SHADOW_VALUE,
+  cleanTokens,
+  densityOf,
+  setDensity,
+  setToken,
+  tokenAttrs,
+  tokenStyle,
+  tokenVars,
+  type Density,
+  type Element,
+  type Shadow,
+  type Tokens,
+} from "./design";
 export { RADII, SKIN_IDS, type Radius, type SkinId } from "./skins";
 export { SKIN_TOKENS } from "./skin-tokens";
 export {
   CONFIG_FORMAT,
   CONFIG_VERSION,
+  FIELDS,
+  FONT_SCALES,
+  FONT_WEIGHTS,
+  LEGACY_FORMAT,
   MODES,
   NO_THEME,
+  TRACKINGS,
   cleanTheme,
+  fieldOf,
+  fieldValue,
   fromConfig,
   isDefault,
   patchTheme,
   readTheme,
+  rootAttrs,
   setThemeField,
   toConfig,
   writeTheme,
+  type Field,
+  type FieldGroup,
   type FieldId,
   type FieldValue,
   type GlobalTheme,
@@ -77,4 +100,6 @@ export {
   type ThemeConfig,
   type ThemeState,
 } from "./theme";
-export { FLOOR, applyVars, colorVars, cssProperties, exportCss, layoutVars, legibleRoles, parseHslToken, skinColors, skinExtras } from "./css";
+export { ELEMENT_DEFAULTS, FLOOR, applyVars, scopedCss, colorVars, cssProperties, densityVars, exportCss, layoutVars, legibleRoles, parseHslToken, skinColors, skinExtras } from "./css";
+export { PRESETS_ROW1, type Preset } from "./presets";
+export { presetTheme } from "./theme";

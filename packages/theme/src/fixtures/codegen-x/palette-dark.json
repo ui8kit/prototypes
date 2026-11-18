@@ -1,0 +1,19 @@
+{
+  "format": "magazine-theme",
+  "version": 2,
+  "mode": "dark",
+  "skin": "supabase",
+  "font": null,
+  "headingFont": null,
+  "radius": 0,
+  "tokens": {
+    "density-badge": "comfortable"
+  },
+  "palette": {
+    "harmony": "triadic",
+    "h": 150,
+    "s": 70,
+    "l": 40,
+    "contrast": "AAA"
+  }
+}

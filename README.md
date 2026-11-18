@@ -10,7 +10,7 @@ This is not a marketing site and not an idea dump. Blocks are organisms of recta
 | --- | --- |
 | `packages/kit` | Official UI8Kit Svelte primitives (`npx ui8kit@3 add --all`). Do not edit by hand. |
 | `packages/blocks` | Layout shells, placeholder shapes, organism blocks, and typed `*.block.ts` manifests. |
-| `packages/theme` | Palette, skins, density, radius, CSS/JSON. No fonts. |
+| `packages/theme` | codegen-x `magazine-theme` v2 model: exact skins, palette, radius / density / shadow per element, presets, CSS/JSON. Fonts carried, not drawn. |
 | `apps/blocks` | Feed of every block × every variant; header Theme button → Theme sheet; dark toggle. |
 
 ## Constructor rules
@@ -37,6 +37,6 @@ bun run kit:install     # npx ui8kit@3 add --all (Svelte; CDN fallback in docs/k
 
 ## Theme
 
-The constructor in `apps/blocks` renders every block from the registry in every layout variant, one after another, full width. Each organism has one content schema and interchangeable layout variants (`docs/content-contract.md`). Later unification reads which fields repeat (`docs/fields.md`, `bun run fields:summary`). Skins, a colour wheel (9 harmonies, 16 presets, AA/AAA), radius (0–16px), density (`compact` / `default` / `comfortable` on the 8+4 grid), and section padding (`compact` / `default` / `spacious`, even 8px including the lg step) live in `packages/theme`. Export JSON (`prototypes-theme` v1) or CSS variables. Fonts are excluded.
+The constructor in `apps/blocks` renders every block from the registry in every layout variant, one after another, full width. Each organism has one content schema and interchangeable layout variants (`docs/content-contract.md`). Later unification reads which fields repeat (`docs/fields.md`, `bun run fields:summary`). Skins (exact codegen-x tokens, picked from 4:3 cards drawn in their own skin), brand presets (taste-data row 1), a colour wheel (9 harmonies, 16 presets, AA/AAA), radius (0–16px) and radius / density / shadow per element (badge, button, card, media), section padding (`compact` / `default` / `spacious`, even 8px including the lg step) and a design-system specimen live in `packages/theme` and the Theme sheet. Export / import JSON in the codegen-x/ui8kit format (`magazine-theme` v2: made in apps/stock, applied here, and back) or CSS variables. Fonts are carried in the config but not drawn.
 
 Storage: `prototypes:v1:theme` and `ui8kit-theme` (light/dark). Dark mode is the `dark` class on `<html>`; `Media` swaps its light/dark hatch with `dark:hidden` / `dark:block`. Semantic roles (token + height): `docs/blocks.md`. See `docs/theme.md`.

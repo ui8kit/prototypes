@@ -1,6 +1,6 @@
 # Theme constructor
 
-`packages/theme` plus the panel in `apps/blocks`. Fonts and typography are out of scope.
+`packages/theme` plus the Theme sheet in `apps/blocks`. The model and the JSON config are codegen-x/ui8kit's (`magazine-theme` v2): a theme made in apps/stock applies here, and back. Fonts are carried through but not drawn.
 
 ## How `apps/stock` works (codegen-x/ui8kit)
 
@@ -10,11 +10,11 @@ Stock keeps a global theme under `stock:v1:theme` as `{ v: 1, theme }`. The mode
 | --- | --- |
 | `mode` | light / dark on `<html>` (`data-theme`) |
 | `skin` | 16 ids from `taste-data` |
-| `font` / `headingFont` | **not ported** |
+| `font` / `headingFont` / `fontScale` / `fontWidth` / `fontWeight` / `headingWeight` / `tracking` | carried through (stored, exported) but not drawn |
 | `radius` | 0, 4, 8, 12, 16 px → `--radius` |
-| per-element radius (`radius-badge` / `-button` / `-card` / `-media`) | **ported** as `radii` → `--radius-badge|button|card|media` (`radii.ts`); alert is not ported (no alert shape) |
-| per-element density / shadow | **not ported** (one global density; no shadows on wireframes) |
+| `tokens` | **ported verbatim** (`design.ts`): `radius-{badge,button,card,alert,media}`, `density-{badge,button,card,alert}`, `shadow-{card,alert,media}`; alert has no shape here, its tokens are kept |
 | `palette` | optional custom wheel |
+| `sectionPadding` | **ours** (exported only when not `default`; codegen-x ignores unknown top-level fields) |
 
 A custom palette (`palette.ts`) is one base colour `{ harmony, h, s, l, contrast? }` plus a harmony. Harmonies and their hue offsets:
 
@@ -52,39 +52,54 @@ Skins without a palette: the exact tokens of the skin, light rule in light and d
 
 Blocks have no words, so the text bar (`muted`), heading bar (`secondary`) and badge / avatar (`accent`) must stand apart from the page. Many skins keep them within 2–4 % lightness of the background (amber-minimal light: 98 / 96 / 96 on 100), and the wireframe then looks empty. `cssProperties(theme, mode, { legible: true })` (`legibleRoles`) moves **only lightness**, away from the background (light: darker, dark: lighter), only when a token is too close: muted ≥ 6 from background, secondary ≥ 6 beyond muted, accent ≥ 10 from background and ≥ 4 from muted and secondary (else one step past secondary). Hue and saturation stay the skin's. Exported CSS and the JSON config keep the exact skin values. Tests: `roles.test.ts` (every skin × mode).
 
-Stock density is per-element (`data-density-*` + `--pad-*` in kit.css). Radii match this package. Export format there is `magazine-theme` v2 (JSON). The Theme sheet (layouts) is a side panel: fields, colour wheel, presets, design-system specimen, font pickers.
+## Export / import (codegen-x compatible)
+
+`toConfig` / `fromConfig` in `theme.ts` follow codegen-x `global-theme.ts` field for field: `{ format: "magazine-theme", version: 2, mode, skin, font, headingFont, radius, tokens, palette, fontScale?, fontWidth?, fontWeight?, headingWeight?, tracking? }`, same key order, same token key order (`cleanTokens`). Import accepts `magazine-theme` v2 (other versions rejected), a codegen-x style preset (format 1), the stored `{ v: 1, theme }`, a bare theme, and our legacy `prototypes-theme` v1 (its `radii` and global `density` migrate to tokens). Unknown tokens and bad values are named in `dropped`. No JSON Schema.
+
+Proof: `packages/theme/src/fixtures/codegen-x/*.json` are configs written by codegen-x's own `toConfig`; `codegen-x.test.ts` imports each one with nothing dropped and exports it back byte for byte. The other direction was run against codegen-x `fromConfig` (our exports: accepted, nothing dropped, re-exported identical apart from `sectionPadding`).
+
+Font ids are checked by shape here (`[a-z0-9-]`); codegen-x checks them against its font list.
 
 ## What this repo ports
 
-- `palette.ts`, `colour-input.ts`, `neutral-tokens.ts`, `skin-neutrals.ts` (MIT, verbatim logic).
-- `SKIN_IDS`, `RADII` from `taste-data`; `skin-tokens.ts` from the skin CSS (`scripts/port-skins.mjs`).
-- Wheel, harmonies, presets, Options, contrast AA/AAA, JSON import/export UI.
-- The header Theme button and the Theme sheet (native modal `Dialog` docked right; palette opens as a wide panel to its left).
+- `palette.ts`, `colour-input.ts`, `neutral-tokens.ts`, `skin-neutrals.ts` (MIT, verbatim logic); `design.ts` (tokens) and the model / config of `global-theme.ts`.
+- `SKIN_IDS`, `RADII` from `taste-data`; `skin-tokens.ts` from the skin CSS (`scripts/port-skins.mjs`); `presets.ts` from `taste-data` (`scripts/port-presets.mjs`).
+- Wheel, harmonies, palette presets, Options, contrast AA/AAA, JSON import/export UI.
+- The header Theme button and the Theme sheet (native modal `Dialog` docked right). Wide panels open to its left: **Skins** (4:3 cards, each in its own skin), **Palette**, **Presets** (brand starting points), **Design system** (specimen).
 
 ## What differs
 
 | Stock | Prototypes |
 | --- | --- |
-| Fonts, heading fonts, type scale, width, tracking | **Excluded** |
-| Per-element radius / density / shadow | Global radius + per-element radius (badge, button, card, media); one global density and section padding |
-| Density via kit `--pad-*` | App CSS remaps `gap-8` / `h-10` / `w-24` / `h-4` under `[data-density]`. Section padding is a separate token. `--spacing` stays 4px |
-| `magazine-theme` v2 | `prototypes-theme` v1 (still **reads** magazine-theme and `{ v:1, theme }`) |
-| `stock:v1:theme` | `prototypes:v1:theme` |
-| Apply `dark` / `data-theme` on `<html>` | Same: tokens on `<html>`, `dark` class from the bottom-right toggle |
-| Design-system specimen, skin/font pickers as wide sheets | Skin `<select>`, palette as the one wide panel |
-| Shadows | None (wireframe) |
+| Fonts, heading fonts, type scale, width, tracking | Carried through, not drawn |
+| Alert tokens | Kept and exported; no alert shape |
+| `stock:v1:theme` | `prototypes:v1:theme` (same `{ v: 1, theme }` shape) |
+| Kit CSS skins via `data-skin` | Exact skin tokens written on `<html>` (plus `data-skin`), with the wireframe legibility floor |
+| Font picker | None |
 
-### Density map (8+4)
+### Density per element
 
-| Token in blocks | compact | default | comfortable |
-| --- | --- | --- | --- |
-| `gap-8` | 16px | 32px | 48px |
-| CTA `h-10` | 32px | 40px | 48px |
-| CTA `w-24` | 64px | 96px | 96px |
-| heading `h-4` | 16px | 16px | 24px |
-| text line `h-2` | 8px | 8px | 8px |
+`data-density-<element>` on `<html>` (codegen-x `rootAttrs`) and, for the wireframe, variables from `densityVars` (`DENSITY_PX` in `design.ts`). `packages/blocks/src/tokens.css` reads them on the shapes only (`[data-shape="cta"]`, `[data-shape="badge"]`, `[data-role="surface"]`), so a kit `Button` in the app chrome (also `data-slot="button"`, `h-10`) never changes size. Class names stay (`h-10 w-24`, `h-6 w-16`, `p-6`); `--spacing` stays 4px.
 
-40px CTA height is the control step (4×10). Everything else is a multiple of 8.
+| Element | Variable | compact | default | comfortable | Source |
+| --- | --- | --- | --- | --- | --- |
+| button | `--h-button` | 32 | 40 | 48 | kit.css |
+| button | `--w-button` | 80 | 96 | 112 | ours (stands in for `--pad-button`: the CTA is a text-free bar) |
+| badge | `--h-badge` | 20 | 24 | 28 | kit.css |
+| badge | `--w-badge` | 56 | 64 | 72 | ours |
+| card | `--pad-card` | 16 | 24 | 32 | kit.css |
+
+### Shadow per element
+
+`shadow-card` / `shadow-media` (and `shadow-alert`, kept): `none` / `sm` / `md` → `--shadow-<element>: 0 0 #0000 | var(--shadow-sm) | var(--shadow-md)`. The skin brings its own `--shadow-sm` / `--shadow-md` per mode. `tokens.css` applies `box-shadow: var(--shadow-card)` on `Surface` and `var(--shadow-media)` on `Media`. No shadow utility class anywhere: ui8px and `check-blocks.py` still forbid `shadow-*` in markup; elevation is a theme token only.
+
+### Brand presets
+
+`PRESETS_ROW1` (`presets.ts`, generated): the owner's curated row 1 of codegen-x `taste-data` (`curated.ts`, minus the excluded screens), each taste's skin, fonts and radius. Density and shadow are **our** rule from the taste's composition and recipe (`scripts/port-presets.mjs`): airy / poster / full-bleed / frame → comfortable, dense-grid / stats → compact; glass or frame → `md`, mesh / conic / rings / dots → `sm`, the rest `none`. One click applies skin + fonts + radius + tokens, drops a custom palette and keeps section padding.
+
+### Skin cards and preset cards
+
+Each card is a miniature page of the real shapes (`MiniPage.svelte`) under `data-skin-card` / `data-preset-card`. `scopedCss` writes the theme as rules for that attribute (light and `.dark`), all in one `<style>` in the head (`ScopedStyles.svelte`), so no inline style; every element token is reset at the card boundary (`ELEMENT_DEFAULTS`).
 
 ### Section padding (even 8px, independent of density)
 
@@ -98,7 +113,7 @@ Blocks render the real class pair. `layout.section` in `packages/blocks/src/clas
 
 ### Radius per element
 
-Ported from `codegen-x/ui8kit` (`packages/theme-model/src/design.ts` `ELEMENTS`, `packages/kit-compose/*/src/styles/kit.css` §11). A shape keeps plain `rounded` (badge: `rounded-full`) and carries a `data-slot`; `packages/blocks/src/radius.css` points that slot at a CSS variable, the theme writes the variable on `<html>`. No new utility class, so ui8px sees only `rounded` / `rounded-full`.
+Ported from `codegen-x/ui8kit` (`packages/theme-model/src/design.ts` `ELEMENTS`, `packages/kit-compose/*/src/styles/kit.css` §11). A shape keeps plain `rounded` (badge: `rounded-full`) and carries a `data-slot`; `packages/blocks/src/tokens.css` points that slot at a CSS variable, the theme writes the variable on `<html>`. No new utility class, so ui8px sees only `rounded` / `rounded-full`.
 
 | Element | Shape | `data-slot` | Variable | Unset |
 | --- | --- | --- | --- | --- |
@@ -107,8 +122,8 @@ Ported from `codegen-x/ui8kit` (`packages/theme-model/src/design.ts` `ELEMENTS`,
 | card | `Surface` | `card` | `--radius-card` | `--radius` |
 | media | `Media` | `media-frame` | `--radius-media` | `--radius` |
 
-Text bars and headings follow `--radius`; the avatar stays `rounded-full`. Values: `RADII` (0, 4, 8, 12, 16 px). Stored in `theme.radii`, exported in the JSON config (`radii`) and CSS.
+Text bars and headings follow `--radius`; the avatar stays `rounded-full`. Values: `RADII` (0, 4, 8, 12, 16 px). Stored as `tokens["radius-<element>"]`, exported in the JSON config (`tokens`) and CSS.
 
 ## UI
 
-`apps/blocks`: a feed of every block in every variant; header **Theme** button opens the Theme sheet. Palette opens as a wide panel inside the sheet (wheel, HSL/Hex, harmonies, ranges, AA/AAA, 16 presets, token chips). Export copies JSON or CSS.
+`apps/blocks`: a feed of every block in every variant; header **Theme** button opens the Theme sheet: skin, radius, radius / density / shadow per element, section padding, and four wide panels (Skins, Palette, Presets, Design system). Export copies JSON (`magazine-theme` v2) or CSS. Native `select` / `input` follow the tokens and `color-scheme` follows the mode, so the dropdown list is dark in dark mode.

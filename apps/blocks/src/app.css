@@ -1,6 +1,6 @@
 @import "tailwindcss";
 /* Radius per element: [data-slot] shapes read --radius-badge|button|card|media (packages/theme radii.ts). */
-@import "../../../packages/blocks/src/radius.css";
+@import "../../../packages/blocks/src/tokens.css";
 
 /* Tailwind does not scan node_modules: blocks and kit are workspace links, so name their sources. */
 @source "../../../packages/blocks/src";
@@ -114,30 +114,6 @@ body {
     background-color: var(--background);
     color: var(--foreground);
   }
-}
-
-/*
- * Density remaps gap / CTA / heading. Class names stay on the 8+4 token list;
- * only the computed px change. --spacing is never rewritten.
- */
-[data-density="compact"] .gap-8 {
-  gap: var(--theme-gap, 16px);
-}
-[data-density="compact"] .h-10 {
-  height: var(--theme-cta-h, 32px);
-}
-[data-density="compact"] .w-24 {
-  width: var(--theme-cta-w, 64px);
-}
-
-[data-density="comfortable"] .gap-8 {
-  gap: var(--theme-gap, 48px);
-}
-[data-density="comfortable"] .h-10 {
-  height: var(--theme-cta-h, 48px);
-}
-[data-density="comfortable"] .h-4 {
-  height: var(--theme-heading-h, 24px);
 }
 
 /* Constructor chrome (app-level). Sizes on the 8+4 grid. */
@@ -264,13 +240,117 @@ body {
   align-items: center;
   gap: 8px;
 }
-.ui8-theme-fields-palette,
 .ui8-theme-panel-radius {
   padding-bottom: 8px;
 }
-.ui8-theme-fields-palette-open {
+/* Wide-panel openers: skins, palette, presets, design system (two per row). */
+.ui8-theme-fields-wide {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+.ui8-theme-fields-wide-open {
   width: 100%;
 }
+.ui8-theme-fields-wide-open[aria-pressed="true"] {
+  border-color: var(--foreground);
+}
+
+/* Skin and preset cards (4:3): a miniature page in its own scoped theme (ScopedStyles), zoomed to half size. */
+.ui8-wide-panel {
+  width: 720px;
+}
+.ui8-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 216px);
+  gap: 16px;
+}
+.ui8-pick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  height: auto;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  text-align: left;
+}
+.ui8-pick-card[aria-pressed="true"] {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.ui8-pick-frame {
+  width: 200px;
+  height: 150px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+.ui8-mini {
+  zoom: 0.5;
+  width: 396px;
+  height: 296px;
+  padding: 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.ui8-pick-label {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted-foreground);
+}
+
+/* Design system specimen. */
+.ui8-specimen-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ui8-swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.ui8-swatch-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.ui8-swatch-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ui8-swatch {
+  height: 48px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.ui8-swatch[data-token="background"] { background: var(--background); }
+.ui8-swatch[data-token="foreground"] { background: var(--foreground); }
+.ui8-swatch[data-token="primary"] { background: var(--primary); }
+.ui8-swatch[data-token="secondary"] { background: var(--secondary); }
+.ui8-swatch[data-token="muted"] { background: var(--muted); }
+.ui8-swatch[data-token="accent"] { background: var(--accent); }
+.ui8-swatch[data-token="card"] { background: var(--card); }
+.ui8-swatch[data-token="border"] { background: var(--border); }
+.ui8-swatch[data-token="destructive"] { background: var(--destructive); }
+.ui8-swatch[data-token="ring"] { background: var(--ring); }
+.ui8-radius-sample {
+  height: 64px;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+}
+.ui8-radius-sample[data-radius-of="badge"] { border-radius: var(--radius-badge, 9999px); }
+.ui8-radius-sample[data-radius-of="button"] { border-radius: var(--radius-button, var(--radius)); }
+.ui8-radius-sample[data-radius-of="card"] { border-radius: var(--radius-card, var(--radius)); }
+.ui8-radius-sample[data-radius-of="media"] { border-radius: var(--radius-media, var(--radius)); }
 .ui8-theme-io {
   margin-top: 16px;
   padding-top: 16px;

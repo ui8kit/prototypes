@@ -1,7 +1,6 @@
 import { paletteTokens, type Mode } from "./palette";
-import { densityVars } from "./density";
+import { cleanTokens, DENSITY_PX, tokenVars, type Density, type Tokens } from "./design";
 import { sectionPaddingVars } from "./section-padding";
-import { radiusVars } from "./radii";
 import { type SkinId } from "./skins";
 import { SKIN_TOKENS } from "./skin-tokens";
 import type { GlobalTheme } from "./theme";
@@ -81,13 +80,23 @@ export function legibleRoles(colors: Record<string, string>, mode: Mode): Record
   return out;
 }
 
+/** Per-element density in px for the wireframe shapes (only the elements set; packages/blocks tokens.css has the defaults). */
+export function densityVars(tokens: Tokens): Record<string, string> {
+  const out: Record<string, string> = {};
+  const b = tokens["density-button"] as Density | undefined;
+  if (b) Object.assign(out, { "--h-button": `${DENSITY_PX.button[b].h}px`, "--w-button": `${DENSITY_PX.button[b].w}px` });
+  const g = tokens["density-badge"] as Density | undefined;
+  if (g) Object.assign(out, { "--h-badge": `${DENSITY_PX.badge[g].h}px`, "--w-badge": `${DENSITY_PX.badge[g].w}px` });
+  const c = tokens["density-card"] as Density | undefined;
+  if (c) out["--pad-card"] = `${DENSITY_PX.card[c].pad}px`;
+  return out;
+}
+
+/** Radius, per-element tokens (radius, shadow, density) and section padding: the same in light and dark. */
 export function layoutVars(theme: GlobalTheme): Record<string, string> {
-  const out: Record<string, string> = {
-    ...densityVars(theme.density),
-    ...sectionPaddingVars(theme.sectionPadding),
-  };
+  const out: Record<string, string> = { ...sectionPaddingVars(theme.sectionPadding) };
   if (theme.radius !== null) out["--radius"] = `${theme.radius}px`;
-  Object.assign(out, radiusVars(theme.radii ?? {}));
+  Object.assign(out, tokenVars(theme.tokens), densityVars(cleanTokens(theme.tokens)));
   return out;
 }
 
@@ -110,24 +119,14 @@ function decls(vars: Record<string, string>, indent = "  "): string {
     .join("\n");
 }
 
-/** CSS file with `:root` (light) and `.dark` (dark), plus density / section padding / radius. */
+/** CSS file with `:root` (light, plus radius / tokens / section padding) and `.dark` (dark colours and shadows), exact skin values. */
 export function exportCss(theme: GlobalTheme): string {
   const light = cssProperties(theme, "light");
-  const darkColors = colorVars(theme, "dark");
+  const darkAll = cssProperties(theme, "dark");
+  const layout = layoutVars(theme);
   const dark: Record<string, string> = {};
-  for (const [k, v] of Object.entries(darkColors)) dark[`--${k}`] = v;
-  const density = theme.density !== "default" ? `[data-density="${theme.density}"]` : null;
-  const section = theme.sectionPadding !== "default" ? `[data-section-padding="${theme.sectionPadding}"]` : null;
-  const parts = [`/* prototypes-theme v1 */`, `:root {`, decls(light), `}`];
-  if (Object.keys(dark).length) {
-    parts.push(``, `.dark {`, decls(dark), `}`);
-  }
-  if (density) {
-    parts.push(``, `${density} {`, decls(densityVars(theme.density)), `}`);
-  }
-  if (section) {
-    parts.push(``, `${section} {`, decls(sectionPaddingVars(theme.sectionPadding)), `}`);
-  }
+  for (const [k, v] of Object.entries(darkAll)) if (!(k in layout) && k !== "--radius") dark[k] = v;
+  const parts = [`/* ui8kit prototypes theme (magazine-theme v2 tokens) */`, `:root {`, decls(light), `}`, ``, `.dark {`, decls(dark), `}`];
   return parts.join("\n") + "\n";
 }
 
@@ -139,4 +138,35 @@ export function applyVars(el: HTMLElement, vars: Record<string, string>, previou
     keys.push(k);
   }
   return keys;
+}
+
+/** Every per-element variable at its default, so a scoped preview does not inherit the page's tokens. */
+export const ELEMENT_DEFAULTS: Record<string, string> = {
+  "--radius-badge": "9999px",
+  "--radius-button": "var(--radius)",
+  "--radius-card": "var(--radius)",
+  "--radius-alert": "var(--radius)",
+  "--radius-media": "var(--radius)",
+  "--shadow-card": "0 0 #0000",
+  "--shadow-alert": "0 0 #0000",
+  "--shadow-media": "0 0 #0000",
+  "--h-button": `${DENSITY_PX.button.default.h}px`,
+  "--w-button": `${DENSITY_PX.button.default.w}px`,
+  "--h-badge": `${DENSITY_PX.badge.default.h}px`,
+  "--w-badge": `${DENSITY_PX.badge.default.w}px`,
+  "--pad-card": `${DENSITY_PX.card.default.pad}px`,
+};
+
+/**
+ * A theme as a CSS rule scoped to `selector` (light) and `.dark <selector>` (dark), with the legibility floor: how the app draws
+ * a skin card or a preset card in its own theme without inline style (the app puts the rules in one <style> in the head).
+ */
+export function scopedCss(selector: string, theme: GlobalTheme): string {
+  const rule = (sel: string, mode: Mode): string => {
+    const vars = { ...ELEMENT_DEFAULTS, "--radius": "0.25rem", ...cssProperties(theme, mode, { legible: true }) };
+    return `${sel}{${Object.entries(vars)
+      .map(([k, v]) => `${k}:${v}`)
+      .join(";")}}`;
+  };
+  return rule(selector, "light") + "\n" + rule(`.dark ${selector}`, "dark");
 }

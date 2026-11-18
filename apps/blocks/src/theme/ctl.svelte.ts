@@ -6,7 +6,9 @@ import {
   isDefault,
   NO_THEME,
   patchTheme,
+  presetTheme,
   readTheme,
+  rootAttrs,
   setThemeField,
   toConfig,
   writeTheme,
@@ -14,6 +16,7 @@ import {
   type FieldValue,
   type GlobalTheme,
   type ImportResult,
+  type Preset,
   type Mode,
   type ThemeConfig,
   type ThemeState,
@@ -22,7 +25,8 @@ import {
 export const STORAGE_KEY = "prototypes:v1:theme";
 export const MODE_KEY = "ui8kit-theme";
 
-export type WidePanel = null | "palette";
+/** the wide panel left of the Theme panel: palette wheel, skin cards, brand presets, design system specimen */
+export type WidePanel = null | "palette" | "skins" | "presets" | "design";
 
 export const appTheme = $state({
   state: { mode: "light" as Mode, theme: NO_THEME } satisfies ThemeState,
@@ -31,6 +35,7 @@ export const appTheme = $state({
 });
 
 let applied: string[] = [];
+let attrs: string[] = [];
 
 export function loadTheme(): void {
   let mode: Mode = "light";
@@ -51,7 +56,11 @@ export function applyTheme(): void {
   const { theme, mode } = appTheme.state;
   root.classList.toggle("dark", mode === "dark");
   root.style.colorScheme = mode;
-  root.setAttribute("data-density", theme.density);
+  // codegen-x rootAttrs: data-skin and data-density-<element> (only what is set)
+  for (const k of attrs) root.removeAttribute(k);
+  const next = rootAttrs(theme);
+  for (const [k, v] of Object.entries(next)) root.setAttribute(k, v);
+  attrs = Object.keys(next);
   root.setAttribute("data-section-padding", theme.sectionPadding);
   // the wireframe legibility floor keeps text, heading and accent bars apart in every skin (exports stay exact)
   applied = applyVars(root, cssProperties(theme, mode, { legible: true }), applied);
@@ -93,6 +102,10 @@ export const themeCtl = {
     } else {
       appTheme.state = { ...appTheme.state, theme: setThemeField(appTheme.state.theme, id, v) };
     }
+    applyTheme();
+  },
+  applyPreset(p: Preset): void {
+    appTheme.state = { ...appTheme.state, theme: presetTheme(p, appTheme.state.theme) };
     applyTheme();
   },
   reset(): void {

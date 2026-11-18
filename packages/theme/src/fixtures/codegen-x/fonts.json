@@ -1,0 +1,12 @@
+{
+  "format": "magazine-theme",
+  "version": 2,
+  "mode": "light",
+  "skin": "claude",
+  "font": "inter",
+  "headingFont": "inter",
+  "radius": 12,
+  "tokens": {},
+  "palette": null,
+  "fontScale": 110
+}

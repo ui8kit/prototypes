@@ -87,7 +87,7 @@ export const shape = {
   mediaDark: "hidden h-full w-full object-cover dark:block",
   mediaOverlay: "absolute inset-0 flex items-center justify-center",
   mediaMark: "rounded-full bg-background h-16 w-16",
-  surface: `${role.surface} p-8`,
+  surface: `${role.surface} p-6`,
 } as const;
 
 export const width = {

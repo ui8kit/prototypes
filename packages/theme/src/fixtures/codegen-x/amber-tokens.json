@@ -1,0 +1,23 @@
+{
+  "format": "magazine-theme",
+  "version": 2,
+  "mode": "light",
+  "skin": "amber-minimal",
+  "font": null,
+  "headingFont": null,
+  "radius": 8,
+  "tokens": {
+    "radius-badge": 4,
+    "radius-button": 16,
+    "radius-card": 12,
+    "radius-alert": 8,
+    "radius-media": 0,
+    "density-button": "compact",
+    "density-card": "comfortable",
+    "density-alert": "compact",
+    "shadow-card": "sm",
+    "shadow-alert": "none",
+    "shadow-media": "md"
+  },
+  "palette": null
+}

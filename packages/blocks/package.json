@@ -7,7 +7,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./manifest": "./src/manifest/index.ts",
-    "./radius.css": "./src/radius.css"
+    "./tokens.css": "./src/tokens.css"
   },
   "ui8kit": {
     "runtime": "svelte",

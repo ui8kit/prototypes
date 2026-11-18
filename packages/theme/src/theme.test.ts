@@ -1,11 +1,13 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { DENSITIES, DENSITY_SCALE, densityVars, onGrid } from "./density";
+import { DENSITIES, DENSITY_PX, cleanTokens, densityOf, setDensity, tokenVars } from "./design";
 import { SECTION_PADDINGS, SECTION_PADDING_SCALE, sectionPaddingVars } from "./section-padding";
 import { RADII, SKIN_IDS } from "./skins";
 import {
   CONFIG_FORMAT,
   NO_THEME,
+  presetTheme,
+  rootAttrs,
   cleanTheme,
   fromConfig,
   isDefault,
@@ -13,32 +15,80 @@ import {
   setThemeField,
   toConfig,
 } from "./theme";
-import { colorVars, cssProperties, exportCss, layoutVars } from "./css";
+import { colorVars, cssProperties, densityVars, exportCss, layoutVars, scopedCss } from "./css";
+import { PRESETS_ROW1 } from "./presets";
 import { DEFAULT_PALETTE, PALETTE_TOKENS, paletteTokens } from "./palette";
 
-describe("density stays on the 8+4 grid", () => {
-  it("every scale step is a multiple of 4, and layout steps are multiples of 8 except the CTA control height", () => {
+describe("density per element (codegen-x tokens)", () => {
+  it("draws on the 4px grid; button and card on 8", () => {
     for (const d of DENSITIES) {
-      const s = DENSITY_SCALE[d];
-      for (const px of Object.values(s)) {
-        assert.equal(onGrid(px), true, `${d} ${px}`);
-        assert.equal(px % 4, 0);
-      }
-      assert.equal(s.gap % 8, 0);
-      assert.equal(s.ctaW % 8, 0);
-      assert.equal(s.headingH % 8, 0);
-      assert.equal(s.lineH % 8, 0);
+      assert.equal(DENSITY_PX.button[d].h % 8, 0);
+      assert.equal(DENSITY_PX.button[d].w % 8, 0);
+      assert.equal(DENSITY_PX.card[d].pad % 8, 0);
+      assert.equal(DENSITY_PX.badge[d].h % 4, 0);
+      assert.equal(DENSITY_PX.badge[d].w % 8, 0);
     }
-    assert.equal(DENSITY_SCALE.compact.ctaH, 32);
-    assert.equal(DENSITY_SCALE.default.ctaH, 40);
-    assert.equal(DENSITY_SCALE.comfortable.ctaH, 48);
+    assert.deepEqual([DENSITY_PX.button.compact.h, DENSITY_PX.button.default.h, DENSITY_PX.button.comfortable.h], [32, 40, 48]);
+    assert.deepEqual([DENSITY_PX.card.compact.pad, DENSITY_PX.card.default.pad, DENSITY_PX.card.comfortable.pad], [16, 24, 32]);
   });
 
-  it("emits CSS variables for the app remap", () => {
-    const v = densityVars("compact");
-    assert.equal(v["--theme-gap"], "16px");
-    assert.equal(v["--theme-cta-h"], "32px");
-    assert.equal(v["--theme-block-py"], undefined);
+  it("only the elements set write variables", () => {
+    assert.deepEqual(densityVars({}), {});
+    assert.deepEqual(densityVars({ "density-button": "compact" }), { "--h-button": "32px", "--w-button": "80px" });
+    assert.deepEqual(densityVars({ "density-card": "comfortable" }), { "--pad-card": "32px" });
+  });
+
+  it("setDensity / densityOf as in codegen-x", () => {
+    const t = setDensity({}, "compact");
+    assert.deepEqual(t, { "density-badge": "compact", "density-button": "compact", "density-card": "compact", "density-alert": "compact" });
+    assert.equal(densityOf(t), "compact");
+    assert.equal(densityOf({ "density-card": "comfortable" }), null);
+    assert.deepEqual(setDensity(t, "default"), {});
+  });
+
+  it("density attributes and the skin on the root", () => {
+    assert.deepEqual(rootAttrs({ ...NO_THEME, skin: "sky", tokens: { "density-card": "compact", "radius-card": 8 } }), { "data-skin": "sky", "data-density-card": "compact" });
+  });
+});
+
+describe("shadow per element", () => {
+  it("none / sm / md map to the skin's own shadow scale", () => {
+    assert.deepEqual(tokenVars({ "shadow-card": "sm", "shadow-media": "md", "shadow-alert": "none" }), {
+      "--shadow-card": "var(--shadow-sm)",
+      "--shadow-alert": "0 0 #0000",
+      "--shadow-media": "var(--shadow-md)",
+    });
+  });
+  it("the skin's shadow scale differs between light and dark where the skin says so", () => {
+    const l = cssProperties({ ...NO_THEME, skin: "doom-64" }, "light");
+    const d = cssProperties({ ...NO_THEME, skin: "doom-64" }, "dark");
+    assert.ok(l["--shadow-sm"] && d["--shadow-sm"]);
+    assert.ok(cssProperties(NO_THEME, "light")["--shadow-md"]);
+  });
+});
+
+describe("radius per element", () => {
+  it("keeps only known keys and radii, in codegen-x order", () => {
+    assert.deepEqual(cleanTokens({ "radius-media": 0, "radius-card": 16, "radius-badge": 3, "radius-x": 8 }), { "radius-card": 16, "radius-media": 0 });
+    assert.deepEqual(Object.keys(cleanTokens({ "radius-media": 0, "radius-badge": 4 })), ["radius-badge", "radius-media"]);
+  });
+  it("setThemeField writes tokens; null clears", () => {
+    const t = setThemeField(NO_THEME, "radius-card", 16);
+    assert.deepEqual(t.tokens, { "radius-card": 16 });
+    assert.equal(layoutVars(t)["--radius-card"], "16px");
+    assert.equal(isDefault(setThemeField(t, "radius-card", null)), true);
+    assert.match(exportCss(t), /--radius-card: 16px/);
+  });
+});
+
+describe("legacy prototypes-theme v1 migrates to tokens", () => {
+  it("radii and one global density become per-element tokens", () => {
+    const r = fromConfig({ format: "prototypes-theme", version: 1, mode: "light", skin: "sky", radius: 8, radii: { card: 16, badge: 4 }, density: "comfortable", sectionPadding: "compact", palette: null });
+    assert.ok(r.ok);
+    assert.deepEqual(r.theme.tokens, { "radius-badge": 4, "radius-card": 16, "density-badge": "comfortable", "density-button": "comfortable", "density-card": "comfortable", "density-alert": "comfortable" });
+    assert.equal(r.theme.sectionPadding, "compact");
+    const stored = cleanTheme({ skin: "sky", radius: null, radii: { media: 0 }, density: "default", sectionPadding: "default" });
+    assert.deepEqual(stored.tokens, { "radius-media": 0 });
   });
 });
 
@@ -60,8 +110,8 @@ describe("section padding stays on the even 8px scale", () => {
     const v = sectionPaddingVars("spacious");
     assert.equal(v["--theme-section-py"], "96px");
     assert.equal(v["--theme-section-py-lg"], "160px");
-    const mixed = layoutVars(cleanTheme({ density: "compact", sectionPadding: "spacious" }));
-    assert.equal(mixed["--theme-gap"], "16px");
+    const mixed = layoutVars(cleanTheme({ tokens: { "density-button": "compact" }, sectionPadding: "spacious" }));
+    assert.equal(mixed["--h-button"], "32px");
     assert.equal(mixed["--theme-section-py"], "96px");
     assert.equal(mixed["--theme-section-py-lg"], "160px");
   });
@@ -69,7 +119,7 @@ describe("section padding stays on the even 8px scale", () => {
 
 describe("theme model", () => {
   it("cleans unknown skins, radii, density, and palettes", () => {
-    assert.deepEqual(cleanTheme({ skin: "nope", radius: 3, density: "huge", palette: { harmony: "x" } }), NO_THEME);
+    assert.deepEqual(cleanTheme({ skin: "nope", radius: 3, density: "huge", tokens: { "density-card": "huge" }, palette: { harmony: "x" } }), NO_THEME);
     assert.equal(cleanTheme({ skin: "nope", sectionPadding: "huge" }).sectionPadding, "default");
     assert.equal(cleanTheme({ skin: "claude", radius: 8, density: "compact" }).skin, "claude");
     assert.equal(cleanTheme({ sectionPadding: "spacious" }).sectionPadding, "spacious");
@@ -87,16 +137,16 @@ describe("theme model", () => {
   });
 
   it("round-trips JSON config; magazine-theme is accepted; unknown format is not", () => {
-    const state = { mode: "dark" as const, theme: cleanTheme({ skin: "rose", radius: 8, density: "comfortable", sectionPadding: "spacious", palette: DEFAULT_PALETTE }) };
+    const state = { mode: "dark" as const, theme: cleanTheme({ skin: "rose", radius: 8, tokens: setDensity({}, "comfortable"), sectionPadding: "spacious", palette: DEFAULT_PALETTE }) };
     const cfg = toConfig(state);
     assert.equal(cfg.format, CONFIG_FORMAT);
-    assert.equal(cfg.version, 1);
+    assert.equal(cfg.version, 2);
     const back = fromConfig(JSON.stringify(cfg));
     assert.equal(back.ok, true);
     if (back.ok) {
       assert.equal(back.mode, "dark");
       assert.equal(back.theme.skin, "rose");
-      assert.equal(back.theme.density, "comfortable");
+      assert.equal(densityOf(back.theme.tokens), "comfortable");
       assert.equal(back.theme.sectionPadding, "spacious");
       assert.deepEqual(back.theme.palette, DEFAULT_PALETTE);
     }
@@ -112,12 +162,13 @@ describe("theme model", () => {
 
   it("setThemeField and isDefault", () => {
     assert.equal(isDefault(NO_THEME), true);
-    const t = setThemeField(NO_THEME, "density", "compact");
-    assert.equal(t.density, "compact");
+    const t = setThemeField(NO_THEME, "density-card", "compact");
+    assert.equal(t.tokens["density-card"], "compact");
     assert.equal(isDefault(t), false);
     assert.equal(setThemeField(t, "radius", 4).radius, 4);
     assert.equal(setThemeField(t, "skin", "notebook").skin, "notebook");
-    assert.equal(setThemeField(t, "mode", "dark").density, "compact");
+    assert.equal(setThemeField(t, "mode", "dark").tokens["density-card"], "compact");
+    assert.deepEqual(setThemeField(t, "density-card", "default").tokens, {});
     assert.equal(setThemeField(NO_THEME, "sectionPadding", "compact").sectionPadding, "compact");
     assert.equal(isDefault(setThemeField(NO_THEME, "sectionPadding", "spacious")), false);
   });
@@ -151,25 +202,25 @@ describe("CSS generation", () => {
     const dark = colorVars(NO_THEME, "dark");
     assert.equal(light.background, "hsl(0 0% 100%)");
     assert.equal(dark.background, "hsl(0 0% 4%)");
-    const layout = layoutVars({ ...NO_THEME, density: "compact", radius: 16 });
+    const layout = layoutVars({ ...NO_THEME, tokens: { "density-card": "compact" }, radius: 16 });
     assert.equal(layout["--radius"], "16px");
-    assert.equal(layout["--theme-gap"], "16px");
+    assert.equal(layout["--pad-card"], "16px");
   });
 
-  it("exportCss writes :root, .dark, and density", () => {
+  it("exportCss writes :root and .dark with exact skin values, tokens and section padding", () => {
     const css = exportCss({
       ...NO_THEME,
       skin: "claude",
       radius: 8,
-      density: "comfortable",
+      tokens: { "density-button": "comfortable", "shadow-card": "sm" },
       sectionPadding: "spacious",
       palette: DEFAULT_PALETTE,
     });
-    assert.match(css, /prototypes-theme v1/);
+    assert.match(css, /magazine-theme v2/);
     assert.match(css, /:root \{/);
     assert.match(css, /\.dark \{/);
-    assert.match(css, /\[data-density="comfortable"\]/);
-    assert.match(css, /\[data-section-padding="spacious"\]/);
+    assert.match(css, /--h-button: 48px/);
+    assert.match(css, /--shadow-card: var\(--shadow-sm\)/);
     assert.match(css, /--theme-section-py: 96px/);
     assert.match(css, /--theme-section-py-lg: 160px/);
     assert.match(css, /--primary:/);
@@ -177,5 +228,36 @@ describe("CSS generation", () => {
     const props = cssProperties({ ...NO_THEME, radius: 4, palette: DEFAULT_PALETTE }, "light");
     assert.equal(props["--radius"], "4px");
     assert.ok(props["--primary"]);
+  });
+});
+
+describe("brand presets (taste-data row 1)", () => {
+  it("every preset is a valid codegen-x theme: known skin, radius and tokens survive cleaning", () => {
+    assert.ok(PRESETS_ROW1.length >= 10);
+    for (const p of PRESETS_ROW1) {
+      const t = presetTheme(p);
+      assert.equal(t.skin, p.skin, p.id);
+      assert.equal(t.radius, p.radius, p.id);
+      assert.deepEqual(t.tokens, cleanTokens(p.tokens), p.id);
+      assert.equal(JSON.stringify(t.tokens), JSON.stringify(cleanTokens(p.tokens)));
+      const cfg = toConfig({ mode: "light", theme: t });
+      const back = fromConfig(cfg);
+      assert.ok(back.ok && back.dropped.length === 0, p.id);
+    }
+  });
+  it("a preset keeps the section padding and drops the palette", () => {
+    const t = presetTheme(PRESETS_ROW1[0]!, { sectionPadding: "spacious" });
+    assert.equal(t.sectionPadding, "spacious");
+    assert.equal(t.palette, undefined);
+  });
+});
+
+describe("scoped previews", () => {
+  it("a skin card carries its own light and dark tokens and resets the page's element tokens", () => {
+    const css = scopedCss('[data-skin-card="sky"]', { ...NO_THEME, skin: "sky" });
+    assert.match(css, /^\[data-skin-card="sky"\]\{/);
+    assert.match(css, /\n\.dark \[data-skin-card="sky"\]\{/);
+    assert.match(css, /--shadow-card:0 0 #0000/);
+    assert.match(css, /--radius:/);
   });
 });

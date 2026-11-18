@@ -74,4 +74,4 @@ Default tokens (no skin, no palette) are wireframe-tuned in `packages/theme/src/
 
 All raw class strings: `packages/blocks/src/classes.ts`. Layout/shape components read maps. Organism files must report **0** raw utilities (`scripts/check-blocks.py`).
 
-Density in `apps/blocks` remaps `gap-8`, `h-10`, `w-24`, and `h-4` under `[data-density]`. Section padding is a real class pair on `Block` from the theme: compact `py-8 lg:py-16` (32/64), standard `py-16 lg:py-32` (64/128), spacious `py-24 lg:py-40` (96/160). Radius per element (badge, button, card, media) rides on `data-slot` + `radius.css`. See `docs/theme.md`.
+Density is per element (badge, button, card) and read by `packages/blocks/src/tokens.css` on the shapes only; shadow per element (card, media) too. Section padding is a real class pair on `Block` from the theme: compact `py-8 lg:py-16` (32/64), standard `py-16 lg:py-32` (64/128), spacious `py-24 lg:py-40` (96/160). Radius per element (badge, button, card, media) rides on `data-slot` + `tokens.css`. See `docs/theme.md`.

@@ -1,9 +1,0 @@
-/*
- * Radius per element, as in codegen-x/ui8kit kit.css (UI8KIT-2.0 §11): a shape keeps plain `rounded` (or `rounded-full`
- * for the badge) and a data-slot; the theme writes --radius-<element>. Unset: the site radius (--radius); the badge: the pill.
- * Text bars and headings follow --radius; the avatar stays a circle.
- */
-[data-slot="button"].rounded { border-radius: var(--radius-button, var(--radius)); }
-[data-slot="card"].rounded { border-radius: var(--radius-card, var(--radius)); }
-[data-slot="media-frame"].rounded { border-radius: var(--radius-media, var(--radius)); }
-[data-slot="badge"].rounded-full { border-radius: var(--radius-badge, calc(infinity * 1px)); }

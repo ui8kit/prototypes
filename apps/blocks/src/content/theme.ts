@@ -53,15 +53,36 @@ export type ThemeText = {
   close: string;
   elementRadius: string;
   elementRadiusNote: string;
-  elements: Record<"badge" | "button" | "card" | "media", string>;
+  elements: Record<"badge" | "button" | "card" | "alert" | "media", string>;
   follow: string;
   pill: string;
+  elementDensity: string;
+  elementDensityNote: string;
+  densities: Record<"compact" | "default" | "comfortable", string>;
+  elementShadow: string;
+  elementShadowNote: string;
+  shadows: Record<"none" | "sm" | "md", string>;
+  open: { skins: string; presets: string; design: string };
   io: ThemeIoText;
+};
+
+export type SkinsText = { title: string; note: string; default: string };
+export type PresetsText = { title: string; note: string };
+export type DesignText = {
+  title: string;
+  note: string;
+  tokens: string;
+  radii: string;
+  buttons: string;
+  badges: string;
+  cards: string;
+  media: string;
+  tokenNames: Record<string, string>;
 };
 
 export const themeText: ThemeText = {
   title: "Theme",
-  note: "Every block in the gallery follows these settings: skin, palette, radius, density and section padding. Light / dark is the toggle in the corner. Fonts are not part of this constructor.",
+  note: "Every block in the gallery follows these settings: skin, palette, radius, density, shadow and section padding. Light / dark is the toggle in the corner. Fonts are carried in the config but not drawn.",
   skin: "Skin",
   default: "Default",
   radius: "Radius",
@@ -73,12 +94,19 @@ export const themeText: ThemeText = {
   close: "Close",
   elementRadius: "Radius per element",
   elementRadiusNote: "Badges, buttons, cards and media each take their own corner; unset follows the radius above (badges: the pill).",
-  elements: { badge: "Badges", button: "Buttons", card: "Cards", media: "Media" },
+  elements: { badge: "Badges", button: "Buttons", card: "Cards", alert: "Alerts", media: "Media" },
   follow: "Follow",
   pill: "Pill",
+  elementDensity: "Density per element",
+  elementDensityNote: "Badge height, button height and width, card padding: each element on its own step.",
+  densities: { compact: "Compact", default: "Default", comfortable: "Comfortable" },
+  elementShadow: "Shadow per element",
+  elementShadowNote: "Cards and media lift with the skin's own shadow scale (sm / md), or stay flat.",
+  shadows: { none: "None", sm: "Small (sm)", md: "Medium (md)" },
+  open: { skins: "Skins", presets: "Presets", design: "Design system" },
   io: {
     title: "Export / import",
-    note: "The whole theme as one JSON config (format prototypes-theme, version 1), or the generated CSS variables. Import replaces the theme. Fonts are never stored.",
+    note: "The whole theme as one JSON config in the codegen-x/ui8kit format (magazine-theme, version 2): made in apps/stock it applies here, and back. Section padding is our extra field (codegen-x ignores it). Or the generated CSS variables. Import replaces the theme.",
     label: "Theme config",
     placeholder: "Paste a theme config (JSON)",
     exportJson: "Copy JSON",
@@ -174,4 +202,38 @@ export const skinLabels: Record<string, string> = {
   "neo-brutalism": "Neo brutalism",
   notebook: "Notebook",
   rose: "Rose",
+};
+
+export const skinsText: SkinsText = {
+  title: "Skins",
+  note: "Every skin drawn in its own colours, radius and shadow, in the current light / dark mode. Picking one keeps radius, density and shadow tokens and drops a custom palette.",
+  default: "Default",
+};
+
+export const presetsText: PresetsText = {
+  title: "Presets",
+  note: "Brand starting points from codegen-x taste-data (the curated row 1): skin, radius, density and shadow in one click. Fonts come along in the config. Section padding stays.",
+};
+
+export const designText: DesignText = {
+  title: "Design system",
+  note: "The current theme as a specimen: tokens, radii, buttons, badges, cards and media, all text-free rectangles.",
+  tokens: "Tokens",
+  radii: "Radii",
+  buttons: "Buttons",
+  badges: "Badges",
+  cards: "Cards",
+  media: "Media",
+  tokenNames: {
+    background: "Background",
+    foreground: "Foreground",
+    primary: "Primary",
+    secondary: "Secondary",
+    muted: "Muted",
+    accent: "Accent",
+    card: "Card",
+    border: "Border",
+    destructive: "Destructive",
+    ring: "Ring",
+  },
 };
