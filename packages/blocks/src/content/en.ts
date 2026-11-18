@@ -6,6 +6,7 @@ export const ui = {
   heroSplit: {
     label: "Hero",
     cta: "Get started",
+    href: "#",
   },
   media: {
     alt: "",

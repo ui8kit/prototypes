@@ -1,40 +1,52 @@
 # Field summary
 
-Generated from `*.block.ts` manifests by `scripts/fields-summary.mjs`.
-This is the scoreboard for later unification: which slots and kinds repeat
-across the prototype library.
+Generated from `*.block.ts` content contracts by `scripts/fields-summary.mjs`.
+Scoreboard for later unification: which **content** fields and record types repeat.
+Variants are layout-only (same schema, full rendering in every variant). See
+`docs/content-contract.md`.
 
-Blocks: **2**. Kinds in two or more blocks: `heading`, `text-line`.
-Shared field paths: `heading`.
+Blocks: **2**. Content kinds in two or more blocks: `title`, `description`.
+Shared field paths: `title`.
+Shared record types: _none yet_.
 
-## Kinds
+## Content kinds
 
-How many blocks render each shape (flattened; item groups multiply nested fields).
-`totalDefault` is the sum of default counts across the library.
+Named fields of the contract (not layout). `totalDefault` is the sum of default
+counts across the library.
 
 | Kind | Blocks | Ids | totalDefault |
 | --- | --- | --- | --- |
-| heading | 2 | features-team, hero-split | 5 |
-| text-line | 2 | features-team, hero-split | 8 |
-| avatar | 1 | features-team | 3 |
-| cta | 1 | hero-split | 1 |
-| media | 1 | hero-split | 1 |
-| item | 1 | features-team | 3 |
+| title | 2 | features-team, hero-split | 3 |
+| description | 2 | features-team, hero-split | 4 |
+| image | 1 | hero-split | 1 |
+| actionLabel | 1 | hero-split | 1 |
+| actionHref | 1 | hero-split | 1 |
+| avatar | 1 | features-team | 1 |
+| record | 1 | features-team | 3 |
 
 ## Field paths
 
-Dot-paths as declared on each manifest (`items.avatar` is a field inside the repeating group).
+Dot-paths as declared on each manifest (`members.avatar` is a field of the
+`teamMember` record). Different entities (later: price vs duration) stay on
+separate record types, not a universal item.
 
 | Path | Kind | Blocks | Ids | Cardinality |
 | --- | --- | --- | --- | --- |
-| cta | cta | 1 | hero-split | 1 |
-| heading | heading | 2 | hero-split, features-team | 1 |
-| items | item | 1 | features-team | 1–6 (default 3) |
-| items.avatar | avatar | 1 | features-team | 1 |
-| items.lines | text-line | 1 | features-team | 2 |
-| items.title | heading | 1 | features-team | 1 |
-| lines | text-line | 1 | hero-split | 2 |
-| media | media | 1 | hero-split | 1 |
+| actionHref | actionHref | 1 | hero-split | 1 |
+| actionLabel | actionLabel | 1 | hero-split | 1 |
+| description | description | 1 | hero-split | 2 |
+| image | image | 1 | hero-split | 1 |
+| members | record (teamMember) | 1 | features-team | 1–6 (default 3) |
+| members.avatar | avatar | 1 | features-team | 1 |
+| members.description | description | 1 | features-team | 2 |
+| members.title | title | 1 | features-team | 1 |
+| title | title | 2 | hero-split, features-team | 1 |
+
+## Record types
+
+| Type | Blocks | Ids | Path | Fields |
+| --- | --- | --- | --- | --- |
+| teamMember | 1 | features-team | members | avatar, title, description |
 
 ## Per block
 
@@ -42,23 +54,26 @@ Dot-paths as declared on each manifest (`items.avatar` is a field inside the rep
 
 - Category: `hero`
 - Label: Hero
-- Variants: default
+- Variants (layout only): `media-left`, `media-right` (default), `media-top`
+- Layout axes: media=left; media=right; media=top
 - Flattened shapes: heading × 1, text-line × 2, cta × 1, media × 1
 
-- `heading` (heading, 1)
-- `lines` (text-line, 2)
-- `cta` (cta, 1)
-- `media` (media, 1)
+- `title` (title, 1)
+- `description` (description, 2)
+- `image` (image, 1)
+- `actionLabel` (actionLabel, 1)
+- `actionHref` (actionHref, 1)
 
 ### `features-team`
 
 - Category: `team`
 - Label: Team
-- Variants: default, pair
+- Variants (layout only): `columns-2`, `columns-3` (default), `columns-4`
+- Layout axes: columns=2; columns=3; columns=4
 - Flattened shapes: heading × 4, text-line × 6, avatar × 3
 
-- `heading` (heading, 1)
-- `items` (item, 1–6 (default 3))
-- `items.avatar` (avatar, 1)
-- `items.title` (heading, 1)
-- `items.lines` (text-line, 2)
+- `title` (title, 1)
+- `members` (record, record teamMember, 1–6 (default 3))
+- `members.avatar` (avatar, 1)
+- `members.title` (title, 1)
+- `members.description` (description, 2)

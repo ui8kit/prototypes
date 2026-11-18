@@ -5,21 +5,23 @@ export const featuresTeam: BlockManifest = {
   id: "features-team",
   category: "team",
   label: ui.featuresTeam.label,
-  slots: [
-    { id: "heading", kind: "heading", count: 1 },
+  content: [
+    { id: "title", kind: "title", count: 1 },
     {
-      id: "items",
-      kind: "item",
+      id: "members",
+      kind: "record",
+      record: "teamMember",
       count: { min: 1, max: 6, default: 3 },
       fields: [
         { id: "avatar", kind: "avatar", count: 1 },
-        { id: "title", kind: "heading", count: 1 },
-        { id: "lines", kind: "text-line", count: 2 },
+        { id: "title", kind: "title", count: 1 },
+        { id: "description", kind: "description", count: 2 },
       ],
     },
   ],
   variants: [
-    { id: "default", props: { count: 3 } },
-    { id: "pair", props: { count: 2 } },
+    { id: "columns-2", layout: { columns: 2 } },
+    { id: "columns-3", layout: { columns: 3 }, default: true },
+    { id: "columns-4", layout: { columns: 4 } },
   ],
 };

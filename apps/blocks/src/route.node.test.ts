@@ -13,4 +13,13 @@ describe("hash routes", () => {
     assert.deepEqual(parseHash("#/block/hero-split"), { view: "block", id: "hero-split" });
     assert.equal(blockHref("hero-split"), "#/block/hero-split");
   });
+
+  it("carries a layout variant on #/block/<id>/<variant>", () => {
+    assert.deepEqual(parseHash("#/block/hero-split/media-left"), {
+      view: "block",
+      id: "hero-split",
+      variant: "media-left",
+    });
+    assert.equal(blockHref("hero-split", "media-left"), "#/block/hero-split/media-left");
+  });
 });

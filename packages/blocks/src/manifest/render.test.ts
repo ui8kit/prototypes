@@ -1,7 +1,13 @@
 import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 import { CATALOG } from "../catalog";
-import { BLOCKS, countsByAttr, shapeCounts } from "./index";
+import {
+  BLOCKS,
+  countsByAttr,
+  fieldRenderCounts,
+  fieldSelector,
+  shapeCounts,
+} from "./index";
 
 describe("manifest matches rendered structure", () => {
   it("exports a component for every registered block", () => {
@@ -12,13 +18,28 @@ describe("manifest matches rendered structure", () => {
   });
 
   for (const block of BLOCKS) {
-    it(`${block.id}: default [data-shape] counts match flattened slots`, () => {
+    it(`${block.id}: default [data-shape] counts match flattened content`, () => {
       const View = CATALOG[block.id];
       const { container } = render(View);
-      const expected = countsByAttr(shapeCounts(block.slots));
+      const expected = countsByAttr(shapeCounts(block.content));
       for (const [attr, n] of Object.entries(expected)) {
         expect(container.querySelectorAll(`[data-shape="${attr}"]`), attr).toHaveLength(n);
       }
     });
+  }
+});
+
+describe("completeness: every contract field renders in every variant", () => {
+  for (const block of BLOCKS) {
+    for (const variant of block.variants) {
+      it(`${block.id} / ${variant.id} renders every filled field`, () => {
+        const View = CATALOG[block.id];
+        const { container } = render(View, { props: { variant: variant.id } });
+        const expected = fieldRenderCounts(block.content);
+        for (const [path, n] of Object.entries(expected)) {
+          expect(container.querySelectorAll(fieldSelector(path)), path).toHaveLength(n);
+        }
+      });
+    }
   }
 });

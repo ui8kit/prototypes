@@ -2,26 +2,51 @@
   import { Block, Container, Grid, Stack } from "../layout";
   import { CtaShape, Heading, Media, TextLine } from "../shapes";
   import { ui } from "../content/en";
+  import { resolveVariant } from "../manifest/types";
+  import { heroSplit } from "./hero-split.block";
 
   let {
+    variant,
     label = ui.heroSplit.label,
     cta = ui.heroSplit.cta,
+    href = ui.heroSplit.href,
   }: {
+    variant?: string;
     label?: string;
     cta?: string;
+    href?: string;
   } = $props();
+
+  const resolved = $derived(resolveVariant(heroSplit, variant));
+  const layout = $derived(resolved.layout.media);
 </script>
 
-<Block tag="section" py="16" aria-label={label}>
+{#snippet copy()}
+  <Stack gap="6">
+    <Heading field="title" width="3/4" size="lg" />
+    <TextLine field="description" width="full" />
+    <TextLine field="description" width="2/3" />
+    <CtaShape field="actionLabel actionHref" label={cta} {href} />
+  </Stack>
+{/snippet}
+
+<Block tag="section" py="16" aria-label={label} data-variant={resolved.id}>
   <Container>
-    <Grid cols={2} gap="8" align="center">
-      <Stack gap="6">
-        <Heading width="3/4" size="lg" />
-        <TextLine width="full" />
-        <TextLine width="2/3" />
-        <CtaShape label={cta} />
+    {#if layout === "top"}
+      <Stack gap="8">
+        <Media field="image" />
+        {@render copy()}
       </Stack>
-      <Media />
-    </Grid>
+    {:else if layout === "left"}
+      <Grid cols={2} gap="8" align="center">
+        <Media field="image" />
+        {@render copy()}
+      </Grid>
+    {:else}
+      <Grid cols={2} gap="8" align="center">
+        {@render copy()}
+        <Media field="image" />
+      </Grid>
+    {/if}
   </Container>
 </Block>

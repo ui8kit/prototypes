@@ -1,36 +1,59 @@
 {
+  "principle": "simple content, interchangeable variants, full rendering of the contract",
   "blocks": [
     {
       "id": "hero-split",
       "category": "hero",
       "label": "Hero",
-      "slots": [
+      "content": [
         {
-          "id": "heading",
-          "kind": "heading",
+          "id": "title",
+          "kind": "title",
           "count": 1
         },
         {
-          "id": "lines",
-          "kind": "text-line",
+          "id": "description",
+          "kind": "description",
           "count": 2
         },
         {
-          "id": "cta",
-          "kind": "cta",
+          "id": "image",
+          "kind": "image",
           "count": 1
         },
         {
-          "id": "media",
-          "kind": "media",
+          "id": "actionLabel",
+          "kind": "actionLabel",
+          "count": 1
+        },
+        {
+          "id": "actionHref",
+          "kind": "actionHref",
           "count": 1
         }
       ],
       "variants": [
         {
-          "id": "default"
+          "id": "media-left",
+          "layout": {
+            "media": "left"
+          }
+        },
+        {
+          "id": "media-right",
+          "layout": {
+            "media": "right"
+          },
+          "default": true
+        },
+        {
+          "id": "media-top",
+          "layout": {
+            "media": "top"
+          }
         }
       ],
+      "defaultVariant": "media-right",
       "shapeCounts": {
         "heading": 1,
         "text-line": 2,
@@ -44,15 +67,16 @@
       "id": "features-team",
       "category": "team",
       "label": "Team",
-      "slots": [
+      "content": [
         {
-          "id": "heading",
-          "kind": "heading",
+          "id": "title",
+          "kind": "title",
           "count": 1
         },
         {
-          "id": "items",
-          "kind": "item",
+          "id": "members",
+          "kind": "record",
+          "record": "teamMember",
           "count": {
             "min": 1,
             "max": 6,
@@ -66,12 +90,12 @@
             },
             {
               "id": "title",
-              "kind": "heading",
+              "kind": "title",
               "count": 1
             },
             {
-              "id": "lines",
-              "kind": "text-line",
+              "id": "description",
+              "kind": "description",
               "count": 2
             }
           ]
@@ -79,18 +103,26 @@
       ],
       "variants": [
         {
-          "id": "default",
-          "props": {
-            "count": 3
+          "id": "columns-2",
+          "layout": {
+            "columns": 2
           }
         },
         {
-          "id": "pair",
-          "props": {
-            "count": 2
+          "id": "columns-3",
+          "layout": {
+            "columns": 3
+          },
+          "default": true
+        },
+        {
+          "id": "columns-4",
+          "layout": {
+            "columns": 4
           }
         }
       ],
+      "defaultVariant": "columns-3",
       "shapeCounts": {
         "heading": 4,
         "text-line": 6,
@@ -110,43 +142,45 @@
     ]
   },
   "kinds": {
-    "heading": {
+    "title": {
       "blocks": [
         "features-team",
         "hero-split"
       ],
-      "totalDefault": 5
+      "totalDefault": 3
     },
-    "text-line": {
+    "description": {
       "blocks": [
         "features-team",
         "hero-split"
       ],
-      "totalDefault": 8
+      "totalDefault": 4
+    },
+    "image": {
+      "blocks": [
+        "hero-split"
+      ],
+      "totalDefault": 1
+    },
+    "actionLabel": {
+      "blocks": [
+        "hero-split"
+      ],
+      "totalDefault": 1
+    },
+    "actionHref": {
+      "blocks": [
+        "hero-split"
+      ],
+      "totalDefault": 1
     },
     "avatar": {
       "blocks": [
         "features-team"
       ],
-      "totalDefault": 3
-    },
-    "cta": {
-      "blocks": [
-        "hero-split"
-      ],
       "totalDefault": 1
     },
-    "media": {
-      "blocks": [
-        "hero-split"
-      ],
-      "totalDefault": 1
-    },
-    "dot": {
-      "blocks": [],
-      "totalDefault": 0
-    },
-    "item": {
+    "record": {
       "blocks": [
         "features-team"
       ],
@@ -154,8 +188,8 @@
     }
   },
   "paths": {
-    "heading": {
-      "kind": "heading",
+    "title": {
+      "kind": "title",
       "blocks": [
         "hero-split",
         "features-team"
@@ -173,8 +207,8 @@
         }
       ]
     },
-    "lines": {
-      "kind": "text-line",
+    "description": {
+      "kind": "description",
       "blocks": [
         "hero-split"
       ],
@@ -186,8 +220,8 @@
         }
       ]
     },
-    "cta": {
-      "kind": "cta",
+    "image": {
+      "kind": "image",
       "blocks": [
         "hero-split"
       ],
@@ -199,8 +233,8 @@
         }
       ]
     },
-    "media": {
-      "kind": "media",
+    "actionLabel": {
+      "kind": "actionLabel",
       "blocks": [
         "hero-split"
       ],
@@ -212,8 +246,22 @@
         }
       ]
     },
-    "items": {
-      "kind": "item",
+    "actionHref": {
+      "kind": "actionHref",
+      "blocks": [
+        "hero-split"
+      ],
+      "counts": [
+        {
+          "id": "hero-split",
+          "count": 1,
+          "default": 1
+        }
+      ]
+    },
+    "members": {
+      "kind": "record",
+      "record": "teamMember",
       "blocks": [
         "features-team"
       ],
@@ -229,7 +277,7 @@
         }
       ]
     },
-    "items.avatar": {
+    "members.avatar": {
       "kind": "avatar",
       "blocks": [
         "features-team"
@@ -242,8 +290,8 @@
         }
       ]
     },
-    "items.title": {
-      "kind": "heading",
+    "members.title": {
+      "kind": "title",
       "blocks": [
         "features-team"
       ],
@@ -255,8 +303,8 @@
         }
       ]
     },
-    "items.lines": {
-      "kind": "text-line",
+    "members.description": {
+      "kind": "description",
       "blocks": [
         "features-team"
       ],
@@ -269,11 +317,34 @@
       ]
     }
   },
+  "records": {
+    "teamMember": {
+      "blocks": [
+        "features-team"
+      ],
+      "path": "members",
+      "fields": [
+        {
+          "id": "avatar",
+          "kind": "avatar"
+        },
+        {
+          "id": "title",
+          "kind": "title"
+        },
+        {
+          "id": "description",
+          "kind": "description"
+        }
+      ]
+    }
+  },
   "repeatedKinds": [
-    "heading",
-    "text-line"
+    "title",
+    "description"
   ],
   "repeatedPaths": [
-    "heading"
-  ]
+    "title"
+  ],
+  "repeatedRecords": []
 }

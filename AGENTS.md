@@ -7,7 +7,7 @@ Wireframe constructor on top of `ui8kit/contract`. Copy `.cursor/rules` and `.cu
 - **Layer:** prototypes (blocks) + a thin showcase app. No layouts package.
 - **Runtime:** Svelte 5 only. The eight-runtime identity rule is a contract target, not generated here.
 - **Kit:** `packages/kit/src` from registry `3.4.0` via `scripts/install-kit.py`. Never hand-edit those files. `ui8kit.lock.json` pins sha256 of every installed path.
-- **Blocks:** `packages/blocks`. Layout shells wrap kit `Box` because UI8Kit v3 has no `Block` / `Container` / `Stack` / `Grid` primitives. Semantic `tag`, `gap`, `align`, `justify`, `cols`, `py` live on those shells. Each organism has a sibling `*.block.ts` manifest (id, category, slots/fields, variants). `src/manifest/registry.ts` exports every manifest; `src/catalog.ts` maps id → component.
+- **Blocks:** `packages/blocks`. Layout shells wrap kit `Box` because UI8Kit v3 has no `Block` / `Container` / `Stack` / `Grid` primitives. Semantic `tag`, `gap`, `align`, `justify`, `cols`, `py` live on those shells. Each organism has a sibling `*.block.ts` **content contract** (id, category, named fields, layout-only variants). `src/manifest/registry.ts` exports every manifest; `src/catalog.ts` maps id → component. Rules: `docs/content-contract.md` — simple content, interchangeable variants, full rendering.
 - **Utilities:** `packages/blocks/src/classes.ts` is the only home for raw Tailwind strings in the constructor. `scripts/check-blocks.py` fails a block `.svelte` file that embeds more than **0** utility tokens, and requires a matching `*.block.ts`.
 - **Shapes:** `TextLine`, `Heading`, `CtaShape`, `Media`, `Dot`, `Avatar`. Organisms import these and the layout shells only.
 - **App:** `apps/blocks` is a gallery (blocks by category from the registry) and a hash-routed single-block studio (`#/block/<id>`) with the theme panel and dual light/dark previews. Fonts are not part of the constructor.
@@ -19,9 +19,9 @@ Wireframe constructor on top of `ui8kit/contract`. Copy `.cursor/rules` and `.cu
 | --- | --- |
 | `python3 scripts/check-blocks.py` | Block root, no nested/looped Block, no bare HTML, no literal copy, no inline style, forbidden radius/shadow/palette, max raw utilities = 0, sibling `*.block.ts`, `blockRoot` in sync |
 | `node scripts/ui8px-gate.mjs` | Extract class maps from `classes.ts`, `ui8px lint`, `validate grid`, `validate patterns`, `validate aria`. Gate `max: 0`, blocking `UI8PX001`, `UI8PX003`, `UI8PX005`, `GRID` |
-| `node --experimental-strip-types --test packages/theme/src/*.test.ts packages/blocks/src/manifest/*.node.test.ts` | Palette WCAG, density 8+4, CSS/JSON export; every organism has a registered manifest |
-| `bun run fields:summary` | Aggregate manifests → `docs/fields.json` + `docs/fields.md` (which slots repeat) |
-| `vitest run` | Organism structure, token classes, empty text content, flattened slot counts match `[data-shape]` |
+| `node --experimental-strip-types --test packages/theme/src/*.test.ts packages/blocks/src/manifest/*.node.test.ts` | Palette WCAG, density 8+4, CSS/JSON export; every organism has a registered content contract; variants are layout-only |
+| `bun run fields:summary` | Aggregate content contracts → `docs/fields.json` + `docs/fields.md` (which fields and record types repeat) |
+| `vitest run` | Organism structure, token classes, empty text content, flattened counts match `[data-shape]`, **completeness** (every field in every variant) |
 
 Kit sources are not extracted: control recipes (`size-3`, `pr-2`) would trip layout 8+4.
 
@@ -42,4 +42,6 @@ Kit sources are not extracted: control recipes (`size-3`, `pr-2`) would trip lay
 
 ## Add a block
 
-See `docs/adding-a-block.md`. Short path: dictionary → `*.block.ts` + registry + catalog → failing test → organism of shapes → `bun run fields:summary` → `bun run verify`.
+See `docs/adding-a-block.md` and `docs/content-contract.md`. Short path: dictionary → one content schema + layout variants in `*.block.ts` + registry + catalog → failing test (including completeness across variants) → organism of shapes with `data-field` → `bun run fields:summary` → `bun run verify`.
+
+Do not fork a block because the image moved or the column count changed. Do not hide a filled field in a variant.

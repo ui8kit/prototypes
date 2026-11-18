@@ -5,12 +5,14 @@
   let {
     width: w = "1/2",
     size = "md",
+    field,
   }: {
     width?: Width;
     size?: "md" | "lg";
+    field?: string;
   } = $props();
 
   const cls = $derived(cn(size === "lg" ? shape.headingLg : shape.heading, width[w]));
 </script>
 
-<Box class={cls} data-shape="heading"></Box>
+<Box class={cls} data-shape="heading" data-field={field}></Box>

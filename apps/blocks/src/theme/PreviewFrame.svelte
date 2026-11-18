@@ -9,11 +9,13 @@
     theme,
     label,
     view: View,
+    variant,
   }: {
     mode: Mode;
     theme: GlobalTheme;
     label: string;
-    view: Component;
+    view: Component<{ variant?: string }>;
+    variant?: string;
   } = $props();
 
   const style = $derived(previewStyle(theme, mode));
@@ -21,5 +23,5 @@
 
 <Box class="ui8-preview" data-mode={mode} data-density={theme.density} data-section-padding={theme.sectionPadding} {style} data-testid={"preview-" + mode}>
   <Text tag="h2" class="ui8-preview-label">{label}</Text>
-  <View />
+  <View {variant} />
 </Box>

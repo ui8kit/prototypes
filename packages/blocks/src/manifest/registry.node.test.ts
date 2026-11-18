@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
-import { BLOCKS, BLOCK_BY_ID, shapeCounts } from "./index.ts";
+import { BLOCKS, BLOCK_BY_ID, fieldPaths, shapeCounts } from "./index.ts";
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SKIP = new Set(["layout", "shapes", "content", "manifest"]);
@@ -43,8 +43,8 @@ describe("block manifests", () => {
     }
   });
 
-  it("flattens default slot counts for the current library", () => {
-    assert.deepEqual(shapeCounts(BLOCK_BY_ID["features-team"].slots), {
+  it("flattens default content counts for the current library", () => {
+    assert.deepEqual(shapeCounts(BLOCK_BY_ID["features-team"].content), {
       heading: 4,
       "text-line": 6,
       avatar: 3,
@@ -52,7 +52,7 @@ describe("block manifests", () => {
       media: 0,
       dot: 0,
     });
-    assert.deepEqual(shapeCounts(BLOCK_BY_ID["hero-split"].slots), {
+    assert.deepEqual(shapeCounts(BLOCK_BY_ID["hero-split"].content), {
       heading: 1,
       "text-line": 2,
       avatar: 0,
@@ -68,6 +68,30 @@ describe("block manifests", () => {
       assert.ok(existsSync(dir), `missing directory ${block.id}`);
       const svelte = readdirSync(dir).filter((file) => file.endsWith(".svelte"));
       assert.equal(svelte.length, 1, `${block.id}: expected one .svelte`);
+    }
+  });
+
+  it("gives each block one content schema and layout-only variants", () => {
+    for (const block of BLOCKS) {
+      assert.ok(block.content.length > 0, `${block.id}: empty content schema`);
+      assert.ok(block.variants.length > 0, `${block.id}: need at least one variant`);
+      const defaults = block.variants.filter((variant) => variant.default);
+      assert.equal(defaults.length, 1, `${block.id}: exactly one default variant`);
+      const ids = block.variants.map((variant) => variant.id);
+      assert.equal(new Set(ids).size, ids.length, `${block.id}: duplicate variant ids`);
+      const contentIds = new Set(fieldPaths(block.content).map((field) => field.path));
+      for (const variant of block.variants) {
+        assert.equal("content" in variant, false, `${block.id}/${variant.id}: variants must not carry content`);
+        assert.ok(variant.layout && Object.keys(variant.layout).length > 0, `${block.id}/${variant.id}: empty layout`);
+        for (const key of Object.keys(variant.layout)) {
+          assert.equal(contentIds.has(key), false, `${block.id}/${variant.id}: layout key ${key} collides with content`);
+        }
+      }
+      for (const field of fieldPaths(block.content)) {
+        if (field.kind === "record") {
+          assert.ok(field.record && field.record !== "item", `${block.id}: record ${field.path} needs a named type`);
+        }
+      }
     }
   });
 });

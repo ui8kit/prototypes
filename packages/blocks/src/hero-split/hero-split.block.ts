@@ -5,11 +5,16 @@ export const heroSplit: BlockManifest = {
   id: "hero-split",
   category: "hero",
   label: ui.heroSplit.label,
-  slots: [
-    { id: "heading", kind: "heading", count: 1 },
-    { id: "lines", kind: "text-line", count: 2 },
-    { id: "cta", kind: "cta", count: 1 },
-    { id: "media", kind: "media", count: 1 },
+  content: [
+    { id: "title", kind: "title", count: 1 },
+    { id: "description", kind: "description", count: 2 },
+    { id: "image", kind: "image", count: 1 },
+    { id: "actionLabel", kind: "actionLabel", count: 1 },
+    { id: "actionHref", kind: "actionHref", count: 1 },
   ],
-  variants: [{ id: "default" }],
+  variants: [
+    { id: "media-left", layout: { media: "left" } },
+    { id: "media-right", layout: { media: "right" }, default: true },
+    { id: "media-top", layout: { media: "top" } },
+  ],
 };

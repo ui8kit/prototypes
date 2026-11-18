@@ -144,6 +144,12 @@ body {
   font-size: 16px;
   line-height: 24px;
 }
+.ui8-studio-variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 16px 8px;
+}
 .ui8-gallery {
   padding: 16px 24px 80px;
   max-width: 960px;

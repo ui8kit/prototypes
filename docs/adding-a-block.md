@@ -1,19 +1,20 @@
 # Adding a block
 
 This repo is a visual prototype constructor. Each organism is a wireframe of
-placeholder shapes, plus a typed **manifest** of its slots. The library grows
-so later we can unify typical fields for a real site constructor.
+placeholder shapes, plus a typed **content contract** (the manifest). The
+library grows so later we can unify typical fields for a real site constructor.
 
 Follow `.cursor/skills/ui8kit-new-block`, adapted here (no Codex records yet).
+Contract rules: `docs/content-contract.md`.
 
 Directory name is the block `id` (`hero-split`, `features-team`).
 
 ## 1. Dictionary
 
-Add `aria-label` (and any CTA name) to `packages/blocks/src/content/en.ts`.
+Add `aria-label` (and any CTA name / href) to `packages/blocks/src/content/en.ts`.
 Templates must not contain letters.
 
-## 2. Manifest
+## 2. Manifest = content contract
 
 Create `packages/blocks/src/<id>/<id>.block.ts` next to the organism:
 
@@ -25,25 +26,34 @@ export const heroSplit: BlockManifest = {
   id: "hero-split",
   category: "hero",
   label: ui.heroSplit.label,
-  slots: [
-    { id: "heading", kind: "heading", count: 1 },
-    { id: "lines", kind: "text-line", count: 2 },
-    { id: "cta", kind: "cta", count: 1 },
-    { id: "media", kind: "media", count: 1 },
+  content: [
+    { id: "title", kind: "title", count: 1 },
+    { id: "description", kind: "description", count: 2 },
+    { id: "image", kind: "image", count: 1 },
+    { id: "actionLabel", kind: "actionLabel", count: 1 },
+    { id: "actionHref", kind: "actionHref", count: 1 },
   ],
-  variants: [{ id: "default" }],
+  variants: [
+    { id: "media-left", layout: { media: "left" } },
+    { id: "media-right", layout: { media: "right" }, default: true },
+    { id: "media-top", layout: { media: "top" } },
+  ],
 };
 ```
 
 - `id` equals the directory name.
 - `category` is one of `hero`, `features`, `team`, `cta`, `pricing`, `content`,
   `media`, `nav`, `footer`, `form`, `social`.
-- Each slot has `id`, `kind`, and `count` (a number, or `{ min, max, default }`).
-- Shape kinds: `heading`, `text-line`, `avatar`, `cta`, `media`, `dot`.
-  `dot` is a small avatar (`[data-shape=avatar]`).
-- Repeating groups use `kind: "item"` and nested `fields` (e.g. `avatar`,
-  `title`, `lines` per member). Flattened counts multiply by the item default.
-- `variants` are optional prop overlays the organism already accepts.
+- **One `content` schema.** Named fields (`title`, `description`, `image`,
+  `actionLabel`, `actionHref`, `avatar`). Repeating groups are `kind: "record"`
+  with a named `record` type (`teamMember`, later `priceTier`) and nested
+  fields. Do not invent a universal item.
+- **Variants are layout.** Image left/right/top, column count, etc. live under
+  `layout`. Exactly one variant is `default: true`. A variant must not add
+  required fields, change types, or drop content.
+- Mark each rendered slot with `data-field` matching the content path
+  (`title`, `members.avatar`). One node may carry two fields
+  (`actionLabel actionHref` on the CTA).
 
 Register it:
 
@@ -52,9 +62,10 @@ Register it:
 2. Map `id` → component in `packages/blocks/src/catalog.ts`.
 3. Re-export the component from `packages/blocks/src/index.ts` if it is new.
 4. Add `src/<id>` to `packages/blocks/package.json` → `ui8kit.blockRoot`.
+5. Add variant labels to `apps/blocks/src/content/gallery.ts` if the ids are new.
 
-The gallery in `apps/blocks` lists blocks by category from the registry.
-A single-block preview is `#/block/<id>` (theme panel + light/dark frames).
+The gallery lists blocks by category. A studio preview is `#/block/<id>` or
+`#/block/<id>/<variant>` (theme panel + light/dark frames + layout switcher).
 Do not hardcode organisms in the app.
 
 ## 3. Test first
@@ -62,14 +73,18 @@ Do not hardcode organisms in the app.
 Create `packages/blocks/src/<id>/<Name>.test.ts`:
 
 - named `region` (section + `aria-label`)
-- counts of `[data-shape=…]`
+- default variant id on `data-variant`
+- counts of `[data-shape=…]` and `[data-field~=…]`
 - token classes present (`bg-muted`, `rounded`, `rounded-full`, …)
 - `textContent` with whitespace stripped is `""`
+- switching variant keeps the same content counts (layout class may change)
 
-The shared test in `packages/blocks/src/manifest/render.test.ts` already
-asserts that flattened manifest slot counts match the default render.
-`packages/blocks/src/manifest/registry.node.test.ts` asserts every organism
-directory has a `*.block.ts` registered under that `id`.
+The shared tests already:
+
+- flatten default content → `[data-shape]` (`render.test.ts`)
+- **completeness:** every block × every variant renders every contract field
+- every organism directory has a registered `*.block.ts`; variants are
+  layout-only (`registry.node.test.ts`)
 
 ## 4. Markup
 
@@ -80,12 +95,15 @@ Inside, only:
 - `Container`, `Stack`, `Group`, `Grid` (`tag`, `gap`, `align`, `justify`, `cols`, `py`)
 - `TextLine`, `Heading`, `CtaShape`, `Media`, `Dot`, `Avatar`
 
+Pass `field="…"` on every shape. Read the active variant with
+`resolveVariant(manifest, variant)` and branch **presentation only**.
+
 No `class="…"` on the organism. If a shell is missing a prop, add a map entry in
 `classes.ts` and a prop on the shell — do not leak utilities into the block file.
 
 Repeated landmarks go in their own file. `{#each}` may wrap shapes, never `Block`.
 
-Default rendered shape counts **must** match `shapeCounts(manifest.slots)`.
+Default rendered shape counts **must** match `shapeCounts(manifest.content)`.
 
 ## 5. Field summary
 
@@ -93,9 +111,9 @@ Default rendered shape counts **must** match `shapeCounts(manifest.slots)`.
 bun run fields:summary
 ```
 
-Rewrites `docs/fields.json` and `docs/fields.md`: which kinds and field paths
-repeat across blocks. Commit the generated files. `bun run verify` regenerates
-them.
+Rewrites `docs/fields.json` and `docs/fields.md`: which **content** kinds,
+paths, and record types repeat (variants are listed as layout, not as fields).
+Commit the generated files. `bun run verify` regenerates them.
 
 ## 6. Checks
 

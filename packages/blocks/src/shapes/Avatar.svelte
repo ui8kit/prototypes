@@ -8,9 +8,9 @@
     lg: shape.avatarLg,
   } as const;
 
-  let { size = "md" }: { size?: AvatarSize } = $props();
+  let { size = "md", field }: { size?: AvatarSize; field?: string } = $props();
 
   const cls = $derived(cn(shape.avatar, sizeClass[size]));
 </script>
 
-<Box class={cls} data-shape="avatar"></Box>
+<Box class={cls} data-shape="avatar" data-field={field}></Box>
