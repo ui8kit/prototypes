@@ -14,7 +14,9 @@
     "lint:px": "node scripts/ui8px-gate.mjs",
     "kit:install": "python3 scripts/install-kit.py",
     "test:theme": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/theme/src/*.test.ts",
-    "verify": "python3 scripts/check-blocks.py && node scripts/ui8px-gate.mjs && node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/theme/src/*.test.ts && vitest run"
+    "test:manifest": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/blocks/src/manifest/*.node.test.ts apps/blocks/src/*.node.test.ts",
+    "fields:summary": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs scripts/fields-summary.mjs",
+    "verify": "python3 scripts/check-blocks.py && node scripts/ui8px-gate.mjs && node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/theme/src/*.test.ts packages/blocks/src/manifest/*.node.test.ts apps/blocks/src/*.node.test.ts && node --experimental-strip-types --import ./scripts/ts-ext-register.mjs scripts/fields-summary.mjs && vitest run"
   },
   "ui8kit": {
     "runtime": "svelte",

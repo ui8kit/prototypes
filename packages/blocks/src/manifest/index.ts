@@ -1,0 +1,21 @@
+export {
+  BLOCK_CATEGORIES,
+  SLOT_KINDS,
+  SHAPE_KINDS,
+  attrForKind,
+  countsByAttr,
+  emptyShapeCounts,
+  fieldPaths,
+  formatCount,
+  resolveCount,
+  shapeCounts,
+  type BlockCategory,
+  type BlockManifest,
+  type BlockVariant,
+  type FieldPath,
+  type ShapeKind,
+  type Slot,
+  type SlotCount,
+  type SlotKind,
+} from "./types";
+export { BLOCKS, BLOCK_BY_ID, blocksIn, categoriesPresent } from "./registry";

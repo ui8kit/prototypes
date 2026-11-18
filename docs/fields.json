@@ -1,0 +1,279 @@
+{
+  "blocks": [
+    {
+      "id": "hero-split",
+      "category": "hero",
+      "label": "Hero",
+      "slots": [
+        {
+          "id": "heading",
+          "kind": "heading",
+          "count": 1
+        },
+        {
+          "id": "lines",
+          "kind": "text-line",
+          "count": 2
+        },
+        {
+          "id": "cta",
+          "kind": "cta",
+          "count": 1
+        },
+        {
+          "id": "media",
+          "kind": "media",
+          "count": 1
+        }
+      ],
+      "variants": [
+        {
+          "id": "default"
+        }
+      ],
+      "shapeCounts": {
+        "heading": 1,
+        "text-line": 2,
+        "avatar": 0,
+        "cta": 1,
+        "media": 1,
+        "dot": 0
+      }
+    },
+    {
+      "id": "features-team",
+      "category": "team",
+      "label": "Team",
+      "slots": [
+        {
+          "id": "heading",
+          "kind": "heading",
+          "count": 1
+        },
+        {
+          "id": "items",
+          "kind": "item",
+          "count": {
+            "min": 1,
+            "max": 6,
+            "default": 3
+          },
+          "fields": [
+            {
+              "id": "avatar",
+              "kind": "avatar",
+              "count": 1
+            },
+            {
+              "id": "title",
+              "kind": "heading",
+              "count": 1
+            },
+            {
+              "id": "lines",
+              "kind": "text-line",
+              "count": 2
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "default",
+          "props": {
+            "count": 3
+          }
+        },
+        {
+          "id": "pair",
+          "props": {
+            "count": 2
+          }
+        }
+      ],
+      "shapeCounts": {
+        "heading": 4,
+        "text-line": 6,
+        "avatar": 3,
+        "cta": 0,
+        "media": 0,
+        "dot": 0
+      }
+    }
+  ],
+  "categories": {
+    "hero": [
+      "hero-split"
+    ],
+    "team": [
+      "features-team"
+    ]
+  },
+  "kinds": {
+    "heading": {
+      "blocks": [
+        "features-team",
+        "hero-split"
+      ],
+      "totalDefault": 5
+    },
+    "text-line": {
+      "blocks": [
+        "features-team",
+        "hero-split"
+      ],
+      "totalDefault": 8
+    },
+    "avatar": {
+      "blocks": [
+        "features-team"
+      ],
+      "totalDefault": 3
+    },
+    "cta": {
+      "blocks": [
+        "hero-split"
+      ],
+      "totalDefault": 1
+    },
+    "media": {
+      "blocks": [
+        "hero-split"
+      ],
+      "totalDefault": 1
+    },
+    "dot": {
+      "blocks": [],
+      "totalDefault": 0
+    },
+    "item": {
+      "blocks": [
+        "features-team"
+      ],
+      "totalDefault": 3
+    }
+  },
+  "paths": {
+    "heading": {
+      "kind": "heading",
+      "blocks": [
+        "hero-split",
+        "features-team"
+      ],
+      "counts": [
+        {
+          "id": "hero-split",
+          "count": 1,
+          "default": 1
+        },
+        {
+          "id": "features-team",
+          "count": 1,
+          "default": 1
+        }
+      ]
+    },
+    "lines": {
+      "kind": "text-line",
+      "blocks": [
+        "hero-split"
+      ],
+      "counts": [
+        {
+          "id": "hero-split",
+          "count": 2,
+          "default": 2
+        }
+      ]
+    },
+    "cta": {
+      "kind": "cta",
+      "blocks": [
+        "hero-split"
+      ],
+      "counts": [
+        {
+          "id": "hero-split",
+          "count": 1,
+          "default": 1
+        }
+      ]
+    },
+    "media": {
+      "kind": "media",
+      "blocks": [
+        "hero-split"
+      ],
+      "counts": [
+        {
+          "id": "hero-split",
+          "count": 1,
+          "default": 1
+        }
+      ]
+    },
+    "items": {
+      "kind": "item",
+      "blocks": [
+        "features-team"
+      ],
+      "counts": [
+        {
+          "id": "features-team",
+          "count": {
+            "min": 1,
+            "max": 6,
+            "default": 3
+          },
+          "default": 3
+        }
+      ]
+    },
+    "items.avatar": {
+      "kind": "avatar",
+      "blocks": [
+        "features-team"
+      ],
+      "counts": [
+        {
+          "id": "features-team",
+          "count": 1,
+          "default": 1
+        }
+      ]
+    },
+    "items.title": {
+      "kind": "heading",
+      "blocks": [
+        "features-team"
+      ],
+      "counts": [
+        {
+          "id": "features-team",
+          "count": 1,
+          "default": 1
+        }
+      ]
+    },
+    "items.lines": {
+      "kind": "text-line",
+      "blocks": [
+        "features-team"
+      ],
+      "counts": [
+        {
+          "id": "features-team",
+          "count": 2,
+          "default": 2
+        }
+      ]
+    }
+  },
+  "repeatedKinds": [
+    "heading",
+    "text-line"
+  ],
+  "repeatedPaths": [
+    "heading"
+  ]
+}

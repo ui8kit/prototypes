@@ -124,6 +124,75 @@ body {
 .ui8-app[data-wide="palette"] {
   grid-template-columns: minmax(0, 1fr) minmax(320px, 640px);
 }
+.ui8-app[data-view="gallery"] {
+  grid-template-columns: 1fr;
+}
+.ui8-studio {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ui8-studio-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.ui8-studio-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+}
+.ui8-gallery {
+  padding: 16px 24px 80px;
+  max-width: 960px;
+}
+.ui8-gallery-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 32px;
+}
+.ui8-gallery-note {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--muted-foreground);
+}
+.ui8-gallery-category {
+  margin-top: 24px;
+}
+.ui8-gallery-category-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  line-height: 24px;
+}
+.ui8-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.ui8-gallery-card {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: inherit;
+  text-decoration: none;
+}
+.ui8-gallery-card-preview {
+  pointer-events: none;
+  max-height: 240px;
+  overflow: hidden;
+}
+.ui8-gallery-card-name {
+  margin: 0;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  line-height: 20px;
+}
 .ui8-previews {
   display: grid;
   grid-template-columns: 1fr 1fr;

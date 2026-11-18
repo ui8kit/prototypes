@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["packages/blocks/src/**/*.test.ts"],
+    exclude: ["packages/blocks/src/**/*.node.test.ts"],
   },
   resolve: {
     alias: {

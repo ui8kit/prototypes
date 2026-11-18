@@ -93,4 +93,4 @@ Block keeps the class `py-16`. Theme writes `--theme-section-py` and `--theme-se
 
 ## UI
 
-`apps/blocks`: light preview | dark preview | theme panel. Palette opens in the panel (wheel, HSL/Hex, harmonies, ranges, AA/AAA, 16 presets, token chips). Export copies JSON or CSS.
+`apps/blocks`: gallery of blocks by category, then `#/block/<id>` for light preview | dark preview | theme panel. Palette opens in the panel (wheel, HSL/Hex, harmonies, ranges, AA/AAA, 16 presets, token chips). Export copies JSON or CSS.

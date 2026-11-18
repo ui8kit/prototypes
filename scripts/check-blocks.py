@@ -8,15 +8,17 @@ kit primitives; they still must not embed Tailwind string literals.
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BLOCKS = ROOT / "packages" / "blocks" / "src"
+BLOCKS_PKG = ROOT / "packages" / "blocks" / "package.json"
 MAX_RAW_UTILITIES = 0
 
-ORGANISM_DIRS = {"features-team", "hero-split"}
+SKIP_TOP = {"layout", "shapes", "content", "manifest"}
 LAYOUT_DIRS = {"layout"}
 SHAPE_DIRS = {"shapes"}
 
@@ -89,10 +91,22 @@ def count_raw_utilities(source: str) -> tuple[int, list[str]]:
     return len(found), found
 
 
-def kind_for(path: Path) -> str:
+def organism_dirs() -> set[str]:
+    found: set[str] = set()
+    if not BLOCKS.is_dir():
+        return found
+    for path in BLOCKS.iterdir():
+        if not path.is_dir() or path.name in SKIP_TOP:
+            continue
+        if any(path.glob("*.svelte")):
+            found.add(path.name)
+    return found
+
+
+def kind_for(path: Path, organisms: set[str]) -> str:
     rel = path.relative_to(BLOCKS)
     top = rel.parts[0]
-    if top in ORGANISM_DIRS:
+    if top in organisms:
         return "organism"
     if top in LAYOUT_DIRS:
         return "layout"
@@ -101,11 +115,11 @@ def kind_for(path: Path) -> str:
     return "other"
 
 
-def check_file(path: Path) -> list[str]:
+def check_file(path: Path, organisms: set[str]) -> list[str]:
     errors: list[str] = []
     source = path.read_text(encoding="utf-8")
     markup = strip_comments(source)
-    kind = kind_for(path)
+    kind = kind_for(path, organisms)
     rel = path.relative_to(ROOT).as_posix()
 
     count, found = count_raw_utilities(source)
@@ -143,20 +157,49 @@ def check_file(path: Path) -> list[str]:
     return errors
 
 
+def check_manifests(organisms: set[str]) -> list[str]:
+    errors: list[str] = []
+    for name in sorted(organisms):
+        directory = BLOCKS / name
+        manifests = list(directory.glob("*.block.ts"))
+        rel = directory.relative_to(ROOT).as_posix()
+        if len(manifests) != 1:
+            found = ", ".join(path.name for path in manifests) or "none"
+            errors.append(f"{rel}: expected exactly one *.block.ts, found {found}")
+        elif manifests[0].name != f"{name}.block.ts":
+            errors.append(
+                f"{rel}: manifest file should be {name}.block.ts, found {manifests[0].name}"
+            )
+    try:
+        pkg = json.loads(BLOCKS_PKG.read_text(encoding="utf-8"))
+        listed = {Path(item).name for item in pkg.get("ui8kit", {}).get("blockRoot", [])}
+        if listed != organisms:
+            errors.append(
+                f"packages/blocks/package.json ui8kit.blockRoot {sorted(listed)} "
+                f"does not match organism dirs {sorted(organisms)}"
+            )
+    except (OSError, json.JSONDecodeError) as exc:
+        errors.append(f"packages/blocks/package.json: {exc}")
+    return errors
+
+
 def main() -> int:
     files = sorted(BLOCKS.rglob("*.svelte"))
     if not files:
         print("no block svelte files", file=sys.stderr)
         return 1
 
+    organisms = organism_dirs()
     errors: list[str] = []
     print(f"max raw utility classes per block file: {MAX_RAW_UTILITIES}")
     print(
         "budget justification: remaining utilities live in classes.ts; "
         "organisms pass Block/Container/Stack/Grid/shape props only."
     )
+    print(f"organism dirs: {', '.join(sorted(organisms)) or '(none)'}")
+    errors.extend(check_manifests(organisms))
     for path in files:
-        errors.extend(check_file(path))
+        errors.extend(check_file(path, organisms))
 
     if errors:
         print("check-blocks failed:", file=sys.stderr)

@@ -30,10 +30,12 @@ Absorbed as:
 
 `lg:py-32` is dropped (`32` is off the layout scale). Container padding is `px-8` (even step). `text-center` is unnecessary: there is no text.
 
-| Sketch | Block | Structure |
-| --- | --- | --- |
-| Team / features row | `FeaturesTeam` | `Block` → `Container` → `Stack` → title `Heading` + `Grid cols={3}` of `Avatar` + `Heading` + two `TextLine`s |
-| Split hero | `HeroSplit` | `Block` → `Container` → `Grid cols={2}` of copy `Stack` (`Heading`, `TextLine`s, `CtaShape`) and `Media` |
+| Sketch | Block | Manifest | Structure |
+| --- | --- | --- | --- |
+| Team / features row | `FeaturesTeam` | `features-team.block.ts` (`team`: heading + items\[avatar, title, 2 lines\]) | `Block` → `Container` → `Stack` → title `Heading` + `Grid cols={3}` of `Avatar` + `Heading` + two `TextLine`s |
+| Split hero | `HeroSplit` | `hero-split.block.ts` (`hero`: heading, 2 lines, cta, media) | `Block` → `Container` → `Grid cols={2}` of copy `Stack` (`Heading`, `TextLine`s, `CtaShape`) and `Media` |
+
+The registry (`packages/blocks/src/manifest/registry.ts`) is the gallery source. Field repetition across the library: `docs/fields.md`. Adding a block: `docs/adding-a-block.md`.
 
 ## Shapes
 

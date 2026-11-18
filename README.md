@@ -9,9 +9,9 @@ This is not a marketing site and not an idea dump. Blocks are organisms of recta
 | Path | Role |
 | --- | --- |
 | `packages/kit` | Official UI8Kit Svelte primitives (CLI/registry). Do not edit by hand. |
-| `packages/blocks` | Layout shells, placeholder shapes, and organism blocks. |
+| `packages/blocks` | Layout shells, placeholder shapes, organism blocks, and typed `*.block.ts` manifests. |
 | `packages/theme` | Palette, skins, density, radius, CSS/JSON. No fonts. |
-| `apps/blocks` | Showcase, theme constructor panel, dual light/dark block preview. |
+| `apps/blocks` | Gallery by category, single-block preview, theme constructor panel. |
 
 ## Constructor rules
 
@@ -26,8 +26,9 @@ This is not a marketing site and not an idea dump. Blocks are organisms of recta
 
 ```sh
 bun install
-bun run verify          # check-blocks + ui8px gate + tests
-bun run dev             # showcase
+bun run verify          # check-blocks + ui8px gate + tests + field summary
+bun run fields:summary  # rewrite docs/fields.md from manifests
+bun run dev             # gallery + theme constructor
 bun run kit:install     # reinstall primitives (CLI, else GitHub registry)
 ```
 
@@ -35,6 +36,6 @@ bun run kit:install     # reinstall primitives (CLI, else GitHub registry)
 
 ## Theme
 
-The constructor in `apps/blocks` live-previews both blocks in light and dark. Skins, a colour wheel (9 harmonies, 16 presets, AA/AAA), radius (0–16px), density (`compact` / `default` / `comfortable` on the 8+4 grid), and section padding (`compact` / `default` / `spacious`, even 8px including the lg step) live in `packages/theme`. Export JSON (`prototypes-theme` v1) or CSS variables. Fonts are excluded.
+The constructor in `apps/blocks` lists blocks by category from the registry and live-previews one block at a time (`#/block/<id>`) in light and dark. Each organism has a sibling manifest of slots/fields so later unification can see which structures repeat (`docs/fields.md`, `bun run fields:summary`). Skins, a colour wheel (9 harmonies, 16 presets, AA/AAA), radius (0–16px), density (`compact` / `default` / `comfortable` on the 8+4 grid), and section padding (`compact` / `default` / `spacious`, even 8px including the lg step) live in `packages/theme`. Export JSON (`prototypes-theme` v1) or CSS variables. Fonts are excluded.
 
 Storage: `prototypes:v1:theme` and `ui8kit-theme` (chrome mode). `Media` swaps hatches with `dark:` utilities scoped to `[data-mode="dark"]` on each preview frame. See `docs/theme.md`.

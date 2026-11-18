@@ -5,7 +5,8 @@
   "type": "module",
   "svelte": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest/index.ts"
   },
   "ui8kit": {
     "runtime": "svelte",
