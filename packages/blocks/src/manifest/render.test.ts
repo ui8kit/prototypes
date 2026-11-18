@@ -4,7 +4,9 @@
  */
 import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
-import { CATALOG, type BlockProps } from "../catalog";
+import BlockView from "../builder/BlockView.svelte";
+import { CATALOG } from "../catalog";
+import type { Mode, TitleLevel } from "./types";
 import { heroFilled, heroMinimal, teamFilled, teamMinimal } from "../fixtures/samples";
 import { getAt, resolvePointer } from "../model/pointer";
 import { leafPaths, type ImageValue } from "../model/types";
@@ -14,8 +16,21 @@ const hero = BLOCK_BY_ID["hero-split"]!;
 const team = BLOCK_BY_ID["features-team"]!;
 const FILLED: Record<string, Record<string, unknown>> = { "hero-split": heroFilled, "features-team": teamFilled };
 
-function mount(item: string, props: BlockProps): HTMLElement {
-  const { container } = render(CATALOG[item]!, { props });
+type MountProps = { variant?: string; mode?: Mode; content?: Record<string, unknown>; headingLevel?: TitleLevel };
+
+/** With a mode: through the builder's BlockView (a saved instance). Without: the organism alone, as the feed renders it. */
+function mount(item: string, { variant, mode, content, headingLevel }: MountProps): HTMLElement {
+  const block = BLOCK_BY_ID[item]!;
+  const instance = {
+    id: "t",
+    item,
+    variant: variant ?? block.variants.find((v) => v.default)!.id,
+    options: headingLevel ? { headingLevel } : undefined,
+    props: content ?? {},
+  };
+  const { container } = mode
+    ? render(BlockView, { props: { instance, mode } })
+    : render(CATALOG[item]!, { props: { variant, content, headingLevel } });
   return container.querySelector("section") as HTMLElement;
 }
 const text = (el: Element | null | undefined) => (el?.textContent ?? "").replace(/\s+/g, " ").trim();
@@ -32,7 +47,6 @@ function emptyElements(root: Element): string[] {
 describe.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)))("%s / %s", (item, variant) => {
   it("page: the filled object renders every value in its place", () => {
     const section = mount(item, { variant, mode: "page", content: FILLED[item] });
-    expect(section.getAttribute("data-variant")).toBe(variant);
     expect(all(section, "[data-shape]"), "no wireframe shapes on a page").toHaveLength(0);
     expect(all(section, "[aria-hidden]")).toHaveLength(0);
 
@@ -99,8 +113,8 @@ describe.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)
     }
   });
 
-  it("wireframe: the same filled input draws only geometry", () => {
-    const section = mount(item, { variant, mode: "wireframe", content: FILLED[item] });
+  it.each([["no mode (default)", undefined], ["explicit wireframe", "wireframe"]] as const)("wireframe, %s: the same filled input draws only geometry", (_, mode) => {
+    const section = mount(item, { variant, mode, content: FILLED[item] });
     expect(text(section)).toBe("");
     expect(all(section, "a, button, h1, h2, h3, p")).toHaveLength(0);
     const contentSrcs = JSON.stringify(FILLED[item]).match(/\/samples\/[^"]+/g)!;

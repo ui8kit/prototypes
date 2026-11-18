@@ -3,15 +3,14 @@
   the page draws one paragraph. Clearing the value removes the paragraph; the wireframe is chosen by the feed only.
 -->
 <script lang="ts">
+  import { useMode } from "./mode";
   import { cn, Text } from "@ui8kit/kit";
   import { page, type Width } from "../classes";
   import Stack from "../layout/Stack.svelte";
-  import type { Mode } from "../manifest/types";
   import { filled } from "../model/validate";
   import TextLine from "../shapes/TextLine.svelte";
 
   let {
-    mode,
     value,
     place,
     field,
@@ -19,7 +18,6 @@
     size = "text",
     center = false,
   }: {
-    mode: Mode;
     value?: string;
     place: string;
     field: string;
@@ -29,9 +27,11 @@
   } = $props();
 
   const cls = $derived(cn(size === "lead" ? page.lead : page.text, center && page.center));
+
+  const mode = useMode();
 </script>
 
-{#if mode === "wireframe"}
+{#if mode() === "wireframe"}
   <Stack gap="2" align={center ? "center" : "stretch"} class={page.fill} aria-hidden="true" data-place={place} data-field={field}>
     {#each bars as bar, i (i)}
       <TextLine {size} width={bar} />

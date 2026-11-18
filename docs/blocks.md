@@ -1,19 +1,21 @@
 # Blocks
 
-Organisms in `packages/blocks`. Each file opens on one `Block`. Inside: layout shells + **places** (`src/places`). One
-composition, two modes: `mode="wireframe"` (the feed) draws every place as a shape; `mode="page"` draws the same places from
-`content` (the saved block's `props`). Data contract: [content-contract.md](./content-contract.md).
+Organisms in `packages/blocks`. Each file opens on one `Block`. Inside: layout shells + **places** (`src/places`).
+**Rectangle-only**: rendered as they are (feed, catalog), blocks draw shapes only: no images, no words, no icons. The
+builder's preview (`BlockView mode="page"`) fills the same places from the saved block's `props`; it is not a second
+version. Data contract: [content-contract.md](./content-contract.md).
 
 ## Places
 
 | Place component | Wireframe | Page (filled) | Page (empty) |
 | --- | --- | --- | --- |
 | `BadgePlace` | `Badge` | `<span>` pill (`data-slot="badge"`) | nothing |
-| `HeadingPlace` | `Heading` (`size`, `width`) | `<h2>` / `<h3>` (`level`) | nothing |
+| `HeadingPlace` | `Heading` (`size`, `width`) | `<h1>`–`<h4>` (`level`; the look follows `size` only) | nothing |
 | `TextPlace` | `TextLine` bars (`bars`) in one `aria-hidden` stack | one `<p>` | nothing |
 | `ActionPlace` | `CtaShape` (a bar, not a link) | `<a href>` (kit `Button`, `data-slot="button"`); label only → text | nothing |
 | `MediaPlace` | `Media` (`ratio`) | `<figure data-slot="media-frame">` + image(s) | nothing |
 | `AvatarPlace` | `Avatar` | round photo | nothing |
+| `ItemPlace` | `Stack` / `Surface` (cards) with the item binding | same | (item skipped when nothing in it is present) |
 
 Each place carries `data-place` and `data-field` (concrete JSON pointers) from `bind(manifest, placeId, index?)`.
 

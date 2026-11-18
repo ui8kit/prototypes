@@ -3,6 +3,8 @@
   import { Box } from "@ui8kit/kit";
   import AppHeader from "./AppHeader.svelte";
   import Gallery from "./Gallery.svelte";
+  import Preview from "./Preview.svelte";
+  import { app } from "./view.svelte";
   import { provideSectionPadding } from "@ui8kit/blocks";
   import { appTheme, loadTheme } from "./theme/ctl.svelte";
   import ThemeSheet from "./theme/ThemeSheet.svelte";
@@ -16,7 +18,11 @@
 
 <Box class="ui8-app">
   <AppHeader />
-  <Gallery />
+  {#if app.view === "preview"}
+    <Preview />
+  {:else}
+    <Gallery />
+  {/if}
   <ThemeSheet />
   <ThemeToggle />
 </Box>

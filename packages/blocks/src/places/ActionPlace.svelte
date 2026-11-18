@@ -3,22 +3,23 @@
   as plain text when only the label is; nothing otherwise (a link without a name or a target is not drawn).
 -->
 <script lang="ts">
+  import { useMode } from "./mode";
   import { Button, Text } from "@ui8kit/kit";
   import { page } from "../classes";
-  import type { Mode } from "../manifest/types";
   import { filled } from "../model/validate";
   import CtaShape from "../shapes/CtaShape.svelte";
 
   let {
-    mode,
     label,
     href,
     place,
     field,
-  }: { mode: Mode; label?: string; href?: string; place: string; field: string } = $props();
+  }: { label?: string; href?: string; place: string; field: string } = $props();
+
+  const mode = useMode();
 </script>
 
-{#if mode === "wireframe"}
+{#if mode() === "wireframe"}
   <CtaShape {place} {field} />
 {:else if filled(label) && filled(href)}
   <Button {href} class={page.action} data-role="cta-primary" data-slot="button" data-place={place} data-field={field}>{label}</Button>

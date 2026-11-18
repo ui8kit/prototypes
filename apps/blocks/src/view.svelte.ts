@@ -1,23 +1,30 @@
-import { MODES, SAMPLE_IDS, type Mode, type SampleId } from "@ui8kit/blocks";
+import { SAMPLE_IDS, type SampleId } from "@ui8kit/blocks";
 
 /**
- * Feed view: wireframe (the search feed, shapes only) or page (the same blocks filled from sample content).
- * Mirrored in the URL (`?mode=page&sample=minimal`) so a view can be linked and screenshotted.
+ * App view. `catalog` is the feed: every block × variant, always rectangle-only (no mode is passed). `preview` is the
+ * builder's page mode, shown separately: the same blocks rendered from saved sample instances through `BlockView`.
+ * Mirrored in the URL (`?view=preview&sample=minimal`).
  */
-function initial(): { mode: Mode; sample: SampleId } {
+export const VIEWS = ["catalog", "preview"] as const;
+export type View = (typeof VIEWS)[number];
+
+function initial(): { view: View; sample: SampleId } {
   const q = typeof location === "undefined" ? new URLSearchParams() : new URLSearchParams(location.search);
-  const mode = MODES.find((m) => m === q.get("mode")) ?? "wireframe";
+  const view = VIEWS.find((v) => v === q.get("view")) ?? "catalog";
   const sample = SAMPLE_IDS.find((s) => s === q.get("sample")) ?? "filled";
-  return { mode, sample };
+  return { view, sample };
 }
 
-export const view = $state(initial());
+export const app = $state(initial());
 
-export function setView(next: Partial<{ mode: Mode; sample: SampleId }>): void {
-  Object.assign(view, next);
+export function setView(next: Partial<{ view: View; sample: SampleId }>): void {
+  Object.assign(app, next);
   if (typeof history === "undefined") return;
-  const q = new URLSearchParams(location.search);
-  q.set("mode", view.mode);
-  q.set("sample", view.sample);
-  history.replaceState(null, "", `${location.pathname}?${q}`);
+  const q = new URLSearchParams();
+  if (app.view === "preview") {
+    q.set("view", app.view);
+    q.set("sample", app.sample);
+  }
+  const query = q.toString();
+  history.replaceState(null, "", query ? `${location.pathname}?${query}` : location.pathname);
 }

@@ -1,6 +1,18 @@
 export { Block, Container, Grid, Group, SectionScope, Stack, provideSectionPadding, sectionPadding } from "./layout";
 export { Avatar, Badge, CtaShape, Dot, Heading, Media, Surface, TextLine } from "./shapes";
-export { ActionPlace, AvatarPlace, BadgePlace, HeadingPlace, MediaPlace, TextPlace } from "./places";
+export {
+  ActionPlace,
+  AvatarPlace,
+  BadgePlace,
+  HeadingPlace,
+  ItemPlace,
+  MediaPlace,
+  TextPlace,
+  presence,
+  provideMode,
+  useMode,
+} from "./places";
+export { default as BlockView } from "./builder/BlockView.svelte";
 export { default as FeaturesTeam } from "./features-team/FeaturesTeam.svelte";
 export { default as HeroSplit } from "./hero-split/HeroSplit.svelte";
 export { app, layout, page, role, shape, width, type MediaRatio, type SectionPadding } from "./classes";

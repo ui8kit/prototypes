@@ -57,7 +57,7 @@
         "src": {
           "type": "string",
           "format": "uri-reference",
-          "pattern": "^(?!\\s*(?:[jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[vV][bB][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]):)"
+          "pattern": "^(?:|[hH][tT][tT][pP][sS]://[^\\s/?#]+[^\\s]*|/(?![/\\\\])[^\\s]*)$"
         },
         "alt": {
           "type": "string"
@@ -65,7 +65,7 @@
         "srcDark": {
           "type": "string",
           "format": "uri-reference",
-          "pattern": "^(?!\\s*(?:[jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[vV][bB][sS][cC][rR][iI][pP][tT]|[dD][aA][tT][aA]):)"
+          "pattern": "^(?:|[hH][tT][tT][pP][sS]://[^\\s/?#]+[^\\s]*|/(?![/\\\\])[^\\s]*)$"
         }
       }
     }

@@ -19,7 +19,7 @@ import {
 } from "./index.ts";
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SKIP = new Set(["layout", "shapes", "content", "manifest", "places", "model", "models", "fixtures"]);
+const SKIP = new Set(["layout", "shapes", "content", "manifest", "places", "model", "models", "fixtures", "builder"]);
 
 function organismDirs(): string[] {
   return readdirSync(SRC, { withFileTypes: true })
@@ -105,6 +105,17 @@ describe("block manifests", () => {
     }
   });
 
+  it("declares instance options with a default inside their values and a dictionary label", () => {
+    for (const block of BLOCKS) {
+      for (const [k, def] of Object.entries(block.options)) {
+        assert.ok(def.values.includes(def.default), `${block.id}: ${k}`);
+        assert.ok(def.label in ui.options, `${block.id}: ${k} label`);
+        assert.equal(k in block.model.fields, false, `${block.id}: option ${k} collides with content`);
+      }
+      assert.deepEqual(block.options.headingLevel?.values, [1, 2, 3], block.id);
+    }
+  });
+
   it("grows schemas with content models, not variants", () => {
     const models = new Set(BLOCKS.map((b) => modelKey(b.model)));
     const variants = BLOCKS.reduce((n, b) => n + b.variants.length, 0);
@@ -124,6 +135,12 @@ describe("block manifests", () => {
       }
     }
     assert.equal(validateInstance({ id: "x", item: "nope", variant: "a", props: {} }).issues[0]?.code, "unknownItem");
+    const hero = { id: "x", item: "hero-split", variant: "media-left", props: { title: "T" } };
+    assert.equal(validateInstance({ ...hero, options: { headingLevel: 1 } }).ok, true);
+    assert.deepEqual(
+      validateInstance({ ...hero, options: { headingLevel: 4, size: 2 } }).issues.map((i) => `${i.path}:${i.code}`),
+      ["/options/headingLevel:optionValue", "/options/size:unknownOption"],
+    );
     const bad = validateInstance({ id: "x", item: "hero-split", variant: "media-diagonal", props: { title: "", actionHref: "javascript:alert(1)" } });
     assert.deepEqual(
       bad.issues.map((i) => `${i.path}:${i.code}`).sort(),

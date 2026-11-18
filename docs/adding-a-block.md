@@ -1,6 +1,7 @@
 # Adding a block
 
-A block is a layout of **places** over a **content model**. The same component draws the wireframe (feed) and the page.
+A block is a layout of **places** over a **content model**. It is rectangle-only as rendered; the builder's preview fills
+the same composition from data (no second version).
 Rules: [content-contract.md](./content-contract.md). Directory name = item id (`hero-split`).
 
 ## 1. Content model (reuse first)
@@ -48,15 +49,20 @@ Register: `BLOCKS` in `manifest/registry.ts`, `CATALOG` in `catalog.ts`, export 
 
 ## 4. Organism
 
-One file, one `Block tag="section" aria-label={label} data-variant data-mode`. Props: `{ variant?, mode?, content?, label? }`.
+One file, one `Block tag="section" aria-label={label}`. Props: `{ variant?, content?, headingLevel?, label? }` (one prop per
+manifest option). **No mode prop, no builder attributes** (`check-blocks` and `builder.test.ts` fail on `mode`,
+`data-place`, `data-field`, `data-shape`, `aria-hidden`, … in an organism).
 
 - Draw every place with a place component from `src/places` and spread its binding from the manifest:
-  `<HeadingPlace {mode} value={c.title} size="lg" width="3/4" {...bind(heroSplit, "title")} />`.
-  In a list: `{...bind(featuresTeam, "member.title", row.index)}`.
-- Place components: `BadgePlace`, `HeadingPlace` (h2 / h3 via `level`), `TextPlace` (`bars` = wireframe widths),
-  `ActionPlace`, `MediaPlace` (`ratio`), `AvatarPlace`. They draw the shape in the wireframe and the kit element on the page.
-- `const c = $derived(mode === "wireframe" ? {} : (content ?? {}))`; wrap groups in `{#if}` so empty wrappers vanish, and
-  let the remaining side take the row when a column is empty.
+  `<HeadingPlace value={c.title} level={headingLevel} size="lg" width="3/4" {...bind(heroSplit, "title")} />`.
+  In a list: `<ItemPlace {cards} {...bind(featuresTeam, "member", row.index)}>` and
+  `{...bind(featuresTeam, "member.title", row.index)}` inside.
+- Place components: `BadgePlace`, `HeadingPlace` (h1–h4 via `level`, same look), `TextPlace` (`bars` = wireframe widths),
+  `ActionPlace`, `MediaPlace` (`ratio`), `AvatarPlace`, `ItemPlace`. They draw the shape in the wireframe and the kit
+  element on the page.
+- `const draw = presence()`; `c = $derived(draw.content(content))`, groups behind `draw.any(...)`, lists from
+  `draw.rows(c.members, placeholders)`. Wrap groups in `{#if}` so empty wrappers vanish, and let the remaining side take
+  the row when a column is empty.
 - No kit imports, no class strings, no literal text; `{#each}` may wrap places, never `Block`.
 
 ## 5. Tests
@@ -74,4 +80,4 @@ bun run verify
 ```
 
 `check-blocks` rejects raw utilities, bare HTML, literal text, interactive kit outside places (Text in places, Button only
-in `ActionPlace`), Image outside `Media.svelte` / `places/ThemedImage.svelte`, and places that do not branch on the mode.
+in `ActionPlace`), Image outside `Media.svelte` / `places/ThemedImage.svelte`, places that do not branch on the mode, and builder-only markers in organisms.

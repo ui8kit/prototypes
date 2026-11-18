@@ -9,14 +9,17 @@ const SAFE_URL = "^(?!\\s*(?:[jJ][aA][vV][aA][sS][cC][rR][iI][pP][tT]|[vV][bB][s
 /** an optional text may be "" (= not filled); a required one needs a non-space character */
 const NON_BLANK = "\\S";
 
+/** image src: https URL or root-relative path; mirrors IMAGE_SRC in validate.ts ("" = no image) */
+const IMAGE_SRC = "^(?:|[hH][tT][tT][pP][sS]://[^\\s/?#]+[^\\s]*|/(?![/\\\\])[^\\s]*)$";
+
 const IMAGE: Schema = {
   type: "object",
   required: ["src", "alt"],
   additionalProperties: false,
   properties: {
-    src: { type: "string", format: "uri-reference", pattern: SAFE_URL },
+    src: { type: "string", format: "uri-reference", pattern: IMAGE_SRC },
     alt: { type: "string" },
-    srcDark: { type: "string", format: "uri-reference", pattern: SAFE_URL },
+    srcDark: { type: "string", format: "uri-reference", pattern: IMAGE_SRC },
   },
 };
 

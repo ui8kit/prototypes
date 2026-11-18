@@ -19,6 +19,10 @@ export const ui = {
     memberTitle: "Name",
     memberDescription: "Role",
   },
+  /** Inspector labels of instance options (`options` in the manifests). */
+  options: {
+    headingLevel: "Heading level",
+  },
   themeToggle: {
     label: "Toggle color theme",
   },

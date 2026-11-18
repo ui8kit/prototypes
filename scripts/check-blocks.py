@@ -25,7 +25,11 @@ BLOCKS = ROOT / "packages" / "blocks" / "src"
 BLOCKS_PKG = ROOT / "packages" / "blocks" / "package.json"
 MAX_RAW_UTILITIES = 0
 
-SKIP_TOP = {"layout", "shapes", "content", "manifest", "places", "model", "models", "fixtures"}
+SKIP_TOP = {"layout", "shapes", "content", "manifest", "places", "model", "models", "fixtures", "builder"}
+# The mode and the builder bindings live in places and shapes: an organism never reads the mode (wireframe is the
+# default; only builder/BlockView sets page mode) and never writes binding or wireframe attributes itself.
+ORGANISM_FORBIDDEN = re.compile(r"data-place|data-field|data-shape|data-ratio|data-mode|aria-hidden|\bmode\b|useMode|provideMode")
+PLACES_WITHOUT_SHAPE = {"ItemPlace.svelte"}
 PLACE_DIRS = {"places"}
 MEDIA_FILES = {"Media.svelte", "ThemedImage.svelte"}
 LAYOUT_DIRS = {"layout"}
@@ -205,6 +209,10 @@ def check_file(path: Path, organisms: set[str]) -> list[str]:
             errors.append(f"{rel}: expected exactly one Block root, found {len(opens)}")
         if EACH_BLOCK.search(source):
             errors.append(f"{rel}: Block inside {{#each}} is not allowed")
+        code = re.sub(r"<!--.*?-->", "", source, flags=re.S)
+        code = re.sub(r"/\*.*?\*/|//[^\n]*", "", code, flags=re.S)
+        for marker in sorted(set(ORGANISM_FORBIDDEN.findall(code))):
+            errors.append(f"{rel}: builder-only marker {marker!r} in an organism; keep it in places")
     if kind in ("organism", "place"):
         for match in LOWER_TAG.finditer(markup):
             tag = match.group("tag")
@@ -248,9 +256,9 @@ def check_file(path: Path, organisms: set[str]) -> list[str]:
     if media_tags and not media_file:
         errors.append(f"{rel}: media markup {sorted(media_tags)} outside Media.svelte / ThemedImage.svelte")
 
-    if kind == "place" and path.name.endswith("Place.svelte"):
-        if 'mode === "wireframe"' not in markup:
-            errors.append(f"{rel}: a place draws the wireframe shape first ({{#if mode === \"wireframe\"}})")
+    if kind == "place" and path.name.endswith("Place.svelte") and path.name not in PLACES_WITHOUT_SHAPE:
+        if 'mode() === "wireframe"' not in markup:
+            errors.append(f"{rel}: a place draws the wireframe shape first ({{#if mode() === \"wireframe\"}})")
         if "data-field={field}" not in markup and "{field}" not in markup:
             errors.append(f"{rel}: a place carries data-place / data-field on its page element")
 

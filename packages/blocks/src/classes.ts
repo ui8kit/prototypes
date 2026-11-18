@@ -137,4 +137,4 @@ export type Width = keyof typeof width;
 export type GridColumns = keyof typeof layout.gridMd;
 export type Role = keyof typeof role;
 export type AvatarSize = "sm" | "md" | "lg";
-export type HeadingLevel = 2 | 3;
+export type HeadingLevel = 1 | 2 | 3 | 4;

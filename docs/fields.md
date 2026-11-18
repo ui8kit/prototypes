@@ -28,7 +28,7 @@ Schemas grow with content models, not with variants: 2 models, 2 blocks, 7 varia
 | --- | --- | --- | --- | --- |
 | `/title` | text ≤ 120 | yes | Title | `features-team#title` |
 | `/description` | longText ≤ 400 |  | Description | `features-team#description` |
-| `/members` | list of teamMember (0–12) |  | Members | `features-team#member` |
+| `/members` | list of teamMember (1–12) | yes | Members | `features-team#member` |
 | `/members/*/avatar` | image |  | Photo | `features-team#member.avatar` |
 | `/members/*/title` | text ≤ 80 | yes | Name | `features-team#member.title` |
 | `/members/*/description` | longText ≤ 240 |  | Role | `features-team#member.description` |
@@ -38,6 +38,7 @@ Schemas grow with content models, not with variants: 2 models, 2 blocks, 7 varia
 ### `hero-split`
 
 - Category: `hero`, label: Hero, model: `hero@1`
+- Options (per instance): `headingLevel` ∈ {1, 2, 3}, default 2
 - Variants (layout only): `media-left` (media=left), `media-right` (default) (media=right), `media-top` (media=top)
 
 | Place | Role | Fields | Repeats over |
@@ -51,6 +52,7 @@ Schemas grow with content models, not with variants: 2 models, 2 blocks, 7 varia
 ### `features-team`
 
 - Category: `team`, label: Team, model: `team@1`
+- Options (per instance): `headingLevel` ∈ {1, 2, 3}, default 2
 - Variants (layout only): `columns-2` (columns=2), `columns-3` (default) (columns=3), `columns-4` (columns=4), `cards-3` (columns=3, cards=true)
 
 | Place | Role | Fields | Repeats over |

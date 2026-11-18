@@ -55,6 +55,6 @@ export const SAMPLES: Record<SampleId, Record<string, BlockInstance["props"]>> =
 
 /** A saved page: blocks as the builder stores them. */
 export const samplePage: BlockInstance[] = [
-  { id: "b1", item: "hero-split", variant: "media-right", props: heroFilled },
+  { id: "b1", item: "hero-split", variant: "media-right", options: { headingLevel: 1 }, props: heroFilled },
   { id: "b2", item: "features-team", variant: "columns-3", props: teamFilled },
 ];

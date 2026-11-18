@@ -1,27 +1,27 @@
-<!-- The header: wireframe / page switch, the sample content set (page mode) and the Theme button (apps/stock). -->
+<!-- The header: Catalog (rectangle-only feed) / Builder preview (page mode), the preview's sample set, and the Theme button. -->
 <script lang="ts">
-  import { Group, MODES, SAMPLE_IDS } from "@ui8kit/blocks";
+  import { Group, SAMPLE_IDS } from "@ui8kit/blocks";
   import { Box, Button } from "@ui8kit/kit";
   import { galleryText } from "./content/gallery";
   import { themeText } from "./content/theme";
   import { themeCtl } from "./theme/ctl.svelte";
-  import { setView, view } from "./view.svelte";
+  import { VIEWS, app, setView } from "./view.svelte";
 </script>
 
 <Box tag="header" class="ui8-header" data-testid="app-header">
   <Group gap="4" justify="between" class="ui8-header-bar">
     <Group gap="4">
-      <Group gap="2" role="group" aria-label={galleryText.modeLabel}>
-        {#each MODES as mode (mode)}
-          <Button class="ui8-seg-btn" pressed={view.mode === mode} onclick={() => setView({ mode })} data-testid={"mode-" + mode}>
-            {galleryText.modes[mode]}
+      <Group gap="2" role="group" aria-label={galleryText.viewLabel}>
+        {#each VIEWS as view (view)}
+          <Button class="ui8-seg-btn" pressed={app.view === view} onclick={() => setView({ view })} data-testid={"view-" + view}>
+            {galleryText.views[view]}
           </Button>
         {/each}
       </Group>
-      {#if view.mode === "page"}
+      {#if app.view === "preview"}
         <Group gap="2" role="group" aria-label={galleryText.sampleLabel}>
           {#each SAMPLE_IDS as sample (sample)}
-            <Button class="ui8-seg-btn" pressed={view.sample === sample} onclick={() => setView({ sample })} data-testid={"sample-" + sample}>
+            <Button class="ui8-seg-btn" pressed={app.sample === sample} onclick={() => setView({ sample })} data-testid={"sample-" + sample}>
               {galleryText.samples[sample]}
             </Button>
           {/each}

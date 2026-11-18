@@ -4,7 +4,7 @@
  */
 import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
-import { CATALOG } from "../catalog";
+import BlockView from "../builder/BlockView.svelte";
 import { samplePage } from "../fixtures/samples";
 import { getAt, setAt, swapAt } from "../model/pointer";
 import type { BlockInstance } from "./types";
@@ -15,7 +15,7 @@ const text = (el: Element | null | undefined) => (el?.textContent ?? "").trim();
 /** Render a saved block the way a builder does: item → organism, variant, props → content. */
 function show(instance: BlockInstance, mode: "page" | "wireframe" = "page") {
   expect(validateInstance(instance).ok).toBe(true);
-  const r = render(CATALOG[instance.item]!, { props: { variant: instance.variant, mode, content: instance.props } });
+  const r = render(BlockView, { props: { instance, mode } });
   return { ...r, section: r.container.querySelector("section")! };
 }
 
@@ -37,9 +37,10 @@ describe("pilot: one data edit, then a variant switch without re-filling", () =>
     const { section, rerender } = show(block);
     for (const variant of ["media-left", "media-top", "media-right"]) {
       block = { ...block, variant };
-      rerender({ variant, mode: "page", content: block.props });
-      expect(section.getAttribute("data-variant")).toBe(variant);
-      expect(text(section.querySelector("h2"))).toBe("Ship a landing page today");
+      rerender({ instance: block, mode: "page" });
+      expect(section.querySelector(".md\\:grid-cols-2") === null, variant).toBe(variant === "media-top");
+      expect(section.querySelector('[data-place="title"]')!.tagName).toBe("H1");
+      expect(text(section.querySelector("h1"))).toBe("Ship a landing page today");
       expect(section.querySelector('[data-field="/image"] img')!.getAttribute("src")).toBe("/samples/hero-alt.png");
       expect(section.querySelector("a")!.getAttribute("href")).toBe(getAt(heroBlock.props, "/actionHref"));
     }
@@ -50,7 +51,7 @@ describe("pilot: one data edit, then a variant switch without re-filling", () =>
     const { section, rerender } = show(block);
     for (const variant of ["columns-2", "cards-3", "columns-4"]) {
       block = { ...block, variant };
-      rerender({ variant, mode: "page", content: block.props });
+      rerender({ instance: block, mode: "page" });
       expect([...section.querySelectorAll("h3")].map(text)).toEqual(["Mira Chen", "Jonas Bergström", "Lena Ortiz"]);
     }
   });
@@ -63,7 +64,7 @@ describe("pilot: one data edit, then a variant switch without re-filling", () =>
 
     // 2. switch variant without re-filling
     block = { ...block, variant: "cards-3" };
-    rerender({ variant: block.variant, mode: "page", content: block.props });
+    rerender({ instance: block, mode: "page" });
 
     // 3. "click" Mira (now second) and read the inspector path from the DOM
     const mira = [...section.querySelectorAll("h3")].find((h) => text(h) === "Mira Chen")!;
@@ -74,14 +75,14 @@ describe("pilot: one data edit, then a variant switch without re-filling", () =>
 
     // 4. edit by that path: Mira changes, Jonas (now first) does not
     block = { ...block, props: setAt(block.props, pointer, "Mira Chen-Park") };
-    rerender({ variant: block.variant, mode: "page", content: block.props });
+    rerender({ instance: block, mode: "page" });
     expect([...section.querySelectorAll("h3")].map(text)).toEqual(["Jonas Berg", "Mira Chen-Park", "Lena Ortiz"]);
     const card = section.querySelector('[data-field="/members/1"]')!;
     expect(card.querySelector("img")!.getAttribute("alt")).toBe("Portrait of Mira Chen");
     expect(text(card.querySelector("p"))).toBe("Design lead");
 
     // 5. the same saved block in the feed: geometry only
-    rerender({ variant: block.variant, mode: "wireframe", content: block.props });
+    rerender({ instance: block, mode: "wireframe" });
     expect(text(section)).toBe("");
     expect(section.querySelectorAll("h3, p, a")).toHaveLength(0);
     expect(section.querySelectorAll('[data-place="member"]')).toHaveLength(3);

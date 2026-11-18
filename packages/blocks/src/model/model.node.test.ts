@@ -65,6 +65,8 @@ describe("content models", () => {
     assert.deepEqual(codes({ title: "T", members: [{ title: "A" }, { description: "no name" }] }), ["/members/1/title:required"]);
     assert.deepEqual(codes({ title: "T", members: Array.from({ length: 13 }, () => ({ title: "A" })) }), ["/members:maxItems"]);
     assert.deepEqual(codes({ title: "T", members: {} }), ["/members:type"]);
+    assert.deepEqual(codes({ title: "T" }), ["/members:required"], "a team has at least one member");
+    assert.deepEqual(codes({ title: "T", members: [] }), ["/members:minItems"]);
   });
 
   it("exports JSON Schema that agrees with the model and validate()", () => {
@@ -92,6 +94,37 @@ describe("content models", () => {
       assert.equal(safe.test(href), true, href);
       assert.equal(validate(heroModel, { title: "a", actionHref: href }).ok, true, href);
     }
+  });
+
+  it("accepts https and root-relative image src, rejects the rest; validate() and the schema agree", () => {
+    const hero = toJsonSchema(heroModel) as { $defs: { image: { properties: { src: { pattern: string }; srcDark: { pattern: string } } } } };
+    const pattern = new RegExp(hero.$defs.image.properties.src.pattern);
+    assert.equal(hero.$defs.image.properties.srcDark.pattern, hero.$defs.image.properties.src.pattern);
+    const ok = [
+      "https://images.unsplash.com/photo-1500000000000?w=1600&q=80",
+      "HTTPS://cdn.pixabay.com/photo/a.jpg",
+      "/samples/hero-light.png",
+      "/a b".replace(" ", "%20"),
+    ];
+    const bad: Array<[string, string]> = [
+      ["http://example.com/a.jpg", "imageUrl"],
+      ["//cdn.example.com/a.jpg", "imageUrl"],
+      ["samples/a.png", "imageUrl"],
+      ["ftp://example.com/a.jpg", "imageUrl"],
+      ["https:///a.jpg", "imageUrl"],
+      ["/a b.png", "imageUrl"],
+      ["javascript:alert(1)", "unsafeUrl"],
+      ["data:image/png;base64,AA", "unsafeUrl"],
+    ];
+    for (const src of ok) {
+      assert.equal(pattern.test(src), true, `schema ${src}`);
+      assert.deepEqual(validate(heroModel, { title: "a", image: { src, alt: "", srcDark: src } }).issues, [], src);
+    }
+    for (const [src, code] of bad) {
+      assert.equal(pattern.test(src), false, `schema ${src}`);
+      assert.deepEqual(validate(heroModel, { title: "a", image: { src, alt: "" } }).issues, [{ path: "/image/src", code }], src);
+    }
+    assert.equal(pattern.test(""), true, "an empty src = no image");
   });
 
   it("ships the generated schema files (bun run contract)", () => {

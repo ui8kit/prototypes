@@ -77,7 +77,7 @@
         },
         "/members": {
           "type": "list",
-          "required": false,
+          "required": true,
           "places": [
             "features-team#member"
           ]

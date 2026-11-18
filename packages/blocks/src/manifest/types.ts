@@ -54,6 +54,17 @@ export type BlockVariant = {
   default?: boolean;
 };
 
+/**
+ * Instance options: presentation choices the builder makes per placed block, next to `variant` (not content, not part of
+ * `props`, not a variant axis). One enum per option; the organism takes each option as a prop of the same name.
+ */
+export type OptionDef = { type: "enum"; values: readonly number[]; default: number; label: string };
+export type BlockOptions = Record<string, OptionDef>;
+
+/** Heading level of the block title: h1 when the block opens the page. Looks the same at every level. */
+export const headingLevelOption = { type: "enum", values: [1, 2, 3], default: 2, label: "headingLevel" } as const satisfies OptionDef;
+export type TitleLevel = 1 | 2 | 3;
+
 export type BlockManifest<M extends ContentModel = ContentModel> = {
   /** stable block type id = `item` of a saved block */
   id: string;
@@ -63,10 +74,26 @@ export type BlockManifest<M extends ContentModel = ContentModel> = {
   model: M;
   places: Place[];
   variants: BlockVariant[];
+  /** instance options the builder may set (`{ headingLevel: 1 }`) */
+  options: BlockOptions;
 };
 
-/** A block as a builder saves it on a page. `id` is the instance, `item` the block type, `props` the content. */
-export type BlockInstance<P = Record<string, unknown>> = { id: string; item: string; variant: string; props: P };
+/**
+ * A block as a builder saves it on a page. `id` is the instance, `item` the block type, `variant` the layout, `options`
+ * presentation choices (`headingLevel`), `props` the content.
+ */
+export type BlockInstance<P = Record<string, unknown>> = {
+  id: string;
+  item: string;
+  variant: string;
+  options?: Record<string, number>;
+  props: P;
+};
+
+/** Options with defaults filled in. */
+export function resolveOptions(block: BlockManifest, options: Record<string, number> | undefined): Record<string, number> {
+  return Object.fromEntries(Object.entries(block.options).map(([k, def]) => [k, options?.[k] ?? def.default]));
+}
 
 export function defaultVariant(block: BlockManifest): BlockVariant {
   return block.variants.find((v) => v.default) ?? block.variants[0]!;

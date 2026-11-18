@@ -1,6 +1,6 @@
 import { ui } from "../content/en";
 import { teamModel } from "../models/team";
-import type { BlockManifest } from "../manifest/types";
+import { headingLevelOption, type BlockManifest } from "../manifest/types";
 
 export const featuresTeam: BlockManifest<typeof teamModel> = {
   id: "features-team",
@@ -21,4 +21,5 @@ export const featuresTeam: BlockManifest<typeof teamModel> = {
     { id: "columns-4", layout: { columns: 4 } },
     { id: "cards-3", layout: { columns: 3, cards: true } },
   ],
+  options: { headingLevel: headingLevelOption },
 };

@@ -17,7 +17,7 @@ export function categoriesPresent(): BlockCategory[] {
   return [...new Set(BLOCKS.map((b) => b.category))];
 }
 
-export type InstanceCheck = { ok: boolean; issues: Array<Issue | { path: "/item" | "/variant"; code: "unknownItem" | "unknownVariant" }> };
+export type InstanceCheck = { ok: boolean; issues: Array<Issue | { path: string; code: "unknownItem" | "unknownVariant" | "unknownOption" | "optionValue" }> };
 
 /** Check a saved block `{ id, item, variant, props }`: known item, known variant, props valid for the item's model. */
 export function validateInstance(instance: BlockInstance<unknown>): InstanceCheck {
@@ -25,6 +25,11 @@ export function validateInstance(instance: BlockInstance<unknown>): InstanceChec
   if (!block) return { ok: false, issues: [{ path: "/item", code: "unknownItem" }] };
   const issues: InstanceCheck["issues"] = [];
   if (!block.variants.some((v) => v.id === instance.variant)) issues.push({ path: "/variant", code: "unknownVariant" });
+  for (const [k, v] of Object.entries(instance.options ?? {})) {
+    const def = block.options[k];
+    if (!def) issues.push({ path: `/options/${k}`, code: "unknownOption" });
+    else if (!def.values.includes(v)) issues.push({ path: `/options/${k}`, code: "optionValue" });
+  }
   issues.push(...validate(block.model, instance.props).issues.map((i) => ({ ...i, path: i.path })));
   return { ok: issues.length === 0, issues };
 }

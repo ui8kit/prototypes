@@ -1,14 +1,13 @@
-<!-- Heading place: a heading bar in the wireframe; an h2 (block title) or h3 (item title) on the page. -->
+<!-- Heading place: a heading bar in the wireframe; h1–h4 on the page. The level never changes the look (`size` does). -->
 <script lang="ts">
+  import { useMode } from "./mode";
   import { Text } from "@ui8kit/kit";
   import { cn } from "@ui8kit/kit";
   import { page, type HeadingLevel, type Width } from "../classes";
-  import type { Mode } from "../manifest/types";
   import { filled } from "../model/validate";
   import Heading from "../shapes/Heading.svelte";
 
   let {
-    mode,
     value,
     place,
     field,
@@ -17,7 +16,6 @@
     width = "1/2",
     center = false,
   }: {
-    mode: Mode;
     value?: string;
     place: string;
     field: string;
@@ -29,13 +27,19 @@
   } = $props();
 
   const cls = $derived(cn(size === "lg" ? page.titleLg : page.title, center && page.center));
+
+  const mode = useMode();
 </script>
 
-{#if mode === "wireframe"}
+{#if mode() === "wireframe"}
   <Heading {size} {width} {place} {field} />
 {:else if filled(value)}
-  {#if level === 3}
+  {#if level === 1}
+    <Text tag="h1" class={cls} data-place={place} data-field={field}>{value}</Text>
+  {:else if level === 3}
     <Text tag="h3" class={cls} data-place={place} data-field={field}>{value}</Text>
+  {:else if level === 4}
+    <Text tag="h4" class={cls} data-place={place} data-field={field}>{value}</Text>
   {:else}
     <Text tag="h2" class={cls} data-place={place} data-field={field}>{value}</Text>
   {/if}

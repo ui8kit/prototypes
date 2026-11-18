@@ -1,6 +1,6 @@
 import { ui } from "../content/en";
 import { heroModel } from "../models/hero";
-import type { BlockManifest } from "../manifest/types";
+import { headingLevelOption, type BlockManifest } from "../manifest/types";
 
 export const heroSplit: BlockManifest<typeof heroModel> = {
   id: "hero-split",
@@ -19,4 +19,5 @@ export const heroSplit: BlockManifest<typeof heroModel> = {
     { id: "media-right", layout: { media: "right" }, default: true },
     { id: "media-top", layout: { media: "top" } },
   ],
+  options: { headingLevel: headingLevelOption },
 };

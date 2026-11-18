@@ -1,5 +1,9 @@
 # Content contract
 
+**Prototypes are rectangle-only.** Every block, rendered as it is (the feed, the catalog, a test, any render without a
+mode), draws only shapes: no images, no words, no icons. Page mode is not a second version of the block: it is the same
+composition with its places filled from data, switched on only by the builder (`builder/BlockView` with `mode="page"`).
+
 Principle (site constructor): **simple content, interchangeable variants, full rendering**, and **one composition** for the
 wireframe feed and the finished page. Everything below is machine-readable: `packages/blocks/contract.json` and
 `packages/blocks/schemas/*.schema.json` are generated from the sources by `bun run contract`, and `bun run verify` fails when
@@ -11,7 +15,7 @@ they or `docs/fields.*` are stale.
 | --- | --- | --- |
 | Content model | `packages/blocks/src/models/<id>.ts` | Value schema of `props` (`hero@1`, `team@1`). Plain TS (`defineModel`), shared by every variant and by every block with the same content. Gives the TS type (`ContentOf`), `validate()` and JSON Schema 2020-12 (`toJsonSchema`). |
 | Block manifest | `packages/blocks/src/<item>/<item>.block.ts` | Stable item id, category, label, `model`, `places` (field → place binding), `variants` (layout only). |
-| Saved block | the builder's page | `{ id, item, variant, props }`: `id` = instance, `item` = manifest id, `variant` = a variant id, `props` = content valid for the model. `validateInstance()` checks all three. |
+| Saved block | the builder's page | `{ id, item, variant, options?, props }`: `id` = instance, `item` = manifest id, `variant` = a variant id, `options` = instance options (`headingLevel`), `props` = content valid for the model. `validateInstance()` checks all three. |
 
 Schemas grow with **content models**, not variants: 250 hero layouts share one `hero@1`. A breaking model change is a new
 version (`hero@2`) with its own schema file (`urn:ui8kit:content:hero:2`).
@@ -25,8 +29,15 @@ Value types (`src/model/types.ts`):
 | `text` | string, `maxLength` | one line (badge, title, label) |
 | `longText` | string, `maxLength` | one paragraph. **One value**, even when the wireframe draws two or three bars |
 | `url` | string | link target; `javascript:` / `vbscript:` / `data:` rejected (validate + schema pattern) |
-| `image` | `{ src, alt, srcDark? }` | one `src` for both themes, optional dark override; `alt: ""` = decorative |
-| `list` | array of a **named** record (`teamMember`), `minItems` / `maxItems` | order is content; cardinality is content, not layout |
+| `image` | `{ src, alt, srcDark? }` | one `src` for both themes, optional dark override; `alt: ""` = decorative; `src` rules below |
+| `list` | array of a **named** record (`teamMember`), `minItems` / `maxItems` | order is content; cardinality is content, not layout. `team@1` members: required, 1–12 |
+
+**Image `src`** (decision): a URL. Allowed: absolute `https://` URLs (stock photos and CDNs, any host) and root-relative
+paths `/…` (local samples, `/samples/hero-light.png`). Rejected: `http:` (mixed content on an https page; stocks serve
+https), protocol-relative `//host/…`, bare relative paths (`samples/a.png`, they depend on the page URL), other schemes
+(`ftp:`), whitespace (encode as `%20`), and `javascript:` / `vbscript:` / `data:` (`unsafeUrl`). Issue code `imageUrl`;
+the schema pattern is the same regex (`IMAGE_SRC`), tested against the same list. `""` = no image. Links (`url`,
+`actionHref`) stay permissive (https, http, mailto, tel, `#`, relative), minus the unsafe schemes.
 
 Rules: blank strings count as empty; `null` is a type error; unknown keys are rejected (`additionalProperties: false`);
 `required` means a filled value. Field labels are dictionary keys (`ui.fields.<key>` in `content/en.ts`) and become the
@@ -79,13 +90,30 @@ attributes). There is no DOM lookup by `data-field` that swaps rectangles for te
 
 ## Modes: one composition
 
-Each organism takes `{ variant?, mode?, content? }`; the builder passes `props` as `content`.
+Each organism takes `{ variant?, content?, <options> }`; it has **no mode prop** and never reads the mode. The mode travels
+by Svelte context (`places/mode.ts`): no provider = `wireframe`. Only `builder/BlockView` provides it:
+`<BlockView instance={{ id, item, variant, options, props }} mode="page" />` (default `wireframe` there too).
 
-- `mode="wireframe"` (default; the feed): draws every place as shapes, ignores `content`, list places draw
-  `wireframe` placeholders. Shapes are static `aria-hidden="true"`; there is no text, no link, no content image.
-- `mode="page"`: draws real elements from `content` through the same places: badge `<span>`, title `<h2>` (block) /
-  `<h3>` (list item), text `<p>`, action `<a href>` (kit `Button`), media `<figure>` + kit `Image` with `src` / `alt`.
+- `wireframe` (default everywhere; the feed and the catalog never set a mode): draws every place as shapes, ignores
+  `content`, list places draw `wireframe` placeholders. Shapes are static `aria-hidden="true"`; no text, no link, no
+  content image. Tested: a block rendered directly with full content shows only shapes.
+- `page` (builder preview only): the same places draw real elements from `content`: badge `<span>`, title `<h1>`–`<h3>`,
+  list item titles one level below, text `<p>`, action `<a href>` (kit `Button`), media `<figure>` + kit `Image`.
   Page elements keep `data-role` / `data-slot` for the theme, never `data-shape`.
+
+The organism asks `presence()` (from places) what to draw: `content(c)`, `any(...values)`, `rows(list, placeholders)`.
+The mode, the bindings and the shapes live in `src/places` and `src/shapes`; organisms only lay out places.
+
+## Instance options
+
+Presentation choices the builder makes per placed block, next to `variant`: saved in `options`, not in `props` (they are
+not content and do not belong to the content model or its schema) and not a variant axis (they do not change layout).
+Declared per item in the manifest (`options`) and in `contract.json`; `validateInstance()` rejects unknown options
+(`unknownOption`) and values outside the enum (`optionValue`). The organism takes each option as a prop of the same name.
+
+| Option | Values | Default | Effect |
+| --- | --- | --- | --- |
+| `headingLevel` | 1, 2, 3 | 2 | element of the block title (`h1` when the block opens the page). The look never changes: size comes from the place, not the level. List item titles (team member names) are **level + 1** (h2 → h3, h1 → h2, h3 → h4), so the outline stays valid at every level. |
 
 Empty values on the page: an empty field renders **no element**; a wrapper with nothing inside is dropped; when the media
 or the whole copy column of a hero is empty the other side takes the full row (no grid); a team without members has no

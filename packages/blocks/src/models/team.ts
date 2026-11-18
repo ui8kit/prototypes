@@ -10,7 +10,8 @@ export const teamModel = defineModel({
     members: {
       type: "list",
       label: "members",
-      minItems: 0,
+      required: true,
+      minItems: 1,
       maxItems: 12,
       item: {
         id: "teamMember",
