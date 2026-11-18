@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Extract Svelte/TS class maps, then run ui8px lint + validate grid/patterns/aria.
- * Blocking rules follow .ui8px/gate.json (max 0).
+ * Extract Svelte/TS class maps, then run the npm `ui8px` CLI (lint + validate
+ * grid/patterns/aria). Blocking rules follow .ui8px/gate.json (max 0).
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";

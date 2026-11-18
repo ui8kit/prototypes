@@ -8,7 +8,7 @@ This is not a marketing site and not an idea dump. Blocks are organisms of recta
 
 | Path | Role |
 | --- | --- |
-| `packages/kit` | Official UI8Kit Svelte primitives (CLI/registry). Do not edit by hand. |
+| `packages/kit` | Official UI8Kit Svelte primitives (`npx ui8kit@3 add --all`). Do not edit by hand. |
 | `packages/blocks` | Layout shells, placeholder shapes, organism blocks, and typed `*.block.ts` manifests. |
 | `packages/theme` | Palette, skins, density, radius, CSS/JSON. No fonts. |
 | `apps/blocks` | Gallery by category, single-block preview, theme constructor panel. |
@@ -30,7 +30,7 @@ bun install
 bun run verify          # check-blocks + ui8px gate + tests + field summary
 bun run fields:summary  # rewrite docs/fields.md from manifests
 bun run dev             # gallery + theme constructor
-bun run kit:install     # reinstall primitives (CLI, else GitHub registry)
+bun run kit:install     # npx ui8kit@3 add --all (Svelte; CDN fallback in docs/kit.md)
 ```
 
 `verify` is what CI runs. ui8px extract + lint + validate grid / patterns / aria are inside `bun run lint:px`.

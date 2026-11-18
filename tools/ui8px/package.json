@@ -1,7 +1,0 @@
-{
-  "name": "ui8px-vendor",
-  "version": "0.2.5",
-  "private": true,
-  "type": "module",
-  "description": "Vendored ui8px 0.2.5 TypeScript sources for local runs without npm"
-}

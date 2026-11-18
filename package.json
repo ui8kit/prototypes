@@ -12,7 +12,7 @@
     "check:blocks": "python3 scripts/check-blocks.py",
     "extract:px": "python3 scripts/ui8px-extract.py",
     "lint:px": "node scripts/ui8px-gate.mjs",
-    "kit:install": "python3 scripts/install-kit.py",
+    "kit:install": "bash scripts/install-kit.sh",
     "test:theme": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/theme/src/*.test.ts",
     "test:manifest": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/blocks/src/manifest/*.node.test.ts apps/blocks/src/*.node.test.ts",
     "fields:summary": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs scripts/fields-summary.mjs",
@@ -32,7 +32,7 @@
     "jsdom": "^26.1.0",
     "svelte": "^5.39.6",
     "typescript": "^5.8.3",
-    "ui8px": "0.2.5",
+    "ui8px": "^0.2.5",
     "vitest": "^3.2.4"
   }
 }

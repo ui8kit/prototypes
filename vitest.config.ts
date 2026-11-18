@@ -1,17 +1,33 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { svelteTesting } from "@testing-library/svelte/vite";
 import { defineConfig } from "vitest/config";
 
+const browser = { conditions: ["browser"] } as const;
+
 export default defineConfig({
-  plugins: [svelte()],
+  plugins: [svelte({ hot: false }), svelteTesting()],
   test: {
     environment: "jsdom",
     include: ["packages/blocks/src/**/*.test.ts"],
     exclude: ["packages/blocks/src/**/*.node.test.ts"],
+    server: {
+      deps: {
+        inline: ["svelte", "@testing-library/svelte"],
+      },
+    },
   },
   resolve: {
+    ...browser,
     alias: {
       "@ui8kit/kit": new URL("./packages/kit/src/index.ts", import.meta.url).pathname,
       "@ui8kit/blocks": new URL("./packages/blocks/src/index.ts", import.meta.url).pathname,
+    },
+  },
+  // Vitest loads modules through Vite's SSR pipeline; pin browser there too.
+  ssr: {
+    resolve: {
+      ...browser,
+      externalConditions: ["browser"],
     },
   },
 });

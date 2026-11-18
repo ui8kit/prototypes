@@ -6,7 +6,7 @@ Wireframe constructor on top of `ui8kit/contract`. Copy `.cursor/rules` and `.cu
 
 - **Layer:** prototypes (blocks) + a thin showcase app. No layouts package.
 - **Runtime:** Svelte 5 only. The eight-runtime identity rule is a contract target, not generated here.
-- **Kit:** `packages/kit/src` from registry `3.4.0` via `scripts/install-kit.py`. Never hand-edit those files. `ui8kit.lock.json` pins sha256 of every installed path.
+- **Kit:** `packages/kit/src` from `npx ui8kit@3 add --all` (Svelte, registry 3.4.0). Never hand-edit those files. `ui8kit.lock.json` pins sha256 of every installed path. Reinstall: `bun run kit:install` (`docs/kit.md`).
 - **Blocks:** `packages/blocks`. Layout shells wrap kit `Box` because UI8Kit v3 has no `Block` / `Container` / `Stack` / `Grid` primitives. Semantic `tag`, `gap`, `align`, `justify`, `cols`, `py` live on those shells. Each organism has a sibling `*.block.ts` **content contract** (id, category, named fields, layout-only variants). `src/manifest/registry.ts` exports every manifest; `src/catalog.ts` maps id → component. Rules: `docs/content-contract.md` — simple content, interchangeable variants, full rendering.
 - **Utilities:** `packages/blocks/src/classes.ts` is the only home for raw Tailwind strings in the constructor. `scripts/check-blocks.py` fails a block `.svelte` file that embeds more than **0** utility tokens, and requires a matching `*.block.ts`.
 - **Shapes:** `TextLine`, `Heading`, `CtaShape`, `Media`, `Dot`, `Avatar`. Organisms import these and the layout shells only. Everything is a rectangle or a text bar. Image/video = `Media` (image inside a rectangle). Avatar = square + `rounded-full`. Accordion, tabs, carousel and other interactive kit widgets are **not** implemented — they are stacks/groups of rectangles. The only kit control allowed in `packages/blocks` is `Button` on `CtaShape`.
@@ -22,7 +22,7 @@ Wireframe constructor on top of `ui8kit/contract`. Copy `.cursor/rules` and `.cu
 | `node scripts/ui8px-gate.mjs` | Extract class maps from `classes.ts`, `ui8px lint`, `validate grid`, `validate patterns`, `validate aria`. Gate `max: 0`, blocking `UI8PX001`, `UI8PX003`, `UI8PX005`, `GRID` |
 | `node --experimental-strip-types --test packages/theme/src/*.test.ts packages/blocks/src/manifest/*.node.test.ts` | Palette WCAG, density 8+4, CSS/JSON export; every organism has a registered content contract; variants are layout-only; field budget 5–10; avatars are square |
 | `bun run fields:summary` | Aggregate content contracts → `docs/fields.json` + `docs/fields.md` (field budget 5–10, which fields and record types repeat) |
-| `vitest run` | Organism structure, token classes, empty text content, flattened counts match `[data-shape]`, **completeness** (every field in every variant) |
+| `vitest run` | Organism structure, token classes, empty text content, flattened counts match `[data-shape]`, **completeness** (every field in every variant). `vitest.config.ts` pins `resolve.conditions: ["browser"]` so Svelte's client `mount` is used |
 
 Kit sources are not extracted: control recipes (`size-3`, `pr-2`) would trip layout 8+4.
 
@@ -30,8 +30,8 @@ Kit sources are not extracted: control recipes (`size-3`, `pr-2`) would trip lay
 
 - `@ui8kit/contract` Codex v0.4 / `codex:validate` is not wired. There are no records yet; dictionary keys live in `packages/blocks/src/content/en.ts`.
 - `codegen-x/ui8kit` `packages/tooling` and `packages/ui-gates` are private and not copied. `check-blocks.py` is the local structural stand-in.
-- Official `npx ui8kit@3` needs `registry.buildy.tw` + npm. The installer falls back to GitHub `ui8kit/registry` JSON (same files).
-- `ui8px` is a devDependency; `tools/ui8px` is a MIT-vendored 0.2.5 fallback for environments that cannot reach npm.
+- Official `npx ui8kit@3` loads `@ui8kit/registry` from npm via CDN (unpkg → jsDelivr). Retry with `--retry` / `--registry-url`; do not copy primitives by hand (`docs/kit.md`).
+- `ui8px` is a devDependency (`^0.2.5`). Run it via `bun` / `npx` (`scripts/ui8px.mjs`). Do not vendor it.
 
 ## Do not
 
