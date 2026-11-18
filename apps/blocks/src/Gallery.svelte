@@ -1,6 +1,6 @@
 <!--
-  The catalog feed: every registered block in every layout variant, full width like page sections. Always rectangle-only:
-  the generated organisms get only the variant axes and an id (wireframeProps), no content, so they draw their wireframe.
+  The catalog feed: every registered block in every layout variant, full width like page sections. Rectangles only: the
+  generated wireframes take the variant axes and the padding setting (wireframeProps), never content.
 -->
 <script lang="ts">
   import { Box } from "@ui8kit/kit";

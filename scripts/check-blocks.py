@@ -29,8 +29,8 @@ MAX_RAW_UTILITIES = 0
 SKIP_TOP = {"layout", "shapes", "content", "manifest", "fixtures", "builder", "generated"}
 GENERATED = BLOCKS / "generated"
 GENERATED_ROOTS = {"generated/svelte/blocks"}
-# The mode and the builder bindings live in places and shapes: an organism never reads the mode (wireframe is the
-# default; only builder/BlockView sets page mode) and never writes binding or wireframe attributes itself.
+# The builder bindings live in places and shapes: an organism never reads a mode (prototypes are wireframes only:
+# rectangles, no page mode) and never writes binding or wireframe attributes itself.
 ORGANISM_FORBIDDEN = re.compile(r"data-place|data-field|data-shape|data-ratio|data-mode|aria-hidden|\bmode\b|useMode|provideMode")
 PLACES_WITHOUT_SHAPE = {"ItemPlace.svelte"}
 PLACE_DIRS = {"places"}

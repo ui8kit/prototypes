@@ -25,5 +25,23 @@
 [data-shape="cta"][data-slot="button"] { height: var(--h-button, 40px); width: var(--w-button, 96px); }
 [data-shape="badge"][data-slot="badge"] { height: var(--h-badge, 24px); width: var(--w-badge, 64px); }
 [data-role="surface"][data-slot="card"] { padding: var(--pad-card, 24px); }
-/* Page mode (no data-shape): the real link keeps the button height step; its width follows the label. */
-[data-role="cta-primary"][data-slot="button"]:not([data-shape]) { height: var(--h-button, 40px); }
+
+/*
+ * Shape colours: the bars of text and headings are the most frequent rectangles and must stay visible (WCAG 1.4.11
+ * non-text contrast, at least 3:1 against the background and the card, light and dark). They do not take bg-muted /
+ * bg-secondary (too pale in light mode) but two shape tokens, mixed in CSS (oklab) from the skin's foreground over its
+ * background, so the heading is always darker than the text and both follow the skin and the mode:
+ *   --shape-heading   default: foreground 92% (light: at least 4.7:1 on background and card, every skin)
+ *   --shape-text      default: foreground 72% (light: at least 3.2:1; dark: at least 4.8:1)
+ * muted-foreground is not the base: in several skins it is too light for 3:1 once mixed.
+ * A skin overrides either per mode (set --shape-heading / --shape-text). The fallback mixes at the element, so a scoped
+ * theme (a skin card) gets its own values. Scoped to the shapes by data-shape / data-role, never app chrome.
+ */
+[data-shape][data-role="heading"],
+[data-shape][data-role="heading-lg"] {
+  background-color: var(--shape-heading, color-mix(in oklab, var(--foreground) 92%, var(--background)));
+}
+[data-shape="text-line"],
+[data-shape="text"] > * {
+  background-color: var(--shape-text, color-mix(in oklab, var(--foreground) 72%, var(--background)));
+}

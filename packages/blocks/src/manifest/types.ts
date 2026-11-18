@@ -25,8 +25,8 @@ export const BLOCK_CATEGORIES = [
 ] as const;
 export type BlockCategory = (typeof BLOCK_CATEGORIES)[number];
 
-/** How a block draws: `wireframe` = shapes only (the catalog feed, the default), `page` = real content from `props`. */
-export const MODES = ["wireframe", "page"] as const;
+/** How a block draws: `wireframe` = shapes only (rectangles). Prototypes have no other mode: the real block is the registry's. */
+export const MODES = ["wireframe"] as const;
 export type Mode = (typeof MODES)[number];
 
 export const PLACE_KINDS = ["badge", "heading", "text", "action", "media"] as const;
@@ -117,15 +117,12 @@ export function resolveVariant(block: BlockManifest, id: string | undefined): Bl
   return block.variants.find((v) => v.id === id) ?? defaultVariant(block);
 }
 
-/** The props of the generated organism for one saved instance: axes of the variant, settings, content, id and mode. */
-export function instanceProps(block: BlockManifest, instance: BlockInstance<unknown>, mode: Mode = block.defaultMode): Record<string, unknown> {
-  const content = (instance.props ?? {}) as Record<string, unknown>;
-  return { ...resolveVariant(block, instance.variant).axes, ...instance.options, ...content, id: instance.id, mode };
-}
-
-/** The props of a catalog (wireframe) tile: no content, only the layout of the variant (and presentation options). */
+/**
+ * The props of a wireframe: the layout axes of the variant and the padding setting, nothing else (a wireframe takes no
+ * content). A saved instance draws the same way: `wireframeProps(block, instance.variant, instance.options)`.
+ */
 export function wireframeProps(block: BlockManifest, variantId: string, options?: BlockOptions): Record<string, unknown> {
-  return { ...resolveVariant(block, variantId).axes, ...options, id: `${block.id}-${variantId}`, mode: "wireframe" };
+  return { ...resolveVariant(block, variantId).axes, ...(options?.padding ? { padding: options.padding } : {}) };
 }
 
 export function placeOf(block: BlockManifest, id: string): Place {
@@ -134,7 +131,7 @@ export function placeOf(block: BlockManifest, id: string): Place {
   return p;
 }
 
-/** The attributes a place instance carries in page mode: `data-place` (place id) and `data-field` (concrete pointers). */
+/** The attributes a shape carries for the inspector: `data-place` (place id) and `data-field` (concrete pointers). */
 export type PlaceBinding = { place: string; field: string };
 
 /** `bind(team, "members.title", 1)` → `{ place: "members.title", field: "/members/1/title" }`. */

@@ -3,13 +3,13 @@
 The organisms are **generated**: `HeroSimple` (`hero-simple`, model `hero@1`) and `TeamSimple` (`team-simple`, model
 `team@1`) come from codegen-x/ui8kit `packages/prototypes` (the simple line) and are synced into
 `packages/blocks/src/generated` by `scripts/sync-codegen.ts`, pinned by `codegen.lock.json`. Never edit them here.
-**Rectangle-only by default**: rendered as they are (`mode` defaults to `wireframe`: the catalog feed), they draw shapes
-only (bars, pills, the decorative placeholder picture). The builder's preview (`BlockView mode="page"`) renders the
-same organism from the saved block's `props`, with `data-place` / `data-field` on every place; it is not a second
-version. Data contract: [content-contract.md](./content-contract.md).
+**Rectangles only**: they are wireframes (the only mode) and take the variant axes and the padding setting, never
+content: bars, pills, discs and frames on the kit `Box`, each shape with `data-place` / `data-field` for the builder's
+inspector. No clean block, composition or recipe is in this repository: the real blocks are the registry's
+(`https://registry.buildy.tw`). Data contract: [content-contract.md](./content-contract.md).
 
 The hand-written part of `packages/blocks` is the layout shells and shapes used by the app's theme panels, the
-manifest helpers over the generated contracts, `BlockView` and the fixtures.
+manifest helpers over the generated contracts.
 
 ## Rectangles and text (wireframe)
 
@@ -70,7 +70,7 @@ A wireframe has no words, so meaning is carried by **token + height**. Every rol
 | Lead / subtitle | `lead` | `TextLine size="lead"` | `bg-muted` | `h-2` (8px) | `h-3` is off the 8+4 layout grid (ui8px UI8PX001), so a lead is the same bar drawn **wider** (`full`, `2/3`, `1/2`) under a heading |
 | Heading | `heading` | `Heading` | `bg-secondary` | `h-4` (16px) | card / item titles |
 | Large heading (H1/H2) | `heading-lg` | `Heading size="lg"` | `bg-secondary` | `h-6` (24px) | section titles |
-| Primary CTA | `cta-primary` | `CtaShape` (`data-slot="button"`) | `bg-primary` | `h-10` (40px, control step) | `w-24`, no text, `aria-hidden` (page mode: the real link) |
+| Primary CTA | `cta-primary` | `CtaShape` (`data-slot="button"`) | `bg-primary` | `h-10` (40px, control step) | `w-24`, no text, `aria-hidden` |
 | Secondary CTA | `cta-secondary` | `CtaShape tone="secondary"` | `bg-secondary` | `h-10` | `w-24`, no text |
 | Accent / emphasis | `accent` | `Avatar` / `Dot` | `bg-accent` | square `h-8`/`h-12`/`h-16` + `rounded-full` | accent only for emphasis (avatar, badge, highlighted item) |
 | Badge | `badge` | `Badge` | `bg-accent` | `h-6` (24px), `w-16` | eyebrow / tag; `rounded-full` + `data-slot="badge"` (theme badge radius, unset: pill) |
@@ -79,10 +79,12 @@ A wireframe has no words, so meaning is carried by **token + height**. Every rol
 
 Default tokens (no skin, no palette) are wireframe-tuned in `packages/theme/src/css.ts` (`FALLBACK`): light muted 0.955 / secondary 0.90 / accent oklch(0.82 0.08 255) / primary 0.205; dark muted 0.25 / secondary 0.38 / accent oklch(0.45 0.09 255) / primary 0.922. Skins and custom palettes bring their own values.
 
-## Page mode classes
+## Shape colours
 
-Page mode is drawn by the generated organisms with the codegen-x compose recipes (`src/generated/svelte/compose`);
-`classes.ts` no longer has a `page` map.
+Heading and text bars do not take `bg-secondary` / `bg-muted` (too pale in light mode) but `--shape-heading` /
+`--shape-text` (`src/tokens.css`), mixed in CSS (oklab) from the skin's foreground over its background: heading 92%,
+text 72%. Measured on all 16 skins and the default: light mode at least 4.76:1 (heading) and 3.24:1 (text) against the
+background and the card (WCAG 1.4.11 asks 3:1), dark at least 7.21:1 and 4.81:1. A skin overrides either token per mode.
 
 ## Utilities
 

@@ -2,9 +2,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { samplePage, SAMPLES, SAMPLE_IDS } from "../fixtures/samples";
 import { BLOCKS, BLOCK_BY_ID, FIELD_BUDGET_MAX, FIELD_BUDGET_MIN, MODELS, fieldBudget, modelPaths, validateInstance } from "./registry";
-import { bind, defaultVariantId, instanceProps, paddingOf, placesFor, settingValues, wireframeProps } from "./types";
+import { bind, defaultVariantId, paddingOf, placesFor, settingValues, wireframeProps } from "./types";
+
+// saved content as a builder stores it (data only: prototypes never render it)
+const hero = { title: "Launch pages from blocks", badge: "New", description: "One small content object.", image: "/hero.png", imageAlt: "A page builder", actionLabel: "Start", actionHref: "https://example.com/start" };
+const team = { title: "Meet the team", members: [{ id: "mira", title: "Mira Chen", description: "Design lead", avatar: "/m1.png" }, { id: "jonas", title: "Jonas Berg" }] };
+const CONTENT: Record<string, Record<string, unknown>> = { "hero-simple": hero, "team-simple": team };
 
 const generated = JSON.parse(readFileSync(new URL("../generated/manifest.json", import.meta.url), "utf8")) as {
   items: Array<{ item: string; model: string; contract: string }>;
@@ -17,11 +21,11 @@ describe("registry", () => {
     assert.equal(new Set(BLOCKS.map((b) => b.id)).size, BLOCKS.length);
   });
 
-  it("every block names a known model, a default variant it has, and both modes (wireframe first)", () => {
+  it("every block names a known model, a default variant it has, and the wireframe as its only mode", () => {
     for (const b of BLOCKS) {
       assert.ok(MODELS[b.model], `${b.id}: model ${b.model}`);
       assert.ok(b.variants.some((v) => v.id === b.defaultVariant), `${b.id}: default variant`);
-      assert.deepEqual(b.modes, ["wireframe", "page"]);
+      assert.deepEqual(b.modes, ["wireframe"]);
       assert.equal(b.defaultMode, "wireframe");
     }
   });
@@ -63,26 +67,17 @@ describe("registry", () => {
     assert.equal(bind(hero, "action").field, "/actionLabel /actionHref");
   });
 
-  it("instance props: variant axes, settings, content, id and mode; wireframe props carry no content", () => {
+  it("wireframe props: the variant axes and padding only, no content, id or mode", () => {
     const hero = BLOCK_BY_ID["hero-simple"]!;
-    const p = instanceProps(hero, samplePage[0]!, "page");
-    assert.equal(p.media, "end");
-    assert.equal(p.level, 1);
-    assert.equal(p.title, SAMPLES.filled["hero-simple"]!.title);
-    assert.equal(p.mode, "page");
-    assert.deepEqual(wireframeProps(hero, "mediaTop"), { media: "top", id: "hero-simple-mediaTop", mode: "wireframe" });
+    assert.deepEqual(wireframeProps(hero, "mediaTop"), { media: "top" });
+    assert.deepEqual(wireframeProps(hero, "mediaEnd", { level: 2, padding: "compact", landmarkLabel: "x" }), { media: "end", padding: "compact" });
     assert.equal(defaultVariantId(hero), "mediaEnd");
   });
 });
 
 describe("saved instances", () => {
-  it("the sample page and every sample set are valid", () => {
-    for (const b of samplePage) assert.deepEqual(validateInstance(b).issues, [], b.id);
-    for (const s of SAMPLE_IDS)
-      for (const b of BLOCKS) {
-        const check = validateInstance({ id: "x", item: b.id, variant: defaultVariantId(b), props: SAMPLES[s][b.id] });
-        assert.deepEqual(check.issues, [], `${s}/${b.id}`);
-      }
+  it("saved content is valid for the model of every block", () => {
+    for (const b of BLOCKS) assert.deepEqual(validateInstance({ id: "x", item: b.id, variant: defaultVariantId(b), options: { level: 1 }, props: CONTENT[b.id] }).issues, [], b.id);
   });
 
   it("flags unknown items, variants, options, bad levels and invalid content by pointer", () => {
@@ -118,9 +113,9 @@ describe("settings", () => {
   });
 
   it("padding is checked as an option and maps from the theme step (default → standard)", () => {
-    const ok = validateInstance({ id: "x", item: "team-simple", variant: "cols3", options: { padding: "spacious" }, props: SAMPLES.filled["team-simple"] });
+    const ok = validateInstance({ id: "x", item: "team-simple", variant: "cols3", options: { padding: "spacious" }, props: team });
     assert.deepEqual(ok.issues, []);
-    const bad = validateInstance({ id: "x", item: "team-simple", variant: "cols3", options: { padding: "huge" as never }, props: SAMPLES.filled["team-simple"] });
+    const bad = validateInstance({ id: "x", item: "team-simple", variant: "cols3", options: { padding: "huge" as never }, props: team });
     assert.deepEqual(bad.issues.map((i) => i.path), ["/options/padding"]);
     assert.deepEqual(["compact", "default", "spacious"].map((s) => paddingOf(s as never)), ["compact", "standard", "spacious"]);
     assert.equal(wireframeProps(BLOCK_BY_ID["hero-simple"]!, "mediaEnd", { padding: "compact" }).padding, "compact");

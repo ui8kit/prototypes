@@ -14,4 +14,13 @@ describe("tokens.css (per-element radius, density, shadow)", () => {
   it("every value reads a theme variable with the class default as fallback", () => {
     for (const r of rules) for (const decl of r.body.split(";").filter((d) => d.trim())) expect(decl, r.sel).toMatch(/var\(--/);
   });
+  it("shape colours: heading and text bars read --shape-heading / --shape-text, mixed from the foreground, heading darker", () => {
+    const pct = (token: string) => {
+      const r = rules.find((x) => x.body.includes(`var(--${token}`));
+      expect(r, token).toBeTruthy();
+      expect(r!.sel).toMatch(/\[data-shape/);
+      return Number(/var\(--foreground\) (\d+)%, var\(--background\)/.exec(r!.body)![1]);
+    };
+    expect(pct("shape-heading")).toBeGreaterThan(pct("shape-text"));
+  });
 });

@@ -8,7 +8,7 @@ Blocks are not written in this repo. A new block (or a variant) is authored in c
 2. Here: `bun run sync:codegen -- --update <commit>` (sparse clone of `packages/prototypes/out` at that commit, sha256
    verified, copied into `packages/blocks/src/generated`, `codegen.lock.json` updated).
 3. Register the item: add its contract to `BLOCKS` (`src/manifest/registry.ts`, with a catalog category), its model to
-   `MODELS`, and its organism to `CATALOG` (`src/catalog.ts`); add sample content to `src/fixtures/samples.ts`.
+   `MODELS`, and its organism to `CATALOG` (`src/catalog.ts`).
 4. `bun run verify` (sync check, check-blocks, ui8px gate, node tests, tsc, vitest).
 
 Do not edit `packages/blocks/src/generated` by hand (`--check` fails on any byte). Do not fork a block because the image

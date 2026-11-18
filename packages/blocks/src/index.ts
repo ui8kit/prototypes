@@ -1,6 +1,5 @@
 export { Block, Container, Grid, Group, SectionScope, Stack, provideSectionPadding, sectionPadding } from "./layout";
 export { Avatar, Badge, CtaShape, Dot, Heading, Media, Surface, TextLine } from "./shapes";
-export { default as BlockView } from "./builder/BlockView.svelte";
 export { default as HeroSimple } from "./generated/svelte/blocks/hero-simple.svelte";
 export { default as TeamSimple } from "./generated/svelte/blocks/team-simple.svelte";
 export type { HeroContent } from "./generated/models/hero@1";
@@ -9,4 +8,3 @@ export { app, layout, role, shape, width, type MediaRatio, type SectionPadding }
 export { ui } from "./content/en";
 export { CATALOG, catalogIds } from "./catalog";
 export * from "./manifest";
-export { SAMPLES, SAMPLE_IDS, samplePage, type SampleId } from "./fixtures/samples";

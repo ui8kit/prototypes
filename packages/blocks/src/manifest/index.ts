@@ -9,7 +9,6 @@ export {
   bind,
   defaultVariant,
   defaultVariantId,
-  instanceProps,
   placeOf,
   placesFor,
   resolveVariant,

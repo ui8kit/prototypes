@@ -27,33 +27,30 @@ version (`hero@2`).
 - `props`: content valid for the model (`validateInstance()`; issues carry JSON pointers such as `/props/members/1/id`).
 - `id`: the instance; the heading id is `<id>-title`.
 
-`instanceProps(block, instance, mode)` turns a saved block into the organism's props (variant axes + options + content +
-`id` + `mode`); `wireframeProps(block, variant)` gives a catalog tile (axes and an id, no content).
+`wireframeProps(block, variant, options)` gives the props of a wireframe (the variant axes and `padding`; no content).
+Prototypes never render `props`: a saved block is data the builder validates (`validateInstance()`) and hands to the
+real block from the registry.
 
 ## Models
 
 - `hero@1`: `badge`, `title` (required), `description`, `image`, `imageAlt`, `imageDark`, `actionLabel`, `actionHref`.
-  The action is a link (`a[href]`, the `link-button` recipe, `data-slot="button"`) drawn only when both label and href are set; with no `image` a decorative placeholder is drawn
-  (empty `alt`).
+  In the clean block the action is a link (`a[href]`) drawn only when both label and href are set.
 - `team@1`: `title` (required), `description`, `members` (1–12 `SimpleMember`: `id` (required), `avatar`, `title`
   (required), `description`). Members render as `ul` / `li`.
 
 Field budget: 5–10 model paths per model (a list counts one plus its item fields), checked in
 `manifest/registry.node.test.ts`.
 
-## Modes
+## Mode
 
-- `wireframe` (default; the catalog): shapes only (`data-shape`), no words, no links, no content images, no labelled
-  landmark; lists draw `wireframe.items` (3) placeholders.
-- `page` (builder preview, `BlockView mode="page"`): the same composition with real content; each place carries
-  `data-place` (place id) and `data-field` (concrete JSON pointers, e.g. `/members/1/title`, from `bind()`). Empty
-  optional values render nothing.
-
-Without the builder attributes, page mode renders the same DOM as the clean block of the kit (parity test in codegen-x
-`packages/prototypes`).
+`wireframe` is the only mode: shapes only (`data-shape`), no words, no links, no images, no labelled landmark; lists
+draw `wireframe.items` (3) placeholders. Each shape carries `data-place` (place id) and `data-field` (concrete JSON
+pointers, e.g. `/members/1/title`, as `bind()` gives them) for the builder's inspector. That every place of a contract
+has its shape, and the clean blocks themselves (DOM, the action link, the team width), are tested in codegen-x
+`packages/prototypes`.
 
 ## Tests
 
-`manifest/render.test.ts` (every item × variant: places bound, values drawn, cleared values gone, wireframe geometry,
-level, landmark label, member swap, variant switch) and `manifest/registry.node.test.ts` (registry = generated items,
+`manifest/wireframe.test.ts` (every item × variant: every place a shape with its binding, no words / images / links,
+padding presets, team width) and `manifest/registry.node.test.ts` (registry = generated items,
 layout-only variants, places ↔ model paths, field budget, saved instances).
