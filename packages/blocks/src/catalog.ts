@@ -1,19 +1,17 @@
 import type { Component } from "svelte";
-import FeaturesTeam from "./features-team/FeaturesTeam.svelte";
-import HeroSplit from "./hero-split/HeroSplit.svelte";
+import HeroSimple from "./generated/svelte/blocks/hero-simple.svelte";
+import TeamSimple from "./generated/svelte/blocks/team-simple.svelte";
 import { BLOCKS } from "./manifest/registry";
-import type { TitleLevel } from "./manifest/types";
 
 /**
- * What every organism accepts: a variant id, the saved block's props as `content`, and its instance options as props of
- * the same name. No mode: rendered directly, a block is rectangle-only (the builder preview sets the mode by context).
+ * item id → generated organism (codegen-x/ui8kit packages/prototypes, synced into src/generated; never edited here).
+ * Props: the variant axes, the settings (`level`, `landmarkLabel`), the content fields, `id` and `mode`
+ * (`wireframe` by default). Build them with `instanceProps()` / `wireframeProps()`. Keep in lockstep with `BLOCKS`.
  */
-export type BlockProps = { variant?: string; content?: Record<string, unknown>; headingLevel?: TitleLevel };
-
-/** item id → organism. Keep in lockstep with `BLOCKS` (enforced in tests). */
-export const CATALOG: Record<string, Component<BlockProps>> = {
-  "hero-split": HeroSplit as Component<BlockProps>,
-  "features-team": FeaturesTeam as Component<BlockProps>,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const CATALOG: Record<string, Component<any>> = {
+  "hero-simple": HeroSimple,
+  "team-simple": TeamSimple,
 };
 
 export function catalogIds(): string[] {

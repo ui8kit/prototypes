@@ -1,150 +1,108 @@
+/** Registry over the generated contracts: ids, variants, places ↔ model paths, field budget, saved instances. */
 import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { fileURLToPath } from "node:url";
-import { ui } from "../content/en.ts";
-import { samplePage, SAMPLES } from "../fixtures/samples.ts";
-import { modelPaths } from "../model/types.ts";
-import { MODELS, modelKey } from "../models/index.ts";
-import {
-  BLOCKS,
-  BLOCK_BY_ID,
-  FIELD_BUDGET_MAX,
-  FIELD_BUDGET_MIN,
-  bind,
-  fieldBudget,
-  placesFor,
-  validateInstance,
-} from "./index.ts";
+import { samplePage, SAMPLES, SAMPLE_IDS } from "../fixtures/samples";
+import { BLOCKS, BLOCK_BY_ID, FIELD_BUDGET_MAX, FIELD_BUDGET_MIN, MODELS, fieldBudget, modelPaths, validateInstance } from "./registry";
+import { bind, defaultVariantId, instanceProps, placesFor, wireframeProps } from "./types";
 
-const SRC = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SKIP = new Set(["layout", "shapes", "content", "manifest", "places", "model", "models", "fixtures", "builder"]);
+const generated = JSON.parse(readFileSync(new URL("../generated/manifest.json", import.meta.url), "utf8")) as {
+  items: Array<{ item: string; model: string; contract: string }>;
+};
 
-function organismDirs(): string[] {
-  return readdirSync(SRC, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && !SKIP.has(entry.name))
-    .map((entry) => entry.name)
-    .filter((name) => readdirSync(join(SRC, name)).some((file) => file.endsWith(".svelte")))
-    .sort();
-}
+describe("registry", () => {
+  it("is exactly the generated items, keyed by item id, in manifest order", () => {
+    assert.deepEqual(BLOCKS.map((b) => b.id), generated.items.map((i) => i.item));
+    for (const i of generated.items) assert.equal(BLOCK_BY_ID[i.item]!.model, i.model);
+    assert.equal(new Set(BLOCKS.map((b) => b.id)).size, BLOCKS.length);
+  });
 
-describe("block manifests", () => {
-  it("gives every organism directory exactly one *.block.ts and one .svelte", () => {
-    const dirs = organismDirs();
-    assert.ok(dirs.length > 0);
-    for (const name of dirs) {
-      const files = readdirSync(join(SRC, name));
-      assert.equal(files.filter((f) => f.endsWith(".block.ts")).length, 1, name);
-      assert.equal(files.filter((f) => f.endsWith(".svelte")).length, 1, name);
+  it("every block names a known model, a default variant it has, and both modes (wireframe first)", () => {
+    for (const b of BLOCKS) {
+      assert.ok(MODELS[b.model], `${b.id}: model ${b.model}`);
+      assert.ok(b.variants.some((v) => v.id === b.defaultVariant), `${b.id}: default variant`);
+      assert.deepEqual(b.modes, ["wireframe", "page"]);
+      assert.equal(b.defaultMode, "wireframe");
     }
   });
 
-  it("registers every organism under its stable item id, once, and in CATALOG", () => {
-    const ids = BLOCKS.map((block) => block.id);
-    assert.equal(new Set(ids).size, ids.length, "duplicate item ids");
-    assert.deepEqual([...ids].sort(), organismDirs());
-    const catalog = readFileSync(join(SRC, "catalog.ts"), "utf8");
-    for (const block of BLOCKS) {
-      assert.equal(BLOCK_BY_ID[block.id], block);
-      assert.ok(existsSync(join(SRC, block.id)));
-      assert.match(catalog, new RegExp(`"${block.id}"\\s*:`), `catalog.ts missing ${block.id}`);
-    }
+  it("variants are layout-only: their axes are the declared axes with declared values", () => {
+    for (const b of BLOCKS)
+      for (const v of b.variants) {
+        assert.deepEqual(Object.keys(v.axes).sort(), Object.keys(b.axes).sort(), `${b.id}/${v.id}`);
+        for (const [k, val] of Object.entries(v.axes)) assert.ok(b.axes[k]!.includes(val), `${b.id}/${v.id}: ${k}=${val}`);
+      }
   });
 
-  it("keeps variants layout-only, with exactly one default", () => {
-    for (const block of BLOCKS) {
-      assert.equal(block.variants.filter((v) => v.default).length, 1, block.id);
-      const ids = block.variants.map((v) => v.id);
-      assert.equal(new Set(ids).size, ids.length, `${block.id}: duplicate variant ids`);
-      const content = new Set(Object.keys(block.model.fields));
-      for (const v of block.variants) {
-        assert.equal("content" in v || "props" in v, false, `${block.id}/${v.id} carries content`);
-        assert.ok(Object.keys(v.layout).length > 0, `${block.id}/${v.id}: empty layout`);
-        for (const key of Object.keys(v.layout)) assert.equal(content.has(key), false, `${block.id}/${v.id}: ${key}`);
+  it("every model path is drawn by a place and every place draws an existing path", () => {
+    for (const b of BLOCKS) {
+      const paths = modelPaths(MODELS[b.model]!.spec.fields);
+      const drawn = new Set(b.places.flatMap((p) => p.fields));
+      for (const p of b.places) for (const f of p.fields) assert.ok(paths.includes(f), `${b.id}: ${p.place} draws ${f}`);
+      // list fields are drawn by their item places; record ids are keys, not drawn
+      for (const path of paths) {
+        if (/\/\*\/id$/.test(path)) continue;
+        const list = b.places.some((p) => p.list && path === `/${p.list}`);
+        assert.ok(drawn.has(path) || list, `${b.id}: ${path} has no place`);
       }
     }
   });
 
-  it("binds every model value to a place and every place to existing model paths", () => {
-    for (const block of BLOCKS) {
-      const paths = modelPaths(block.model.fields);
-      // a list item itself (`/members/*`) is addressable too: the item place binds it
-      const known = new Set(paths.flatMap((p) => (p.field.type === "list" ? [p.path, `${p.path}/*`] : [p.path])));
-      const placeIds = block.places.map((p) => p.id);
-      assert.equal(new Set(placeIds).size, placeIds.length, `${block.id}: duplicate place ids`);
-      for (const place of block.places) {
-        assert.ok(place.fields.length > 0, `${block.id}#${place.id}: no fields`);
-        for (const f of place.fields) assert.ok(known.has(f), `${block.id}#${place.id}: ${f} is not in ${modelKey(block.model)}`);
-        if (place.each) {
-          assert.ok(known.has(place.each), `${block.id}#${place.id}: each ${place.each}`);
-          for (const f of place.fields) assert.ok(f.startsWith(`${place.each}/*`), `${block.id}#${place.id}: ${f} outside ${place.each}`);
-        }
-      }
-      for (const { path, field } of paths) {
-        const drawn = placesFor(block, path).length > 0 || block.places.some((p) => p.role === "item" && p.each === path);
-        assert.ok(drawn, `${block.id}: ${path} (${field.type}) has no place`);
-      }
+  it(`field budget ${FIELD_BUDGET_MIN}–${FIELD_BUDGET_MAX} per model`, () => {
+    for (const b of BLOCKS) {
+      const n = fieldBudget(b);
+      assert.ok(n >= FIELD_BUDGET_MIN && n <= FIELD_BUDGET_MAX, `${b.id}: ${n}`);
     }
   });
 
-  it("resolves place bindings to concrete pointers per list index", () => {
-    const team = BLOCK_BY_ID["features-team"]!;
-    assert.deepEqual(bind(team, "member.title", 1), { place: "member.title", field: "/members/1/title" });
-    assert.deepEqual(bind(team, "member", 0), { place: "member", field: "/members/0" });
-    assert.deepEqual(bind(BLOCK_BY_ID["hero-split"]!, "action"), { place: "action", field: "/actionLabel /actionHref" });
+  it("bind resolves list places to concrete pointers; placesFor goes back", () => {
+    const team = BLOCK_BY_ID["team-simple"]!;
+    assert.deepEqual(bind(team, "members.title", 1), { place: "members.title", field: "/members/1/title" });
+    assert.deepEqual(placesFor(team, "/members/*/avatar").map((p) => p.place), ["members.avatar"]);
+    const hero = BLOCK_BY_ID["hero-simple"]!;
+    assert.equal(bind(hero, "action").field, "/actionLabel /actionHref");
   });
 
-  it("keeps each content model in the 5–10 field budget and labels every field from the dictionary", () => {
-    for (const block of BLOCKS) {
-      const n = fieldBudget(block);
-      assert.ok(n >= FIELD_BUDGET_MIN && n <= FIELD_BUDGET_MAX, `${block.id}: ${n}`);
-      for (const { path, field } of modelPaths(block.model.fields)) {
-        assert.ok(field.label in ui.fields, `${block.id}: ${path} label ${field.label} not in ui.fields`);
+  it("instance props: variant axes, settings, content, id and mode; wireframe props carry no content", () => {
+    const hero = BLOCK_BY_ID["hero-simple"]!;
+    const p = instanceProps(hero, samplePage[0]!, "page");
+    assert.equal(p.media, "end");
+    assert.equal(p.level, 1);
+    assert.equal(p.title, SAMPLES.filled["hero-simple"]!.title);
+    assert.equal(p.mode, "page");
+    assert.deepEqual(wireframeProps(hero, "mediaTop"), { media: "top", id: "hero-simple-mediaTop", mode: "wireframe" });
+    assert.equal(defaultVariantId(hero), "mediaEnd");
+  });
+});
+
+describe("saved instances", () => {
+  it("the sample page and every sample set are valid", () => {
+    for (const b of samplePage) assert.deepEqual(validateInstance(b).issues, [], b.id);
+    for (const s of SAMPLE_IDS)
+      for (const b of BLOCKS) {
+        const check = validateInstance({ id: "x", item: b.id, variant: defaultVariantId(b), props: SAMPLES[s][b.id] });
+        assert.deepEqual(check.issues, [], `${s}/${b.id}`);
       }
-    }
   });
 
-  it("declares instance options with a default inside their values and a dictionary label", () => {
-    for (const block of BLOCKS) {
-      for (const [k, def] of Object.entries(block.options)) {
-        assert.ok(def.values.includes(def.default), `${block.id}: ${k}`);
-        assert.ok(def.label in ui.options, `${block.id}: ${k} label`);
-        assert.equal(k in block.model.fields, false, `${block.id}: option ${k} collides with content`);
-      }
-      assert.deepEqual(block.options.headingLevel?.values, [1, 2, 3], block.id);
-    }
-  });
-
-  it("grows schemas with content models, not variants", () => {
-    const models = new Set(BLOCKS.map((b) => modelKey(b.model)));
-    const variants = BLOCKS.reduce((n, b) => n + b.variants.length, 0);
-    assert.equal(models.size, MODELS.length, "every registered model is used, every used model is registered");
-    assert.ok(variants > models.size);
-    const schemas = readdirSync(join(SRC, "..", "schemas")).filter((f) => f.endsWith(".schema.json"));
-    assert.equal(schemas.length, MODELS.length);
-  });
-
-  it("accepts the saved sample page and every sample set; rejects unknown items, variants and invalid props", () => {
-    for (const instance of samplePage) assert.deepEqual(validateInstance(instance), { ok: true, issues: [] }, instance.id);
-    for (const [sample, byItem] of Object.entries(SAMPLES)) {
-      for (const [item, props] of Object.entries(byItem)) {
-        for (const v of BLOCK_BY_ID[item]!.variants) {
-          assert.equal(validateInstance({ id: "x", item, variant: v.id, props }).ok, true, `${sample}/${item}/${v.id}`);
-        }
-      }
-    }
-    assert.equal(validateInstance({ id: "x", item: "nope", variant: "a", props: {} }).issues[0]?.code, "unknownItem");
-    const hero = { id: "x", item: "hero-split", variant: "media-left", props: { title: "T" } };
-    assert.equal(validateInstance({ ...hero, options: { headingLevel: 1 } }).ok, true);
-    assert.deepEqual(
-      validateInstance({ ...hero, options: { headingLevel: 4, size: 2 } }).issues.map((i) => `${i.path}:${i.code}`),
-      ["/options/headingLevel:optionValue", "/options/size:unknownOption"],
-    );
-    const bad = validateInstance({ id: "x", item: "hero-split", variant: "media-diagonal", props: { title: "", actionHref: "javascript:alert(1)" } });
-    assert.deepEqual(
-      bad.issues.map((i) => `${i.path}:${i.code}`).sort(),
-      ["/actionHref:unsafeUrl", "/title:required", "/variant:unknownVariant"],
-    );
+  it("flags unknown items, variants, options, bad levels and invalid content by pointer", () => {
+    assert.equal(validateInstance({ id: "x", item: "nope", variant: "a", props: {} }).issues[0]!.path, "/item");
+    const bad = validateInstance({
+      id: "x",
+      item: "team-simple",
+      variant: "cols5",
+      options: { level: 4 as never, headingLevel: 1 } as never,
+      props: { title: "T", members: [{ id: "a", title: "" }, { title: "B" }] },
+    });
+    const paths = bad.issues.map((i) => i.path);
+    assert.ok(paths.includes("/variant"));
+    assert.ok(paths.includes("/options/level"));
+    assert.ok(paths.includes("/options/headingLevel"));
+    assert.ok(paths.includes("/props/members/1/id"), paths.join(" "));
+    assert.equal(bad.ok, false);
+    const many = validateInstance({ id: "x", item: "team-simple", variant: "cols3", props: { title: "T", members: [] } });
+    assert.ok(many.issues.some((i) => i.path === "/props/members"));
+    const url = validateInstance({ id: "x", item: "hero-simple", variant: "mediaEnd", props: { title: "T", actionHref: "javascript:alert(1)" } });
+    assert.ok(url.issues.some((i) => i.path === "/props/actionHref"));
   });
 });

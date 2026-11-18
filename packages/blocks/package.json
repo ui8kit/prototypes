@@ -7,7 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./manifest": "./src/manifest/index.ts",
-    "./tokens.css": "./src/tokens.css"
+    "./tokens.css": "./src/tokens.css",
+    "./generated/*": "./src/generated/*"
   },
   "ui8kit": {
     "runtime": "svelte",
@@ -16,14 +17,15 @@
       "src"
     ],
     "blockRoot": [
-      "src/features-team",
-      "src/hero-split"
+      "src/generated/svelte/blocks"
     ]
   },
   "peerDependencies": {
     "svelte": "^5.0.0"
   },
   "dependencies": {
-    "@ui8kit/kit": "workspace:*"
+    "@ui8kit/kit": "workspace:*",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1"
   }
 }

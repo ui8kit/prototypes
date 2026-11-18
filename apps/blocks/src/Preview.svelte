@@ -1,6 +1,6 @@
 <!--
   Builder preview (page mode), separate from the catalog: each block × variant rendered from one saved sample instance
-  `{ id, item, variant, options, props }` through BlockView with an explicit mode="page". Same components as the feed.
+  `{ id, item, variant, options, props }` through BlockView with an explicit mode="page". Same generated organisms as the feed.
 -->
 <script lang="ts">
   import { Box } from "@ui8kit/kit";

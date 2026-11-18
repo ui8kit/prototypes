@@ -1,10 +1,10 @@
 <!--
   The catalog feed: every registered block in every layout variant, full width like page sections. Always rectangle-only:
-  no mode and no content are passed, so blocks draw their wireframe (the default).
+  the generated organisms get only the variant axes and an id (wireframeProps), no content, so they draw their wireframe.
 -->
 <script lang="ts">
   import { Box } from "@ui8kit/kit";
-  import { BLOCKS, CATALOG } from "@ui8kit/blocks";
+  import { BLOCKS, CATALOG, wireframeProps } from "@ui8kit/blocks";
   import { galleryText } from "./content/gallery";
 </script>
 
@@ -14,7 +14,7 @@
     {#if View}
       {#each block.variants as variant (variant.id)}
         <Box class="ui8-feed-item" data-block={block.id} data-variant={variant.id} data-testid={"feed-" + block.id + "-" + variant.id}>
-          <View variant={variant.id} />
+          <View {...wireframeProps(block, variant.id)} />
         </Box>
       {/each}
     {/if}

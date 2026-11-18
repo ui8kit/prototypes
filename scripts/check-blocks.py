@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """Structural discipline for packages/blocks.
 
-Fails when a block file leaks raw utility classes, bare HTML, nested Block,
+Fails when a hand-written file leaks raw utility classes, bare HTML, nested Block,
 literal copy, or forbidden style tokens. Layout and shape files may compose
 kit primitives; they still must not embed Tailwind string literals.
 
-Interactive kit widgets (Button, Dialog, Select, accordion/tabs/carousel, …)
-are forbidden in packages/blocks. Exceptions are the page-mode places
-(packages/blocks/src/places): Text in every place, Button (rendered as <a href>)
-only in ActionPlace. Image/Picture/Source belong only in Media.svelte (wireframe
-placeholder) and places/ThemedImage.svelte (page images). Organisms never import
-@ui8kit/kit; they bind places directly.
+The organisms are generated: packages/blocks/src/generated is a verbatim copy of
+codegen-x/ui8kit packages/prototypes/out, pinned by codegen.lock.json and checked
+byte for byte by `scripts/sync-codegen.ts --check` (sha256 per file). It is not
+scanned here (its rules run in codegen-x: compose-gen check, ui8px, parity) and
+must never be edited by hand. Interactive kit widgets (Button, Dialog, Select,
+accordion/tabs/carousel, …) are forbidden in the hand-written part of
+packages/blocks; Image/Picture/Source belong only in shapes/Media.svelte.
 """
 
 from __future__ import annotations
@@ -25,7 +26,9 @@ BLOCKS = ROOT / "packages" / "blocks" / "src"
 BLOCKS_PKG = ROOT / "packages" / "blocks" / "package.json"
 MAX_RAW_UTILITIES = 0
 
-SKIP_TOP = {"layout", "shapes", "content", "manifest", "places", "model", "models", "fixtures", "builder"}
+SKIP_TOP = {"layout", "shapes", "content", "manifest", "fixtures", "builder", "generated"}
+GENERATED = BLOCKS / "generated"
+GENERATED_ROOTS = {"generated/svelte/blocks"}
 # The mode and the builder bindings live in places and shapes: an organism never reads the mode (wireframe is the
 # default; only builder/BlockView sets page mode) and never writes binding or wireframe attributes itself.
 ORGANISM_FORBIDDEN = re.compile(r"data-place|data-field|data-shape|data-ratio|data-mode|aria-hidden|\bmode\b|useMode|provideMode")
@@ -267,6 +270,8 @@ def check_file(path: Path, organisms: set[str]) -> list[str]:
 
 def check_manifests(organisms: set[str]) -> list[str]:
     errors: list[str] = []
+    if not (GENERATED / "manifest.json").is_file():
+        errors.append("packages/blocks/src/generated/manifest.json missing: run scripts/sync-codegen.ts")
     for name in sorted(organisms):
         directory = BLOCKS / name
         manifests = list(directory.glob("*.block.ts"))
@@ -280,11 +285,11 @@ def check_manifests(organisms: set[str]) -> list[str]:
             )
     try:
         pkg = json.loads(BLOCKS_PKG.read_text(encoding="utf-8"))
-        listed = {Path(item).name for item in pkg.get("ui8kit", {}).get("blockRoot", [])}
-        if listed != organisms:
+        listed = {item.removeprefix("src/") for item in pkg.get("ui8kit", {}).get("blockRoot", [])}
+        if listed != organisms | GENERATED_ROOTS:
             errors.append(
                 f"packages/blocks/package.json ui8kit.blockRoot {sorted(listed)} "
-                f"does not match organism dirs {sorted(organisms)}"
+                f"does not match organism dirs {sorted(organisms | GENERATED_ROOTS)}"
             )
     except (OSError, json.JSONDecodeError) as exc:
         errors.append(f"packages/blocks/package.json: {exc}")
@@ -292,7 +297,7 @@ def check_manifests(organisms: set[str]) -> list[str]:
 
 
 def main() -> int:
-    files = sorted(BLOCKS.rglob("*.svelte"))
+    files = sorted(p for p in BLOCKS.rglob("*.svelte") if GENERATED not in p.parents)
     if not files:
         print("no block svelte files", file=sys.stderr)
         return 1
@@ -305,7 +310,7 @@ def main() -> int:
         "organisms pass Block/Container/Stack/Grid/shape props only."
     )
     print(f"organism dirs: {', '.join(sorted(organisms)) or '(none)'}")
-    print("interactive kit: Text in places, Button (link) only in places/ActionPlace.svelte")
+    print("generated organisms: packages/blocks/src/generated (verified by scripts/sync-codegen.ts --check)")
     errors.extend(check_manifests(organisms))
     for path in files:
         errors.extend(check_file(path, organisms))

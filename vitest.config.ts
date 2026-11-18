@@ -18,10 +18,11 @@ export default defineConfig({
   },
   resolve: {
     ...browser,
-    alias: {
-      "@ui8kit/kit": new URL("./packages/kit/src/index.ts", import.meta.url).pathname,
-      "@ui8kit/blocks": new URL("./packages/blocks/src/index.ts", import.meta.url).pathname,
-    },
+    // Exact matches only: the generated organisms import `@ui8kit/kit/ui/*` and `@ui8kit/kit/utils` (package exports).
+    alias: [
+      { find: /^@ui8kit\/kit$/, replacement: new URL("./packages/kit/src/index.ts", import.meta.url).pathname },
+      { find: /^@ui8kit\/blocks$/, replacement: new URL("./packages/blocks/src/index.ts", import.meta.url).pathname },
+    ],
   },
   // Vitest loads modules through Vite's SSR pipeline; pin browser there too.
   ssr: {

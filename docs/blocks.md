@@ -1,23 +1,15 @@
 # Blocks
 
-Organisms in `packages/blocks`. Each file opens on one `Block`. Inside: layout shells + **places** (`src/places`).
-**Rectangle-only**: rendered as they are (feed, catalog), blocks draw shapes only: no images, no words, no icons. The
-builder's preview (`BlockView mode="page"`) fills the same places from the saved block's `props`; it is not a second
+The organisms are **generated**: `HeroSimple` (`hero-simple`, model `hero@1`) and `TeamSimple` (`team-simple`, model
+`team@1`) come from codegen-x/ui8kit `packages/prototypes` (the simple line) and are synced into
+`packages/blocks/src/generated` by `scripts/sync-codegen.ts`, pinned by `codegen.lock.json`. Never edit them here.
+**Rectangle-only by default**: rendered as they are (`mode` defaults to `wireframe`: the catalog feed), they draw shapes
+only (bars, pills, the decorative placeholder picture). The builder's preview (`BlockView mode="page"`) renders the
+same organism from the saved block's `props`, with `data-place` / `data-field` on every place; it is not a second
 version. Data contract: [content-contract.md](./content-contract.md).
 
-## Places
-
-| Place component | Wireframe | Page (filled) | Page (empty) |
-| --- | --- | --- | --- |
-| `BadgePlace` | `Badge` | `<span>` pill (`data-slot="badge"`) | nothing |
-| `HeadingPlace` | `Heading` (`size`, `width`) | `<h1>`–`<h4>` (`level`; the look follows `size` only) | nothing |
-| `TextPlace` | `TextLine` bars (`bars`) in one `aria-hidden` stack | one `<p>` | nothing |
-| `ActionPlace` | `CtaShape` (a bar, not a link) | `<a href>` (kit `Button`, `data-slot="button"`); label only → text | nothing |
-| `MediaPlace` | `Media` (`ratio`) | `<figure data-slot="media-frame">` + image(s) | nothing |
-| `AvatarPlace` | `Avatar` | round photo | nothing |
-| `ItemPlace` | `Stack` / `Surface` (cards) with the item binding | same | (item skipped when nothing in it is present) |
-
-Each place carries `data-place` and `data-field` (concrete JSON pointers) from `bind(manifest, placeId, index?)`.
+The hand-written part of `packages/blocks` is the layout shells and shapes used by the app's theme panels, the
+manifest helpers over the generated contracts, `BlockView` and the fixtures.
 
 ## Rectangles and text (wireframe)
 
@@ -31,7 +23,7 @@ In the wireframe everything is a **rectangle** or a **text bar** (`Heading`, `Te
 | CTA | `CtaShape`: a bar (`data-slot="button"`), not interactive; the page draws the link |
 | Accordion, tabs, carousel, dialog, form, select, … | **Not implemented.** Draw them as `Stack` / `Group` / `Grid` of rectangles |
 
-`scripts/check-blocks.py` forbids interactive kit primitives in `packages/blocks` except in places: `Text` in every place, `Button` (as `<a href>`) only in `ActionPlace`; `Image` only in `Media.svelte` and `places/ThemedImage.svelte`. Organisms never import `@ui8kit/kit`.
+`scripts/check-blocks.py` forbids interactive kit primitives in the hand-written part of `packages/blocks`; `Image` only in `shapes/Media.svelte`. `src/generated` is checked by `scripts/sync-codegen.ts --check` (sha256 per file) and by the codegen-x gates.
 
 ## Sketch mapping
 
@@ -63,10 +55,10 @@ Absorbed as:
 
 | Sketch | Block | Content contract | Variants (layout) | Structure |
 | --- | --- | --- | --- | --- |
-| Team / features row | `FeaturesTeam` | `team@1`: title, description, `members: teamMember[]` (avatar, title, description) | `columns-2` / `columns-3` / `columns-4` / `cards-3` (members on `Surface`) | `Block` → `Container` → `Stack` → centred intro (`Heading` lg + two lead `TextLine`s) + `Grid` of centred `Avatar` + `Heading` + two `TextLine`s |
-| Split hero | `HeroSplit` | `hero@1`: badge, title, description, image, actionLabel, actionHref | `media-left` / `media-right` / `media-top` | `Block` → `Container` → `Grid` (2 cols, vertically centred) or `Stack` of copy (`Heading` lg, two lead `TextLine`s, gap, `CtaShape`) and `Media` (4:3 with a centred circle) |
+| Team row | `TeamSimple` (generated) | `team@1`: title, description, `members: SimpleMember[]` (id, avatar, title, description) | `cols3` / `cols2` / `cols4` / `cards3` (axes `cols`, `surface`) | `section` → container → heading + text → `ul` of `li` (portrait, name, line); the wireframe draws 3 members |
+| Simple hero | `HeroSimple` (generated) | `hero@1`: badge, title, description, image, imageAlt, imageDark, actionLabel, actionHref | `mediaEnd` / `mediaStart` / `mediaTop` (axis `media`) | `section` → container → grid of copy (badge, heading, text, link) and the picture (4:3, 21:9 on top) |
 
-The registry (`packages/blocks/src/manifest/registry.ts`) is the gallery source. Content contract: `docs/content-contract.md`. Field budget (5–10) and repetition: `docs/fields.md`. Adding a block: `docs/adding-a-block.md`.
+The registry (`packages/blocks/src/manifest/registry.ts`, over `src/generated/contracts`) is the gallery source. Content contract: `docs/content-contract.md`. Adding a block: `docs/adding-a-block.md`.
 
 ## Roles
 
@@ -89,13 +81,11 @@ Default tokens (no skin, no palette) are wireframe-tuned in `packages/theme/src/
 
 ## Page mode classes
 
-`page` in `classes.ts`: badge `h-8 px-4 rounded-full bg-accent`, block title `text-4xl font-bold`, item title `text-xl
-font-semibold`, lead `text-lg` / text `text-base` in `text-muted-foreground`, action `h-10 px-6 rounded bg-primary`
-(its height follows the theme's button density via `tokens.css`), media `rounded overflow-hidden` + ratio, avatar
-`rounded-full` square. Radius and shadow follow the theme through the same `data-slot` / `data-role` hooks as the shapes.
+Page mode is drawn by the generated organisms with the codegen-x compose recipes (`src/generated/svelte/compose`);
+`classes.ts` no longer has a `page` map.
 
 ## Utilities
 
 All raw class strings: `packages/blocks/src/classes.ts`. Layout/shape components read maps. Organism files must report **0** raw utilities (`scripts/check-blocks.py`).
 
-Density is per element (badge, button, card) and read by `packages/blocks/src/tokens.css` on the shapes only; shadow per element (card, media) too. Section padding is a real class pair on `Block` from the theme: compact `py-8 lg:py-16` (32/64), standard `py-16 lg:py-32` (64/128), spacious `py-24 lg:py-40` (96/160). Radius per element (badge, button, card, media) rides on `data-slot` + `tokens.css`. See `docs/theme.md`.
+Density is per element (badge, button, card) and read by `packages/blocks/src/tokens.css` on the shapes only; shadow per element (card, media) too. Section padding is a real class pair on the hand-written `Block` from the theme (the generated blocks carry their own `py-16`): compact `py-8 lg:py-16` (32/64), standard `py-16 lg:py-32` (64/128), spacious `py-24 lg:py-40` (96/160). Radius per element (badge, button, card, media) rides on `data-slot` + `tokens.css`. See `docs/theme.md`.

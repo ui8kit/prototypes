@@ -23,6 +23,8 @@
     "apps/**/*.svelte",
     "packages/**/*.ts",
     "packages/**/*.svelte",
-    "scripts/**/*.mjs"
-  ]
+    "scripts/**/*.mjs",
+    "scripts/**/*.ts"
+  ],
+  "exclude": ["packages/blocks/src/generated/svelte/index.ts"]
 }

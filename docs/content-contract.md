@@ -1,143 +1,58 @@
 # Content contract
 
-**Prototypes are rectangle-only.** Every block, rendered as it is (the feed, the catalog, a test, any render without a
-mode), draws only shapes: no images, no words, no icons. Page mode is not a second version of the block: it is the same
-composition with its places filled from data, switched on only by the builder (`builder/BlockView` with `mode="page"`).
+A block type (item) is a generated organism plus a generated **contract** over a **content model**. Both come from
+codegen-x/ui8kit (`packages/compose-gen/specs/models`, `packages/prototypes`), are synced into
+`packages/blocks/src/generated` by `scripts/sync-codegen.ts` (pinned by `codegen.lock.json`, sha256 per file) and are
+published on the registry:
 
-Principle (site constructor): **simple content, interchangeable variants, full rendering**, and **one composition** for the
-wireframe feed and the finished page. Everything below is machine-readable: `packages/blocks/contract.json` and
-`packages/blocks/schemas/*.schema.json` are generated from the sources by `bun run contract`, and `bun run verify` fails when
-they or `docs/fields.*` are stale.
-
-## The three objects
-
-| Object | Where | What |
+| What | Here | Registry |
 | --- | --- | --- |
-| Content model | `packages/blocks/src/models/<id>.ts` | Value schema of `props` (`hero@1`, `team@1`). Plain TS (`defineModel`), shared by every variant and by every block with the same content. Gives the TS type (`ContentOf`), `validate()` and JSON Schema 2020-12 (`toJsonSchema`). |
-| Block manifest | `packages/blocks/src/<item>/<item>.block.ts` | Stable item id, category, label, `model`, `places` (field → place binding), `variants` (layout only). |
-| Saved block | the builder's page | `{ id, item, variant, options?, props }`: `id` = instance, `item` = manifest id, `variant` = a variant id, `options` = instance options (`headingLevel`), `props` = content valid for the model. `validateInstance()` checks all three. |
+| Content model (JSON Schema 2020-12, TS type, `validate()`) | `src/generated/models/<model>.schema.json`, `<model>.ts` | `https://registry.buildy.tw/models/<model>.schema.json` |
+| Block contract (axes, variants, settings, modes, places) | `src/generated/contracts/<item>/<n>.json`, `contracts/v0.json` | `https://registry.buildy.tw/contracts/<item>/<n>.json` |
+| Organism (Svelte 5) | `src/generated/svelte/blocks/<item>.svelte` | `https://registry.buildy.tw/svelte/blocks/<item>.json` (`meta.model`, `meta.contract`) |
 
-Schemas grow with **content models**, not variants: 250 hero layouts share one `hero@1`. A breaking model change is a new
-version (`hero@2`) with its own schema file (`urn:ui8kit:content:hero:2`).
+Schemas grow with **content models**, not variants: every hero layout shares `hero@1`. A breaking model change is a new
+version (`hero@2`).
 
-## Content model
-
-Value types (`src/model/types.ts`):
-
-| Type | Value | Notes |
-| --- | --- | --- |
-| `text` | string, `maxLength` | one line (badge, title, label) |
-| `longText` | string, `maxLength` | one paragraph. **One value**, even when the wireframe draws two or three bars |
-| `url` | string | link target; `javascript:` / `vbscript:` / `data:` rejected (validate + schema pattern) |
-| `image` | `{ src, alt, srcDark? }` | one `src` for both themes, optional dark override; `alt: ""` = decorative; `src` rules below |
-| `list` | array of a **named** record (`teamMember`), `minItems` / `maxItems` | order is content; cardinality is content, not layout. `team@1` members: required, 1–12 |
-
-**Image `src`** (decision): a URL. Allowed: absolute `https://` URLs (stock photos and CDNs, any host) and root-relative
-paths `/…` (local samples, `/samples/hero-light.png`). Rejected: `http:` (mixed content on an https page; stocks serve
-https), protocol-relative `//host/…`, bare relative paths (`samples/a.png`, they depend on the page URL), other schemes
-(`ftp:`), whitespace (encode as `%20`), and `javascript:` / `vbscript:` / `data:` (`unsafeUrl`). Issue code `imageUrl`;
-the schema pattern is the same regex (`IMAGE_SRC`), tested against the same list. `""` = no image. Links (`url`,
-`actionHref`) stay permissive (https, http, mailto, tel, `#`, relative), minus the unsafe schemes.
-
-Rules: blank strings count as empty; `null` is a type error; unknown keys are rejected (`additionalProperties: false`);
-`required` means a filled value. Field labels are dictionary keys (`ui.fields.<key>` in `content/en.ts`) and become the
-schema `title`.
-
-**Field budget 5–10.** Every model path counts once (`modelPaths`): a list counts 1 plus each item field; bar counts and
-cardinality never multiply. `hero@1` = 6, `team@1` = 6.
+## Saved block
 
 ```ts
-export const heroModel = defineModel({
-  id: "hero",
-  version: 1,
-  fields: {
-    badge: { type: "text", maxLength: 40, label: "badge" },
-    title: { type: "text", maxLength: 120, required: true, label: "title" },
-    description: { type: "longText", maxLength: 400, label: "description" },
-    image: { type: "image", label: "image" },
-    actionLabel: { type: "text", maxLength: 40, label: "actionLabel" },
-    actionHref: { type: "url", label: "actionHref" },
-  },
-});
+{ id: "b1", item: "hero-simple", variant: "mediaEnd", options: { level: 1 }, props: { title: "…", … } }
 ```
 
-## Places: field → place binding
+- `item`: the contract's `item`; `variant`: one of its `variants[].id` (layout axes only, never content).
+- `options`: the contract's `settings`: `level` (heading level 1–3, default 2; list item titles one level below) and
+  `landmarkLabel` (replaces `aria-labelledby` with `aria-label`).
+- `props`: content valid for the model (`validateInstance()`; issues carry JSON pointers such as `/props/members/1/id`).
+- `id`: the instance; the heading id is `<id>-title`.
 
-A **place** is one spot of the composition. It binds one or more JSON-pointer templates (RFC 6901, `*` = list index):
+`instanceProps(block, instance, mode)` turns a saved block into the organism's props (variant axes + options + content +
+`id` + `mode`); `wireframeProps(block, variant)` gives a catalog tile (axes and an id, no content).
 
-| Case | Example | Wireframe | Page |
-| --- | --- | --- | --- |
-| one field → several shapes | `description` → `/description` | 2 bars (the variant's design) | one `<p>` |
-| several fields → one element | `action` → `/actionLabel` + `/actionHref` | CTA bar | `<a href>` when both are filled; label alone → plain text; otherwise nothing |
-| a place repeated in a list | `member.title` → `/members/*/title`, `each: "/members"` | 3 placeholders (`wireframe: 3`) | one per array item, in order |
+## Models
 
-Every model path has a place in **every** variant and every place points at existing paths (`registry.node.test.ts`).
+- `hero@1`: `badge`, `title` (required), `description`, `image`, `imageAlt`, `imageDark`, `actionLabel`, `actionHref`.
+  The action is drawn as a link only when both label and href are set; with no `image` a decorative placeholder is drawn
+  (empty `alt`).
+- `team@1`: `title` (required), `description`, `members` (1–12 `SimpleMember`: `id` (required), `avatar`, `title`
+  (required), `description`). Members render as `ul` / `li`.
 
-### DOM binding attributes
+Field budget: 5–10 model paths per model (a list counts one plus its item fields), checked in
+`manifest/registry.node.test.ts`.
 
-| Attribute | Value | Purpose |
-| --- | --- | --- |
-| `data-place` | place id (`member.title`) | which spot this is |
-| `data-field` | space-separated **concrete** pointers (`/members/1/title`, `/actionLabel /actionHref`) | which values it shows; select with `[data-field~="/members/1/title"]` |
-| `data-slot`, `data-role`, `data-shape` | theme hooks | **styling only**, never bindings (`tokens.css`) |
+## Modes
 
-Pointers are resolved from the render index (`bind(manifest, "member.title", i)`), so after a reorder a click on a member
-maps to its new position. The inspector reads the pointer from the clicked element and edits `props` with `setAt`
-(`src/model/pointer.ts`: `getAt`, `setAt`, `swapAt`, immutable).
+- `wireframe` (default; the catalog): shapes only (`data-shape`), no words, no links, no content images, no labelled
+  landmark; lists draw `wireframe.items` (3) placeholders.
+- `page` (builder preview, `BlockView mode="page"`): the same composition with real content; each place carries
+  `data-place` (place id) and `data-field` (concrete JSON pointers, e.g. `/members/1/title`, from `bind()`). Empty
+  optional values render nothing.
 
-Decision: bindings are **direct and typed in Svelte** (organism → place component with the value and the bound
-attributes). There is no DOM lookup by `data-field` that swaps rectangles for text: that would be a second render path.
+Without the builder attributes, page mode renders the same DOM as the clean block of the kit (parity test in codegen-x
+`packages/prototypes`).
 
-## Modes: one composition
+## Tests
 
-Each organism takes `{ variant?, content?, <options> }`; it has **no mode prop** and never reads the mode. The mode travels
-by Svelte context (`places/mode.ts`): no provider = `wireframe`. Only `builder/BlockView` provides it:
-`<BlockView instance={{ id, item, variant, options, props }} mode="page" />` (default `wireframe` there too).
-
-- `wireframe` (default everywhere; the feed and the catalog never set a mode): draws every place as shapes, ignores
-  `content`, list places draw `wireframe` placeholders. Shapes are static `aria-hidden="true"`; no text, no link, no
-  content image. Tested: a block rendered directly with full content shows only shapes.
-- `page` (builder preview only): the same places draw real elements from `content`: badge `<span>`, title `<h1>`–`<h3>`,
-  list item titles one level below, text `<p>`, action `<a href>` (kit `Button`), media `<figure>` + kit `Image`.
-  Page elements keep `data-role` / `data-slot` for the theme, never `data-shape`.
-
-The organism asks `presence()` (from places) what to draw: `content(c)`, `any(...values)`, `rows(list, placeholders)`.
-The mode, the bindings and the shapes live in `src/places` and `src/shapes`; organisms only lay out places.
-
-## Instance options
-
-Presentation choices the builder makes per placed block, next to `variant`: saved in `options`, not in `props` (they are
-not content and do not belong to the content model or its schema) and not a variant axis (they do not change layout).
-Declared per item in the manifest (`options`) and in `contract.json`; `validateInstance()` rejects unknown options
-(`unknownOption`) and values outside the enum (`optionValue`). The organism takes each option as a prop of the same name.
-
-| Option | Values | Default | Effect |
-| --- | --- | --- | --- |
-| `headingLevel` | 1, 2, 3 | 2 | element of the block title (`h1` when the block opens the page). The look never changes: size comes from the place, not the level. List item titles (team member names) are **level + 1** (h2 → h3, h1 → h2, h3 → h4), so the outline stays valid at every level. |
-
-Empty values on the page: an empty field renders **no element**; a wrapper with nothing inside is dropped; when the media
-or the whole copy column of a hero is empty the other side takes the full row (no grid); a team without members has no
-grid; a member with no filled value is skipped (the others keep their own index paths).
-
-### Images and dark mode
-
-`{ src, srcDark? }`. Without `srcDark`: one `Image`. With it: two `Image` elements toggled by `dark:hidden` /
-`hidden dark:block` (the dark one `loading="lazy"`). Decision: not `<picture media="(prefers-color-scheme)">`, because
-the app's dark mode is the `dark` class on `<html>`, which media queries cannot see. The DOM is the same in light and dark.
-
-## Interchangeable variants
-
-A variant stores only `layout` axes (media side, column count, cards). It never adds required fields, changes types,
-drops content, or carries props. One `props` object renders fully in every variant of its item; switching the variant
-never needs a refill.
-
-| Block | Model | Variants |
-| --- | --- | --- |
-| `hero-split` | `hero@1` | `media-left`, `media-right` (default), `media-top` |
-| `features-team` | `team@1` | `columns-2`, `columns-3` (default), `columns-4`, `cards-3` |
-
-## Proof (tests)
-
-`packages/blocks/src/manifest/render.test.ts` (every item × variant, same object), `pilot.test.ts` (edit by pointer,
-switch variant, swap members), `registry.node.test.ts` (bindings, budget, instances), `model/model.node.test.ts`
-(pointers, validation, JSON Schema agreement). Summary: [fields.md](./fields.md).
+`manifest/render.test.ts` (every item × variant: places bound, values drawn, cleared values gone, wireframe geometry,
+level, landmark label, member swap, variant switch) and `manifest/registry.node.test.ts` (registry = generated items,
+layout-only variants, places ↔ model paths, field budget, saved instances).

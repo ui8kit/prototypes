@@ -9,6 +9,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CLASSES = ROOT / "packages" / "blocks" / "src" / "classes.ts"
+# The generated organisms (codegen-x/ui8kit packages/prototypes): their blocks, shapes and compose recipes carry the
+# layout class strings of the simple line; they are linted here too. compose/recipes.ts is not: like the kit primitives,
+# it holds control recipes (badge/button sizes such as h-5 px-3) that would trip layout 8+4.
+GENERATED = ROOT / "packages" / "blocks" / "src" / "generated" / "svelte"
+GENERATED_GLOBS = ("blocks/*.svelte", "shapes/*.svelte", "shapes/*.ts")
 EXTRACT_DIR = ROOT / ".ui8px" / "extract"
 EXTRACT_HTML = EXTRACT_DIR / "blocks.html"
 CLASS_MAP = ROOT / ".ui8px" / "class-map.json"
@@ -86,15 +91,24 @@ def class_map(lists: list[str]) -> dict[str, str]:
 
 
 def main() -> int:
-    lists = class_lists(CLASSES.read_text(encoding="utf-8"))
+    sources = [("classes.ts", CLASSES)]
+    for pattern in GENERATED_GLOBS:
+        sources.extend((p.relative_to(GENERATED.parent).as_posix(), p) for p in sorted(GENERATED.glob(pattern)))
+    lists: list[str] = []
+    origin: dict[str, str] = {}
+    for name, path in sources:
+        for raw in class_lists(path.read_text(encoding="utf-8")):
+            if raw not in origin:
+                origin[raw] = name
+                lists.append(raw)
     EXTRACT_DIR.mkdir(parents=True, exist_ok=True)
     lines = [
         "<!doctype html>",
-        "<!-- generated from packages/blocks/src/classes.ts; do not edit -->",
+        "<!-- generated from packages/blocks/src/classes.ts and src/generated/svelte; do not edit -->",
         "<html><body>",
     ]
     for index, raw in enumerate(lists):
-        lines.append(f'<i data-src="classes.ts#{index}" class="{raw}"></i>')
+        lines.append(f'<i data-src="{origin[raw]}#{index}" class="{raw}"></i>')
     lines.append("</body></html>")
     EXTRACT_HTML.write_text("\n".join(lines) + "\n", encoding="utf-8")
     CLASS_MAP.write_text(json.dumps(class_map(lists), indent=2) + "\n", encoding="utf-8")

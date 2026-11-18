@@ -1,7 +1,7 @@
 import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 import { layout } from "../classes";
-import HeroSplit from "../hero-split/HeroSplit.svelte";
+import Block from "./Block.svelte";
 import SectionProbe from "./SectionProbe.test.svelte";
 
 describe("section padding", () => {
@@ -20,8 +20,8 @@ describe("section padding", () => {
   });
 
   it("a Block without a theme provider uses the standard step", () => {
-    const { getByRole } = render(HeroSplit);
-    const region = getByRole("region");
+    const { container } = render(Block, { props: { tag: "section" } });
+    const region = container.querySelector("section")!;
     expect(region.getAttribute("data-section-padding")).toBe("default");
     expect(region.classList.contains("py-16")).toBe(true);
     expect(region.classList.contains("lg:py-32")).toBe(true);
@@ -32,8 +32,8 @@ describe("section padding", () => {
       ["compact", "py-8", "lg:py-16"],
       ["spacious", "py-24", "lg:py-40"],
     ] as const) {
-      const { getByRole, unmount } = render(SectionProbe, { props: { padding } });
-      const region = getByRole("region");
+      const { container, unmount } = render(SectionProbe, { props: { padding } });
+      const region = container.querySelector("section")!;
       expect(region.getAttribute("data-section-padding")).toBe(padding);
       expect(region.classList.contains(base)).toBe(true);
       expect(region.classList.contains(lg)).toBe(true);

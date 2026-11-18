@@ -14,9 +14,10 @@
     "lint:px": "node scripts/ui8px-gate.mjs",
     "kit:install": "bash scripts/install-kit.sh",
     "test:theme": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/theme/src/*.test.ts",
-    "test:manifest": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/blocks/src/manifest/*.node.test.ts packages/blocks/src/model/*.node.test.ts",
-    "verify": "python3 scripts/check-blocks.py && node scripts/ui8px-gate.mjs && node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/theme/src/*.test.ts packages/blocks/src/manifest/*.node.test.ts packages/blocks/src/model/*.node.test.ts && node --experimental-strip-types --import ./scripts/ts-ext-register.mjs scripts/contract.mjs --check && vitest run",
-    "contract": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs scripts/contract.mjs"
+    "test:manifest": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/blocks/src/manifest/*.node.test.ts",
+    "sync:codegen": "node --experimental-strip-types scripts/sync-codegen.ts",
+    "check:codegen": "node --experimental-strip-types scripts/sync-codegen.ts --check",
+    "verify": "node --experimental-strip-types scripts/sync-codegen.ts --check && python3 scripts/check-blocks.py && node scripts/ui8px-gate.mjs && node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/theme/src/*.test.ts packages/blocks/src/manifest/*.node.test.ts && tsc --noEmit && vitest run"
   },
   "ui8kit": {
     "runtime": "svelte",
