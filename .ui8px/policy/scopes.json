@@ -2,6 +2,13 @@
   "defaultScope": "layout",
   "scopes": [
     {
+      "name": "controls",
+      "files": [
+        ".ui8px/extract/recipes-controls.html"
+      ],
+      "spacing": "control"
+    },
+    {
       "name": "layout",
       "files": [
         "packages/blocks/**",

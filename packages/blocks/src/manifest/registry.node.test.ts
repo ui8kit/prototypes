@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { samplePage, SAMPLES, SAMPLE_IDS } from "../fixtures/samples";
 import { BLOCKS, BLOCK_BY_ID, FIELD_BUDGET_MAX, FIELD_BUDGET_MIN, MODELS, fieldBudget, modelPaths, validateInstance } from "./registry";
-import { bind, defaultVariantId, instanceProps, placesFor, wireframeProps } from "./types";
+import { bind, defaultVariantId, instanceProps, paddingOf, placesFor, settingValues, wireframeProps } from "./types";
 
 const generated = JSON.parse(readFileSync(new URL("../generated/manifest.json", import.meta.url), "utf8")) as {
   items: Array<{ item: string; model: string; contract: string }>;
@@ -104,5 +104,25 @@ describe("saved instances", () => {
     assert.ok(many.issues.some((i) => i.path === "/props/members"));
     const url = validateInstance({ id: "x", item: "hero-simple", variant: "mediaEnd", props: { title: "T", actionHref: "javascript:alert(1)" } });
     assert.ok(url.issues.some((i) => i.path === "/props/actionHref"));
+  });
+});
+
+describe("settings", () => {
+  it("every block has level 1–3 and padding compact | standard | spacious (default standard)", () => {
+    for (const b of BLOCKS) {
+      assert.deepEqual(settingValues(b.settings.level!), [1, 2, 3]);
+      assert.deepEqual(settingValues(b.settings.padding!), ["compact", "standard", "spacious"]);
+      assert.equal(b.settings.padding!.default, "standard");
+      assert.equal(settingValues(b.settings.landmarkLabel!), undefined);
+    }
+  });
+
+  it("padding is checked as an option and maps from the theme step (default → standard)", () => {
+    const ok = validateInstance({ id: "x", item: "team-simple", variant: "cols3", options: { padding: "spacious" }, props: SAMPLES.filled["team-simple"] });
+    assert.deepEqual(ok.issues, []);
+    const bad = validateInstance({ id: "x", item: "team-simple", variant: "cols3", options: { padding: "huge" as never }, props: SAMPLES.filled["team-simple"] });
+    assert.deepEqual(bad.issues.map((i) => i.path), ["/options/padding"]);
+    assert.deepEqual(["compact", "default", "spacious"].map((s) => paddingOf(s as never)), ["compact", "standard", "spacious"]);
+    assert.equal(wireframeProps(BLOCK_BY_ID["hero-simple"]!, "mediaEnd", { padding: "compact" }).padding, "compact");
   });
 });

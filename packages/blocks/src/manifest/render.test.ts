@@ -59,6 +59,8 @@ describe.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)
       expect(text(byField(section, "/description")[0])).toBe(heroFilled.description);
       const a = section.querySelector("a");
       expect(a?.getAttribute("href")).toBe(heroFilled.actionHref);
+      expect(a?.getAttribute("data-slot")).toBe("button");
+      expect(section.querySelector("button")).toBeNull();
       expect(text(a)).toBe(heroFilled.actionLabel);
       const srcs = all(section, "img").map((img) => img.getAttribute("src"));
       expect(srcs).toContain(heroFilled.image);
@@ -126,5 +128,27 @@ describe("builder edits", () => {
     const values = (v: string) => text(page("hero-simple", v, heroFilled));
     expect(values("mediaStart")).toBe(values("mediaEnd"));
     expect(values("mediaTop")).toBe(values("mediaEnd"));
+  });
+});
+
+describe("section padding (theme → padding setting)", () => {
+  const PRESETS = { compact: ["py-8", "lg:py-16"], standard: ["py-16", "lg:py-32"], spacious: ["py-24", "lg:py-40"] } as const;
+  it.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)))("%s / %s: every preset in both modes", (item, variant) => {
+    for (const [padding, cls] of Object.entries(PRESETS)) {
+      const pageSection = page(item, variant, FILLED[item]!, { padding: padding as never });
+      const { container } = render(CATALOG[item]!, { props: wireframeProps(BLOCK_BY_ID[item]!, variant, { padding: padding as never }) });
+      for (const s of [pageSection, container.querySelector("section")!]) for (const c of cls) expect(s.classList.contains(c), `${padding} ${c}`).toBe(true);
+    }
+  });
+});
+
+describe("team list width (round 6 bug)", () => {
+  it.each(BLOCK_BY_ID["team-simple"]!.variants.map((v) => v.id))("%s: the list is a full-width grid in a stretching column, both modes", (variant) => {
+    for (const s of [page("team-simple", variant, teamFilled), wireframe("team-simple", variant)]) {
+      const ul = s.querySelector("ul")!;
+      expect(ul.classList.contains("w-full")).toBe(true);
+      expect(ul.classList.contains("grid")).toBe(true);
+      expect(ul.parentElement!.classList.contains("items-stretch")).toBe(true);
+    }
   });
 });

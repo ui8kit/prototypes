@@ -21,8 +21,9 @@ version (`hero@2`).
 ```
 
 - `item`: the contract's `item`; `variant`: one of its `variants[].id` (layout axes only, never content).
-- `options`: the contract's `settings`: `level` (heading level 1–3, default 2; list item titles one level below) and
-  `landmarkLabel` (replaces `aria-labelledby` with `aria-label`).
+- `options`: the contract's `settings`: `level` (heading level 1–3, default 2; list item titles one level below),
+  `padding` (`compact` py-8 lg:py-16, `standard` py-16 lg:py-32 (default), `spacious` py-24 lg:py-40; a setting, not a
+  variant axis) and `landmarkLabel` (replaces `aria-labelledby` with `aria-label`).
 - `props`: content valid for the model (`validateInstance()`; issues carry JSON pointers such as `/props/members/1/id`).
 - `id`: the instance; the heading id is `<id>-title`.
 
@@ -32,7 +33,7 @@ version (`hero@2`).
 ## Models
 
 - `hero@1`: `badge`, `title` (required), `description`, `image`, `imageAlt`, `imageDark`, `actionLabel`, `actionHref`.
-  The action is drawn as a link only when both label and href are set; with no `image` a decorative placeholder is drawn
+  The action is a link (`a[href]`, the `link-button` recipe, `data-slot="button"`) drawn only when both label and href are set; with no `image` a decorative placeholder is drawn
   (empty `alt`).
 - `team@1`: `title` (required), `description`, `members` (1–12 `SimpleMember`: `id` (required), `avatar`, `title`
   (required), `description`). Members render as `ul` / `li`.

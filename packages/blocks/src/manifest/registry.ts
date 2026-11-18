@@ -3,7 +3,7 @@ import teamSimple from "../generated/contracts/team-simple/1.json" with { type: 
 import { model as heroModel, validateHeroContent } from "../generated/models/hero@1";
 import { model as teamModel, validateTeamContent } from "../generated/models/team@1";
 import type { Issue, ModelField, ModelSpec } from "../generated/models/validate";
-import { TITLE_LEVELS, type BlockCategory, type BlockInstance, type BlockManifest, type Contract } from "./types";
+import { settingValues, type BlockCategory, type BlockInstance, type BlockManifest, type Contract } from "./types";
 
 /** Generated contracts (codegen-x/ui8kit packages/prototypes, synced by scripts/sync-codegen.ts) plus a catalog category. */
 const manifest = (contract: unknown, category: BlockCategory): BlockManifest => {
@@ -54,7 +54,10 @@ export function validateInstance(instance: BlockInstance<unknown>): InstanceChec
   if (!block.variants.some((v) => v.id === instance.variant)) issues.push({ path: "/variant", code: "unknownVariant" });
   for (const [k, v] of Object.entries(instance.options ?? {})) {
     if (!(k in block.settings) || k === "id") issues.push({ path: `/options/${k}`, code: "unknownOption" });
-    else if (k === "level" ? !TITLE_LEVELS.includes(v as never) : typeof v !== "string") issues.push({ path: `/options/${k}`, code: "optionValue" });
+    else {
+      const allowed = settingValues(block.settings[k]!);
+      if (allowed ? !allowed.includes(v as never) : typeof v !== "string") issues.push({ path: `/options/${k}`, code: "optionValue" });
+    }
   }
   issues.push(...MODELS[block.model]!.validate(instance.props).map((i) => ({ ...i, path: `/props${i.path}` })));
   return { ok: issues.length === 0, issues };

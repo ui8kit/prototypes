@@ -7,7 +7,8 @@
  *   model     the content model of `props` (`hero@1`), shared by every variant
  *   places    where each value is drawn: a place binds JSON-pointer templates (`*` = list index) to one spot
  *   variants  layout-only alternatives (axes); any valid `props` renders fully in every variant
- *   settings  instance options next to the variant: `level` (heading level 1–3), `landmarkLabel`
+ *   settings  instance options next to the variant: `level` (heading level 1–3), `padding` (section padding preset),
+ *             `landmarkLabel`
  */
 export const BLOCK_CATEGORIES = [
   "hero",
@@ -79,8 +80,22 @@ export type BlockManifest = Contract & {
 export type TitleLevel = 1 | 2 | 3;
 export const TITLE_LEVELS: readonly TitleLevel[] = [1, 2, 3];
 
+/** Section padding presets of the generated blocks: compact py-8 lg:py-16, standard py-16 lg:py-32, spacious py-24 lg:py-40. */
+export const SECTION_PADDING_PRESETS = ["compact", "standard", "spacious"] as const;
+export type SectionPaddingPreset = (typeof SECTION_PADDING_PRESETS)[number];
+/** The theme's section padding step (packages/theme: compact | default | spacious) as the blocks' `padding` setting. */
+export const paddingOf = (step: "compact" | "default" | "spacious"): SectionPaddingPreset => (step === "default" ? "standard" : step);
+
 /** Instance options: presentation choices per placed block (not content, not a variant axis). */
-export type BlockOptions = { level?: TitleLevel; landmarkLabel?: string };
+export type BlockOptions = { level?: TitleLevel; padding?: SectionPaddingPreset; landmarkLabel?: string };
+
+/** The values a setting allows, from its contract type (`1 | 2 | 3`, `"compact" | "standard"`); undefined: any string. */
+export function settingValues(setting: Setting): Array<string | number> | undefined {
+  const parts = setting.type.split("|").map((t) => t.trim());
+  if (parts.every((t) => /^\d+$/.test(t))) return parts.map(Number);
+  if (parts.every((t) => /^"[^"]*"$/.test(t))) return parts.map((t) => t.slice(1, -1));
+  return undefined;
+}
 
 /**
  * A block as a builder saves it on a page. `id` is the instance (also the heading id prefix), `item` the block type,
@@ -108,9 +123,9 @@ export function instanceProps(block: BlockManifest, instance: BlockInstance<unkn
   return { ...resolveVariant(block, instance.variant).axes, ...instance.options, ...content, id: instance.id, mode };
 }
 
-/** The props of a catalog (wireframe) tile: no content, only the layout of the variant. */
-export function wireframeProps(block: BlockManifest, variantId: string): Record<string, unknown> {
-  return { ...resolveVariant(block, variantId).axes, id: `${block.id}-${variantId}`, mode: "wireframe" };
+/** The props of a catalog (wireframe) tile: no content, only the layout of the variant (and presentation options). */
+export function wireframeProps(block: BlockManifest, variantId: string, options?: BlockOptions): Record<string, unknown> {
+  return { ...resolveVariant(block, variantId).axes, ...options, id: `${block.id}-${variantId}`, mode: "wireframe" };
 }
 
 export function placeOf(block: BlockManifest, id: string): Place {

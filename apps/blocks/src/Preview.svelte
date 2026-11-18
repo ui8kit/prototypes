@@ -4,11 +4,14 @@
 -->
 <script lang="ts">
   import { Box } from "@ui8kit/kit";
-  import { BLOCKS, BlockView, SAMPLES, samplePage } from "@ui8kit/blocks";
+  import { BLOCKS, BlockView, SAMPLES, paddingOf, samplePage } from "@ui8kit/blocks";
+  import { appTheme } from "./theme/ctl.svelte";
   import { galleryText } from "./content/gallery";
   import { app } from "./view.svelte";
 
-  const optionsOf = (item: string) => samplePage.find((b) => b.item === item)?.options;
+  // saved options of the sample page plus the theme's section padding as the padding setting
+  const padding = $derived(paddingOf(appTheme.state.theme.sectionPadding));
+  const optionsOf = (item: string) => ({ ...samplePage.find((b) => b.item === item)?.options, padding });
 </script>
 
 <Box tag="main" class="ui8-feed" aria-label={galleryText.previewTitle} data-testid="preview">

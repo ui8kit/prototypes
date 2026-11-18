@@ -47,3 +47,28 @@ devDependencies (`bun install`) and uses the committed kit tree.
 are the same packed files the CLI fetches from CDN, so the committed tree is
 registry 3.4.0 primitives, not hand-written components. The Python bypass is
 gone; reinstall is CLI-only.
+
+## ui8px policy for the generated blocks
+
+`scripts/ui8px-extract.py` lints, next to `classes.ts`:
+
+- the generated blocks and shapes (`packages/blocks/src/generated/svelte/{blocks,shapes}`), layout scope;
+- `generated/svelte/compose/recipes.ts`, but only the recipes the shipped compositions read (`generated/manifest.json`
+  `recipes.used`). The recipes codegen-x marks as controls (`recipes.controls`, from `CONTROL_RECIPES` in
+  `packages/kit-compose/src/map.ts`: `badge`, `link-button`) go to `.ui8px/extract/recipes-controls.html`, which the
+  `controls` scope of `.ui8px/policy/scopes.json` lints with control spacing (4px steps allowed: `h-5 px-3`), the same
+  8 + 4 rule as the kit controls. Every other used recipe is linted under the layout scope (8px steps only).
+
+Allowlist entries (`.ui8px/policy/allowed.json`) that exist only because the generated code uses them. Each one is a
+Tailwind v4 core utility that the ui8px 0.2.5 dictionary does not know; none of them adds a spacing value, and every
+colour is a theme token:
+
+| Utility | Why |
+| --- | --- |
+| `inset-ring`, `inset-ring-border`, `inset-ring-primary`, `inset-ring-transparent` | the 1px inner outline of the media frame, badge and link-button recipes; inset rings do not take layout space. All four are in the codegen-x/ui8kit policy too |
+| `aspect-3/4` | the portrait ratio of the media frame (`MediaFrame ratio="3/4"`), next to the already allowed `aspect-4/3` and `aspect-21/9` |
+| `max-w-full`, `size-6`, `size-8`, `size-12`, `size-16`, `size-20` | image recipe (`max-w-full`) and avatar/icon sizes on the 8px grid (24–80px); in the codegen-x policy |
+| `object-none`, `object-scale-down`, `object-left`, `object-left-top`, `object-left-bottom`, `object-right`, `object-right-top`, `object-right-bottom` | the `fit` / `position` keys of the image recipe |
+| `items-baseline` | the `align` key of the stack recipe |
+| `transition-colors`, `bg-primary/90`, `bg-secondary/80` | hover state of the link-button recipe (token colours with opacity) |
+| `ring-destructive/20`, `ring-destructive/40` | the focus ring of the destructive badge variant (light / dark) |

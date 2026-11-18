@@ -2,6 +2,9 @@ export {
   BLOCK_CATEGORIES,
   MODES,
   PLACE_KINDS,
+  SECTION_PADDING_PRESETS,
+  paddingOf,
+  settingValues,
   TITLE_LEVELS,
   bind,
   defaultVariant,
@@ -21,6 +24,7 @@ export {
   type Place,
   type PlaceBinding,
   type PlaceKind,
+  type SectionPaddingPreset,
   type Setting,
   type TitleLevel,
 } from "./types";

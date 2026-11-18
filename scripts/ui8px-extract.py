@@ -10,10 +10,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CLASSES = ROOT / "packages" / "blocks" / "src" / "classes.ts"
 # The generated organisms (codegen-x/ui8kit packages/prototypes): their blocks, shapes and compose recipes carry the
-# layout class strings of the simple line; they are linted here too. compose/recipes.ts is not: like the kit primitives,
-# it holds control recipes (badge/button sizes such as h-5 px-3) that would trip layout 8+4.
+# layout class strings of the simple line; they are linted here too (layout scope).
 GENERATED = ROOT / "packages" / "blocks" / "src" / "generated" / "svelte"
 GENERATED_GLOBS = ("blocks/*.svelte", "shapes/*.svelte", "shapes/*.ts")
+# compose/recipes.ts: the token-only recipes of the compositions. Only the recipes the shipped compositions read are linted
+# (generated/manifest.json recipes.used); the ones codegen-x marks as controls (recipes.controls: badge, link-button, …) go to
+# their own file under the ui8px `controls` scope (.ui8px/policy/scopes.json, spacing "control": 4px steps allowed, the
+# same owner rule 8 + 4 as kit controls), every other recipe to the layout scope.
+GENERATED_MANIFEST = GENERATED.parent / "manifest.json"
+RECIPES_TS = GENERATED / "compose" / "recipes.ts"
+RECIPES_CONTROLS = ROOT / ".ui8px" / "extract" / "recipes-controls.html"
+RECIPES_LAYOUT = ROOT / ".ui8px" / "extract" / "recipes-layout.html"
 EXTRACT_DIR = ROOT / ".ui8px" / "extract"
 EXTRACT_HTML = EXTRACT_DIR / "blocks.html"
 CLASS_MAP = ROOT / ".ui8px" / "class-map.json"
@@ -90,6 +97,47 @@ def class_map(lists: list[str]) -> dict[str, str]:
     return dict(sorted(mapping.items()))
 
 
+def recipe_classes(recipe: dict) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    if recipe.get("base", "").strip():
+        out.append(("base", recipe["base"].strip()))
+    for key, values in recipe.get("byKey", {}).items():
+        for value, cls in values.items():
+            if cls.strip():
+                out.append((f"byKey.{key}.{value}", cls.strip()))
+    for index, compound in enumerate(recipe.get("compound", [])):
+        if compound.get("class", "").strip():
+            out.append((f"compound[{index}]", compound["class"].strip()))
+    return out
+
+
+def write_recipes() -> tuple[int, int]:
+    """Mirror the used recipes of compose/recipes.ts into two HTML files, one per ui8px scope."""
+    manifest = json.loads(GENERATED_MANIFEST.read_text(encoding="utf-8"))
+    used = manifest.get("recipes", {}).get("used", [])
+    controls = set(manifest.get("recipes", {}).get("controls", []))
+    source = RECIPES_TS.read_text(encoding="utf-8")
+    start = source.index("= {", source.index("export const RECIPES")) + 2
+    end = source.index("\n};\n", start) + 2
+    recipes = json.loads(source[start:end])
+    counts = []
+    for target, pick in ((RECIPES_CONTROLS, lambda r: r in controls), (RECIPES_LAYOUT, lambda r: r not in controls)):
+        lines = ["<!doctype html>", "<!-- generated from packages/blocks/src/generated/svelte/compose/recipes.ts; do not edit -->", "<html><body>"]
+        n = 0
+        for name in used:
+            if not pick(name):
+                continue
+            if name not in recipes:
+                raise SystemExit(f"recipe {name} of generated/manifest.json is not in compose/recipes.ts")
+            for where, cls in recipe_classes(recipes[name]):
+                lines.append(f'<i data-src="recipes.ts#{name}.{where}" class="{cls}"></i>')
+                n += 1
+        lines.append("</body></html>")
+        target.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        counts.append(n)
+    return counts[0], counts[1]
+
+
 def main() -> int:
     sources = [("classes.ts", CLASSES)]
     for pattern in GENERATED_GLOBS:
@@ -114,6 +162,8 @@ def main() -> int:
     CLASS_MAP.write_text(json.dumps(class_map(lists), indent=2) + "\n", encoding="utf-8")
     print(f"wrote {EXTRACT_HTML.relative_to(ROOT)} ({len(lists)} class lists)")
     print(f"wrote {CLASS_MAP.relative_to(ROOT)}")
+    controls, layout = write_recipes()
+    print(f"wrote {RECIPES_CONTROLS.relative_to(ROOT)} ({controls} control class lists), {RECIPES_LAYOUT.relative_to(ROOT)} ({layout})")
     return 0
 
 

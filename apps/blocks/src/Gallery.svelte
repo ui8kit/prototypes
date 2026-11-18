@@ -4,7 +4,11 @@
 -->
 <script lang="ts">
   import { Box } from "@ui8kit/kit";
-  import { BLOCKS, CATALOG, wireframeProps } from "@ui8kit/blocks";
+  import { BLOCKS, CATALOG, paddingOf, wireframeProps } from "@ui8kit/blocks";
+  import { appTheme } from "./theme/ctl.svelte";
+
+  // the theme's section padding drives the padding setting of every generated block
+  const padding = $derived(paddingOf(appTheme.state.theme.sectionPadding));
   import { galleryText } from "./content/gallery";
 </script>
 
@@ -14,7 +18,7 @@
     {#if View}
       {#each block.variants as variant (variant.id)}
         <Box class="ui8-feed-item" data-block={block.id} data-variant={variant.id} data-testid={"feed-" + block.id + "-" + variant.id}>
-          <View {...wireframeProps(block, variant.id)} />
+          <View {...wireframeProps(block, variant.id, { padding })} />
         </Box>
       {/each}
     {/if}
