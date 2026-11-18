@@ -15,6 +15,9 @@ import {
   CONTENT_KINDS,
   SHAPE_KINDS,
   defaultVariantId,
+  FIELD_BUDGET_MAX,
+  FIELD_BUDGET_MIN,
+  fieldBudget,
   fieldPaths,
   formatCount,
   recordTypes,
@@ -76,6 +79,7 @@ for (const block of BLOCKS) {
 
 const summary = {
   principle: "simple content, interchangeable variants, full rendering of the contract",
+  fieldBudget: { min: FIELD_BUDGET_MIN, max: FIELD_BUDGET_MAX },
   blocks: BLOCKS.map((block) => ({
     id: block.id,
     category: block.category,
@@ -83,6 +87,7 @@ const summary = {
     content: block.content,
     variants: block.variants,
     defaultVariant: defaultVariantId(block),
+    fieldBudget: fieldBudget(block.content),
     shapeCounts: shapeCounts(block.content),
   })),
   categories,
@@ -98,6 +103,12 @@ function mdTable(headers, rows) {
   const line = (cells) => `| ${cells.join(" | ")} |`;
   return [line(headers), line(headers.map(() => "---")), ...rows.map(line)].join("\n");
 }
+
+const budgetRows = BLOCKS.map((block) => {
+  const n = fieldBudget(block.content);
+  const paths = fieldPaths(block.content).map((field) => `\`${field.path}\``).join(", ");
+  return [block.id, String(n), `${FIELD_BUDGET_MIN}–${FIELD_BUDGET_MAX}`, paths];
+});
 
 const kindRows = [...CONTENT_KINDS, "record"]
   .filter((kind) => kinds[kind].blocks.length > 0)
@@ -141,6 +152,18 @@ Shared field paths: ${
 Shared record types: ${
     repeatedRecords.length ? repeatedRecords.map((p) => `\`${p}\``).join(", ") : "_none yet_"
   }.
+
+## Field budget
+
+Each contract is **${FIELD_BUDGET_MIN}–${FIELD_BUDGET_MAX}** fields. Counting rule:
+
+- Every declared path counts as 1 (\`title\`, \`members.avatar\`, …).
+- Cardinality does not multiply (\`description\` with \`count: 2\` is still one field).
+- A record (array) counts as 1, plus each field of its item type (recursive).
+- \`actionLabel\` and \`actionHref\` are two fields even when they render on one CTA.
+- Layout variants do not count.
+
+${mdTable(["Block", "Fields", "Budget", "Paths"], budgetRows)}
 
 ## Content kinds
 
@@ -186,6 +209,7 @@ ${BLOCKS.map((block) => {
 
 - Category: \`${block.category}\`
 - Label: ${block.label}
+- Field budget: ${fieldBudget(block.content)} / ${FIELD_BUDGET_MAX}
 - Variants (layout only): ${variants}
 - Layout axes: ${layout}
 - Flattened shapes: ${shapes || "—"}

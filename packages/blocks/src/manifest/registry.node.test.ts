@@ -3,7 +3,16 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
-import { BLOCKS, BLOCK_BY_ID, fieldPaths, shapeCounts } from "./index.ts";
+import { shape } from "../classes.ts";
+import {
+  BLOCKS,
+  BLOCK_BY_ID,
+  FIELD_BUDGET_MAX,
+  FIELD_BUDGET_MIN,
+  fieldBudget,
+  fieldPaths,
+  shapeCounts,
+} from "./index.ts";
 
 const SRC = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SKIP = new Set(["layout", "shapes", "content", "manifest"]);
@@ -92,6 +101,67 @@ describe("block manifests", () => {
           assert.ok(field.record && field.record !== "item", `${block.id}: record ${field.path} needs a named type`);
         }
       }
+    }
+  });
+
+  it("counts a record as one field plus its item fields (cardinality does not multiply)", () => {
+    const n = fieldBudget([
+      { id: "title", kind: "title", count: 1 },
+      { id: "description", kind: "description", count: 2 },
+      { id: "image", kind: "image", count: 1 },
+      { id: "actionLabel", kind: "actionLabel", count: 1 },
+      { id: "actionHref", kind: "actionHref", count: 1 },
+      {
+        id: "members",
+        kind: "record",
+        record: "teamMember",
+        count: { min: 2, max: 8, default: 4 },
+        fields: [
+          { id: "avatar", kind: "avatar", count: 1 },
+          { id: "title", kind: "title", count: 1 },
+          { id: "description", kind: "description", count: 2 },
+        ],
+      },
+    ]);
+    // 5 scalars + members + members.{avatar,title,description} = 9. Not 5 + 4×3.
+    assert.equal(n, 9);
+    assert.ok(n <= FIELD_BUDGET_MAX);
+    const over = fieldBudget([
+      { id: "a", kind: "title", count: 1 },
+      { id: "b", kind: "title", count: 1 },
+      { id: "c", kind: "title", count: 1 },
+      { id: "d", kind: "title", count: 1 },
+      { id: "e", kind: "title", count: 1 },
+      { id: "f", kind: "title", count: 1 },
+      { id: "g", kind: "title", count: 1 },
+      { id: "h", kind: "title", count: 1 },
+      { id: "i", kind: "title", count: 1 },
+      { id: "j", kind: "title", count: 1 },
+      { id: "k", kind: "title", count: 1 },
+    ]);
+    assert.equal(over, 11);
+    assert.ok(over > FIELD_BUDGET_MAX);
+  });
+
+  it(`keeps every content contract within ${FIELD_BUDGET_MIN}–${FIELD_BUDGET_MAX} fields`, () => {
+    for (const block of BLOCKS) {
+      const n = fieldBudget(block.content);
+      assert.ok(
+        n >= FIELD_BUDGET_MIN && n <= FIELD_BUDGET_MAX,
+        `${block.id}: field budget ${n} is outside ${FIELD_BUDGET_MIN}–${FIELD_BUDGET_MAX} (paths: ${fieldPaths(block.content)
+          .map((field) => field.path)
+          .join(", ")})`,
+      );
+    }
+  });
+
+  it("keeps avatars square and rounded-full", () => {
+    assert.match(shape.avatar, /\brounded-full\b/);
+    for (const key of ["avatarSm", "avatarMd", "avatarLg"] as const) {
+      const h = shape[key].match(/\bh-(\d+)\b/);
+      const w = shape[key].match(/\bw-(\d+)\b/);
+      assert.ok(h && w, `${key} needs h-N and w-N`);
+      assert.equal(h[1], w[1], `${key} must be a square`);
     }
   });
 });

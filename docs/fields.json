@@ -1,5 +1,9 @@
 {
   "principle": "simple content, interchangeable variants, full rendering of the contract",
+  "fieldBudget": {
+    "min": 5,
+    "max": 10
+  },
   "blocks": [
     {
       "id": "hero-split",
@@ -54,6 +58,7 @@
         }
       ],
       "defaultVariant": "media-right",
+      "fieldBudget": 5,
       "shapeCounts": {
         "heading": 1,
         "text-line": 2,
@@ -123,6 +128,7 @@
         }
       ],
       "defaultVariant": "columns-3",
+      "fieldBudget": 5,
       "shapeCounts": {
         "heading": 4,
         "text-line": 6,

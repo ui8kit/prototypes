@@ -54,6 +54,9 @@ export const heroSplit: BlockManifest = {
 - Mark each rendered slot with `data-field` matching the content path
   (`title`, `members.avatar`). One node may carry two fields
   (`actionLabel actionHref` on the CTA).
+- **Field budget 5–10.** Every declared path counts as 1. An array counts as
+  one field plus its item fields. Cardinality does not multiply. Tests fail
+  above 10 or below 5.
 
 Register it:
 
@@ -84,16 +87,21 @@ The shared tests already:
 - flatten default content → `[data-shape]` (`render.test.ts`)
 - **completeness:** every block × every variant renders every contract field
 - every organism directory has a registered `*.block.ts`; variants are
-  layout-only (`registry.node.test.ts`)
+  layout-only; field budget is 5–10 (`registry.node.test.ts`)
 
 ## 4. Markup
 
 One file, one `Block tag="section"` with `aria-label={label}`.
 
-Inside, only:
+Inside, only rectangles and text bars:
 
 - `Container`, `Stack`, `Group`, `Grid` (`tag`, `gap`, `align`, `justify`, `cols`, `py`)
 - `TextLine`, `Heading`, `CtaShape`, `Media`, `Dot`, `Avatar`
+
+Do not import kit `Dialog`, `Select`, `Disclosure`, accordion, tabs, or carousel.
+Those patterns are stacks/groups of the shapes above. The only kit control in
+`packages/blocks` is `Button` inside `CtaShape`. Media is an `Image` inside a
+rectangle. Avatars are squares (`h-N w-N`) with `rounded-full`.
 
 Pass `field="…"` on every shape. Read the active variant with
 `resolveVariant(manifest, variant)` and branch **presentation only**.
@@ -112,8 +120,9 @@ bun run fields:summary
 ```
 
 Rewrites `docs/fields.json` and `docs/fields.md`: which **content** kinds,
-paths, and record types repeat (variants are listed as layout, not as fields).
-Commit the generated files. `bun run verify` regenerates them.
+paths, and record types repeat, plus the 5–10 field-budget count per block
+(variants are listed as layout, not as fields). Commit the generated files.
+`bun run verify` regenerates them.
 
 ## 6. Checks
 
@@ -122,5 +131,6 @@ bun run verify
 ```
 
 `check-blocks` must print `raw-utilities …: 0` for the new file, require the
-sibling manifest, and keep `blockRoot` in sync. ui8px extract picks up new
-strings from `classes.ts` only.
+sibling manifest, keep `blockRoot` in sync, and reject interactive kit widgets
+(accordion, tabs, carousel, Dialog, Select, …). Only `CtaShape` may use `Button`.
+ui8px extract picks up new strings from `classes.ts` only.

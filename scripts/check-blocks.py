@@ -4,6 +4,10 @@
 Fails when a block file leaks raw utility classes, bare HTML, nested Block,
 literal copy, or forbidden style tokens. Layout and shape files may compose
 kit primitives; they still must not embed Tailwind string literals.
+
+Interactive kit widgets (Button, Dialog, Select, accordion/tabs/carousel, …)
+are forbidden in packages/blocks except Button on CtaShape. Image/Picture/Source
+belong only in Media.svelte. Organisms never import @ui8kit/kit.
 """
 
 from __future__ import annotations
@@ -69,11 +73,62 @@ ALLOWED_SHAPE_IMPORTS = {
 }
 ALLOWED_LAYOUT_IMPORTS = {"Block", "Container", "Grid", "Group", "Stack"}
 
+# Kit widgets that are not rectangles. Accordion/tabs/carousel are not in v3 kit;
+# if they appear later they join this set. Button is allowed only on CtaShape.
+KIT_INTERACTIVE = {
+    "Accordion",
+    "Button",
+    "Carousel",
+    "Checkbox",
+    "Dialog",
+    "Disclosure",
+    "Summary",
+    "Form",
+    "Icon",
+    "Input",
+    "Label",
+    "Link",
+    "Meter",
+    "Progress",
+    "Radio",
+    "Select",
+    "SelectOption",
+    "SelectOptGroup",
+    "Switch",
+    "Tabs",
+    "Text",
+    "Textarea",
+}
+KIT_MEDIA = {"Image", "Picture", "Source"}
+KIT_IMPORT = re.compile(
+    r"import\s+(?:type\s+)?(?:\{([^}]+)\}|(\w+))\s+from\s+[\"']@ui8kit/kit(?:/[^\"']+)?[\"']"
+)
+
 
 def strip_comments(source: str) -> str:
     source = re.sub(r"<!--.*?-->", "", source, flags=re.S)
     source = re.sub(r"<script[\s\S]*?</script>", " ", source)
     return source
+
+
+def imported_kit_names(source: str) -> list[str]:
+    names: list[str] = []
+    for match in KIT_IMPORT.finditer(source):
+        body = match.group(1) or match.group(2) or ""
+        for raw in body.split(","):
+            token = re.sub(r"^type\s+", "", raw.strip())
+            name = token.split(" as ")[0].strip()
+            if name:
+                names.append(name)
+    return names
+
+
+def interactive_markup(markup: str) -> set[str]:
+    found: set[str] = set()
+    for name in KIT_INTERACTIVE | KIT_MEDIA:
+        if re.search(rf"<{name}\b", markup):
+            found.add(name)
+    return found
 
 
 def tokens_in(value: str) -> list[str]:
@@ -154,6 +209,36 @@ def check_file(path: Path, organisms: set[str]) -> list[str]:
         for match in LITERAL_ATTR.finditer(source):
             errors.append(f"{rel}: literal naming text {match.group(1)!r}")
 
+    kit_names = imported_kit_names(source)
+    interactive = [name for name in kit_names if name in KIT_INTERACTIVE]
+    media_names = [name for name in kit_names if name in KIT_MEDIA]
+    cta_file = path.name == "CtaShape.svelte"
+    media_file = path.name == "Media.svelte"
+
+    if kind == "organism" and kit_names:
+        errors.append(
+            f"{rel}: organisms must not import @ui8kit/kit; use layout shells and shapes"
+        )
+
+    if interactive and not (cta_file and set(interactive) <= {"Button"}):
+        errors.append(
+            f"{rel}: interactive kit {interactive}; only CtaShape may use Button. "
+            "Accordion, tabs, carousel and other widgets are stacks/groups of rectangles."
+        )
+
+    if media_names and not media_file:
+        errors.append(f"{rel}: Image/Picture/Source belong only in Media.svelte (media in a rectangle)")
+
+    tags = interactive_markup(markup)
+    bad_tags = {name for name in tags if name in KIT_INTERACTIVE}
+    if cta_file:
+        bad_tags.discard("Button")
+    if bad_tags:
+        errors.append(f"{rel}: interactive markup {sorted(bad_tags)}")
+    media_tags = {name for name in tags if name in KIT_MEDIA}
+    if media_tags and not media_file:
+        errors.append(f"{rel}: media markup {sorted(media_tags)} outside Media.svelte")
+
     return errors
 
 
@@ -197,6 +282,7 @@ def main() -> int:
         "organisms pass Block/Container/Stack/Grid/shape props only."
     )
     print(f"organism dirs: {', '.join(sorted(organisms)) or '(none)'}")
+    print("interactive kit: Button allowed only in CtaShape.svelte")
     errors.extend(check_manifests(organisms))
     for path in files:
         errors.extend(check_file(path, organisms))

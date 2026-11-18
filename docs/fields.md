@@ -9,6 +9,21 @@ Blocks: **2**. Content kinds in two or more blocks: `title`, `description`.
 Shared field paths: `title`.
 Shared record types: _none yet_.
 
+## Field budget
+
+Each contract is **5–10** fields. Counting rule:
+
+- Every declared path counts as 1 (`title`, `members.avatar`, …).
+- Cardinality does not multiply (`description` with `count: 2` is still one field).
+- A record (array) counts as 1, plus each field of its item type (recursive).
+- `actionLabel` and `actionHref` are two fields even when they render on one CTA.
+- Layout variants do not count.
+
+| Block | Fields | Budget | Paths |
+| --- | --- | --- | --- |
+| hero-split | 5 | 5–10 | `title`, `description`, `image`, `actionLabel`, `actionHref` |
+| features-team | 5 | 5–10 | `title`, `members`, `members.avatar`, `members.title`, `members.description` |
+
 ## Content kinds
 
 Named fields of the contract (not layout). `totalDefault` is the sum of default
@@ -54,6 +69,7 @@ separate record types, not a universal item.
 
 - Category: `hero`
 - Label: Hero
+- Field budget: 5 / 10
 - Variants (layout only): `media-left`, `media-right` (default), `media-top`
 - Layout axes: media=left; media=right; media=top
 - Flattened shapes: heading × 1, text-line × 2, cta × 1, media × 1
@@ -68,6 +84,7 @@ separate record types, not a universal item.
 
 - Category: `team`
 - Label: Team
+- Field budget: 5 / 10
 - Variants (layout only): `columns-2`, `columns-3` (default), `columns-4`
 - Layout axes: columns=2; columns=3; columns=4
 - Flattened shapes: heading × 4, text-line × 6, avatar × 3

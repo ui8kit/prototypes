@@ -18,7 +18,8 @@ This is not a marketing site and not an idea dump. Blocks are organisms of recta
 - One `Block` per organism file. Never nest or loop `Block` in that file.
 - No bare HTML in composition. Retag with `tag` on kit primitives / layout shells.
 - No copy, no raster images, no unique colors or gradients. Media is a hatched data-URI `Image`.
-- Blocks render **only** `TextLine`, `Heading`, `CtaShape`, `Media`, `Dot` / `Avatar`.
+- Blocks render **only** `TextLine`, `Heading`, `CtaShape`, `Media`, `Dot` / `Avatar` (rectangles and text bars). Accordion, tabs, carousel: stacks of rectangles, not kit widgets.
+- Content contracts are 5–10 fields (`docs/fields.md`).
 - Remaining Tailwind utilities live in `packages/blocks/src/classes.ts`. Organisms pass `tag`, `gap`, `align`, `justify`, `cols`, `py` on `Block` / `Container` / `Stack` / `Group` / `Grid`.
 - Structural check: **0 raw utility classes per block `.svelte` file**.
 

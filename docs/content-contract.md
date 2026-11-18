@@ -23,6 +23,18 @@ Repeated content is a **typed array of records**. The record has a name (`teamMe
 
 Cardinality (`count`, or `{ min, max, default }`) is content, not layout. Switching a variant must not change how many records are filled.
 
+## Field budget (5–10)
+
+Each contract has **at least 5 and at most 10** fields. Counting rule (`fieldBudget`):
+
+- Every declared path counts as 1 (`title`, `members.avatar`, …).
+- Cardinality does not multiply: `description` with `count: 2` is still one field.
+- A record (array) counts as **1**, plus each field of its item type (recursive). `members` + `avatar` + `title` + `description` = 4, plus a block-level `title` = 5.
+- `actionLabel` and `actionHref` are two fields even on one CTA.
+- Layout variants do not count.
+
+`hero-split` is 5; `features-team` is 5. Tests fail outside 5–10. The scoreboard in `docs/fields.md` prints the count per block.
+
 ## Interchangeable variants
 
 Layout differences are variants of the **same** block, selected with a `variant` prop:

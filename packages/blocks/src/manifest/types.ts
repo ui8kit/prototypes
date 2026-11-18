@@ -5,6 +5,8 @@
  * Rules (docs/content-contract.md):
  * - Simple content: named fields (title, description, image, actionLabel, …).
  *   Repeated content is a named record type, not a universal item.
+ * - Field budget 5–10: every path counts as 1; a record is 1 plus its item
+ *   fields; cardinality does not multiply.
  * - Interchangeable variants: layout only. A variant never adds required
  *   fields, changes types, or drops/transforms content.
  * - Full rendering: every filled field has a DOM rendering in every variant.
@@ -139,6 +141,10 @@ export type FieldPath = {
   record?: string;
 };
 
+/** Inclusive field-budget bounds. Tests fail outside this range. */
+export const FIELD_BUDGET_MIN = 5;
+export const FIELD_BUDGET_MAX = 10;
+
 /** Dot-path of every content field, including nested record fields (`members.avatar`). */
 export function fieldPaths(fields: ContentField[], prefix = ""): FieldPath[] {
   const out: FieldPath[] = [];
@@ -180,6 +186,16 @@ export type RecordTypeInfo = {
   path: string;
   fields: { id: string; kind: ContentKind | "record" }[];
 };
+
+/**
+ * Field budget: every declared path counts as 1.
+ * Cardinality does not multiply (`description` × 2 is still one field).
+ * A record (array) counts as 1, plus each field of its item type (recursive).
+ * `actionLabel` and `actionHref` are two fields even on one CTA.
+ */
+export function fieldBudget(fields: ContentField[]): number {
+  return fieldPaths(fields).length;
+}
 
 export function recordTypes(fields: ContentField[], prefix = ""): RecordTypeInfo[] {
   const out: RecordTypeInfo[] = [];

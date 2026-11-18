@@ -2,6 +2,20 @@
 
 Organisms in `packages/blocks`. Each file opens on one `Block`. Inside: layout shells + placeholder shapes. No copy.
 
+## Rectangles and text
+
+Everything in a block is a **rectangle** or **text**. Text is a placeholder bar (`Heading`, `TextLine`), not kit `Text` with copy.
+
+| What | How |
+| --- | --- |
+| Copy | `Heading` / `TextLine` rectangles |
+| Image or video | `Media`: hatched `Image` **inside** a muted rectangle |
+| Avatar | Square (`h-N w-N` equal sides) with `rounded-full` |
+| CTA | The only interactive kit widget: `CtaShape` (`Button`) |
+| Accordion, tabs, carousel, dialog, form, select, … | **Not implemented.** Draw them as `Stack` / `Group` / `Grid` of rectangles |
+
+`scripts/check-blocks.py` forbids interactive kit primitives in `packages/blocks` except `Button` on `CtaShape.svelte`. Organisms never import `@ui8kit/kit`.
+
 ## Sketch mapping
 
 Typical marketing markup:
@@ -35,7 +49,7 @@ Absorbed as:
 | Team / features row | `FeaturesTeam` | title + `teamMember[]` (avatar, title, description × 2) | `columns-2` / `columns-3` / `columns-4` | `Block` → `Container` → `Stack` → title `Heading` + `Grid` of `Avatar` + `Heading` + two `TextLine`s |
 | Split hero | `HeroSplit` | title, description × 2, image, actionLabel, actionHref | `media-left` / `media-right` / `media-top` | `Block` → `Container` → `Grid` or `Stack` of copy (`Heading`, `TextLine`s, `CtaShape`) and `Media` |
 
-The registry (`packages/blocks/src/manifest/registry.ts`) is the gallery source. Content contract: `docs/content-contract.md`. Field repetition: `docs/fields.md`. Adding a block: `docs/adding-a-block.md`.
+The registry (`packages/blocks/src/manifest/registry.ts`) is the gallery source. Content contract: `docs/content-contract.md`. Field budget (5–10) and repetition: `docs/fields.md`. Adding a block: `docs/adding-a-block.md`.
 
 ## Shapes
 
@@ -45,7 +59,7 @@ The registry (`packages/blocks/src/manifest/registry.ts`) is the gallery source.
 | `Heading` | `bg-secondary rounded h-4` or `h-6` |
 | `CtaShape` | `Button` `bg-primary rounded h-10 w-24`, named via `aria-label` |
 | `Media` | muted frame, `aspect-video`, light/dark hatched data-URI `Image` |
-| `Avatar` / `Dot` | `rounded-full bg-accent` (accent is allowed only here) |
+| `Avatar` / `Dot` | square (`h-8 w-8` / `h-12 w-12` / `h-16 w-16`) + `rounded-full bg-accent` (accent only here) |
 
 ## Utilities
 
