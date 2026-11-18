@@ -13,4 +13,4 @@
   const cls = $derived(cn(shape.avatar, sizeClass[size]));
 </script>
 
-<Box class={cls} data-shape="avatar" data-field={field}></Box>
+<Box class={cls} data-shape="avatar" data-role="accent" data-field={field}></Box>

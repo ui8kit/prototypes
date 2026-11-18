@@ -22,10 +22,12 @@
 </script>
 
 {#snippet copy()}
-  <Stack gap="6">
-    <Heading field="title" width="3/4" size="lg" />
-    <TextLine field="description" width="full" />
-    <TextLine field="description" width="2/3" />
+  <Stack gap="8">
+    <Stack gap="4">
+      <Heading field="title" width="3/4" size="lg" />
+      <TextLine field="description" size="lead" width="full" />
+      <TextLine field="description" size="lead" width="2/3" />
+    </Stack>
     <CtaShape field="actionLabel actionHref" label={cta} {href} />
   </Stack>
 {/snippet}

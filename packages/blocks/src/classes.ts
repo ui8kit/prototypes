@@ -45,19 +45,40 @@ export const layout = {
   },
 } as const;
 
-export const shape = {
-  textLine: "bg-muted rounded h-2",
+/**
+ * Semantic roles of a wireframe. Each role = one shadcn token + one height, so roles stay apart
+ * in light and dark. Documented in docs/blocks.md ("Roles"); enforced by shapes/roles.test.ts.
+ */
+export const role = {
+  text: "bg-muted rounded h-2",
+  /** 8+4 forbids h-3 in layout scope: a lead is a body bar drawn wider (w-full, 2/3, 1/2). */
+  lead: "bg-muted rounded h-2",
   heading: "bg-secondary rounded h-4",
   headingLg: "bg-secondary rounded h-6",
-  cta: "bg-primary rounded h-10 w-24 shrink-0",
-  avatar: "rounded-full bg-accent shrink-0",
+  ctaPrimary: "bg-primary rounded h-10",
+  ctaSecondary: "bg-secondary rounded h-10",
+  accent: "bg-accent",
+  media: "bg-muted rounded",
+  surface: "bg-card border border-border rounded",
+} as const;
+
+export const shape = {
+  textLine: role.text,
+  lead: role.lead,
+  heading: role.heading,
+  headingLg: role.headingLg,
+  cta: `${role.ctaPrimary} w-24 shrink-0`,
+  ctaSecondary: `${role.ctaSecondary} w-24 shrink-0`,
+  avatar: `rounded-full ${role.accent} shrink-0`,
   avatarSm: "h-8 w-8",
   avatarMd: "h-12 w-12",
   avatarLg: "h-16 w-16",
-  media: "relative flex items-center justify-center overflow-hidden rounded bg-muted w-full aspect-video",
+  media: `relative flex items-center justify-center overflow-hidden ${role.media} w-full aspect-4/3`,
   mediaLight: "h-full w-full rounded object-cover dark:hidden",
   mediaDark: "hidden h-full w-full rounded object-cover dark:block",
   mediaOverlay: "absolute inset-0 flex items-center justify-center",
+  mediaMark: "rounded-full bg-background h-16 w-16",
+  surface: `${role.surface} p-8`,
 } as const;
 
 export const width = {
@@ -83,4 +104,5 @@ export type Justify = keyof typeof layout.justify;
 export type Py = keyof typeof layout.py;
 export type Width = keyof typeof width;
 export type GridColumns = keyof typeof layout.gridMd;
+export type Role = keyof typeof role;
 export type AvatarSize = "sm" | "md" | "lg";

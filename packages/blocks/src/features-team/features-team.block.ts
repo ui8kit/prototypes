@@ -7,6 +7,7 @@ export const featuresTeam: BlockManifest = {
   label: ui.featuresTeam.label,
   content: [
     { id: "title", kind: "title", count: 1 },
+    { id: "description", kind: "description", count: 2 },
     {
       id: "members",
       kind: "record",

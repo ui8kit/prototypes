@@ -15,7 +15,7 @@ describe("FeaturesTeam", () => {
     expect(region.getAttribute("data-variant")).toBe("columns-3");
     expect(region.querySelectorAll('[data-shape="avatar"]')).toHaveLength(3);
     expect(region.querySelectorAll('[data-shape="heading"]')).toHaveLength(4);
-    expect(region.querySelectorAll('[data-shape="text-line"]')).toHaveLength(6);
+    expect(region.querySelectorAll('[data-shape="text-line"]')).toHaveLength(8);
     expect(region.querySelector(".md\\:grid-cols-3")).not.toBeNull();
     expect(region.querySelector(".bg-accent")).not.toBeNull();
     expect(region.querySelector(".bg-muted")).not.toBeNull();

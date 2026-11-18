@@ -27,18 +27,6 @@
 
 <Stack gap="4" class="ui8-theme-fields" data-testid="theme-fields">
   <Box class="ui8-theme-field">
-    <Label for="theme-mode">{themeText.mode}</Label>
-    <Select
-      id="theme-mode"
-      value={appTheme.state.mode}
-      onchange={(e: Event) => themeCtl.setField("mode", (e.currentTarget as HTMLSelectElement).value)}
-      options={[
-        { value: "light", label: themeText.light },
-        { value: "dark", label: themeText.dark },
-      ]}
-    />
-  </Box>
-  <Box class="ui8-theme-field">
     <Label for="theme-skin">{themeText.skin}</Label>
     <Select
       id="theme-skin"

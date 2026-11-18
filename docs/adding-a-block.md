@@ -65,10 +65,8 @@ Register it:
 2. Map `id` → component in `packages/blocks/src/catalog.ts`.
 3. Re-export the component from `packages/blocks/src/index.ts` if it is new.
 4. Add `src/<id>` to `packages/blocks/package.json` → `ui8kit.blockRoot`.
-5. Add variant labels to `apps/blocks/src/content/gallery.ts` if the ids are new.
 
-The gallery lists blocks by category. A studio preview is `#/block/<id>` or
-`#/block/<id>/<variant>` (theme panel + light/dark frames + layout switcher).
+The feed renders every registered block in every variant automatically.
 Do not hardcode organisms in the app.
 
 ## 3. Test first

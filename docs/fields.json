@@ -79,6 +79,11 @@
           "count": 1
         },
         {
+          "id": "description",
+          "kind": "description",
+          "count": 2
+        },
+        {
           "id": "members",
           "kind": "record",
           "record": "teamMember",
@@ -128,10 +133,10 @@
         }
       ],
       "defaultVariant": "columns-3",
-      "fieldBudget": 5,
+      "fieldBudget": 6,
       "shapeCounts": {
         "heading": 4,
-        "text-line": 6,
+        "text-line": 8,
         "avatar": 3,
         "cta": 0,
         "media": 0,
@@ -160,7 +165,7 @@
         "features-team",
         "hero-split"
       ],
-      "totalDefault": 4
+      "totalDefault": 6
     },
     "image": {
       "blocks": [
@@ -216,11 +221,17 @@
     "description": {
       "kind": "description",
       "blocks": [
-        "hero-split"
+        "hero-split",
+        "features-team"
       ],
       "counts": [
         {
           "id": "hero-split",
+          "count": 2,
+          "default": 2
+        },
+        {
+          "id": "features-team",
           "count": 2,
           "default": 2
         }
@@ -350,6 +361,7 @@
     "description"
   ],
   "repeatedPaths": [
+    "description",
     "title"
   ],
   "repeatedRecords": []

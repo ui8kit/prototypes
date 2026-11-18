@@ -26,12 +26,16 @@
 
 <Block tag="section" py="16" aria-label={label} data-variant={resolved.id}>
   <Container>
-    <Stack gap="8" align="center">
-      <Heading field="title" width="1/3" size="lg" />
+    <Stack gap="8">
+      <Stack gap="4" align="center">
+        <Heading field="title" width="1/3" size="lg" />
+        <TextLine field="description" size="lead" width="1/2" />
+        <TextLine field="description" size="lead" width="1/3" />
+      </Stack>
       <Grid cols={columns} gap="8">
         {#each members as member (member)}
           <Stack gap="4" align="center">
-            <Avatar field="members.avatar" size="md" />
+            <Avatar field="members.avatar" size="lg" />
             <Heading field="members.title" width="1/2" />
             <TextLine field="members.description" width="3/4" />
             <TextLine field="members.description" width="1/2" />

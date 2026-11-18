@@ -54,8 +54,11 @@ function skinNeutrals(skin: SkinId | null, mode: Mode): Record<string, string> {
   return out;
 }
 
-/** Kit defaults (oklch) used for chrome + previews when no skin and no palette. */
-const FALLBACK: Record<Mode, Record<string, string>> = {
+/**
+ * Wireframe defaults (oklch) when no skin and no palette. shadcn neutral, except that muted, secondary and accent
+ * are pulled apart (text bars, headings, emphasis) so every role reads distinctly in light and dark.
+ */
+export const FALLBACK: Record<Mode, Record<string, string>> = {
   light: {
     background: "oklch(1 0 0)",
     foreground: "oklch(0.145 0 0)",
@@ -65,11 +68,11 @@ const FALLBACK: Record<Mode, Record<string, string>> = {
     "popover-foreground": "oklch(0.145 0 0)",
     primary: "oklch(0.205 0 0)",
     "primary-foreground": "oklch(0.985 0 0)",
-    secondary: "oklch(0.97 0 0)",
+    secondary: "oklch(0.9 0 0)",
     "secondary-foreground": "oklch(0.205 0 0)",
-    muted: "oklch(0.97 0 0)",
+    muted: "oklch(0.955 0 0)",
     "muted-foreground": "oklch(0.556 0 0)",
-    accent: "oklch(0.97 0 0)",
+    accent: "oklch(0.82 0.08 255)",
     "accent-foreground": "oklch(0.205 0 0)",
     destructive: "oklch(0.577 0.245 27.325)",
     border: "oklch(0.922 0 0)",
@@ -85,11 +88,11 @@ const FALLBACK: Record<Mode, Record<string, string>> = {
     "popover-foreground": "oklch(0.985 0 0)",
     primary: "oklch(0.922 0 0)",
     "primary-foreground": "oklch(0.205 0 0)",
-    secondary: "oklch(0.269 0 0)",
+    secondary: "oklch(0.38 0 0)",
     "secondary-foreground": "oklch(0.985 0 0)",
-    muted: "oklch(0.269 0 0)",
+    muted: "oklch(0.25 0 0)",
     "muted-foreground": "oklch(0.708 0 0)",
-    accent: "oklch(0.269 0 0)",
+    accent: "oklch(0.45 0.09 255)",
     "accent-foreground": "oklch(0.985 0 0)",
     destructive: "oklch(0.704 0.191 22.216)",
     border: "oklch(1 0 0 / 10%)",

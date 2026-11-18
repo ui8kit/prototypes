@@ -6,12 +6,14 @@
   let {
     label = ui.heroSplit.cta,
     href = ui.heroSplit.href,
+    tone = "primary",
     field,
   }: {
+    tone?: "primary" | "secondary";
     label?: string;
     href?: string;
     field?: string;
   } = $props();
 </script>
 
-<Button class={shape.cta} aria-label={label} {href} data-shape="cta" data-field={field}></Button>
+<Button class={tone === "secondary" ? shape.ctaSecondary : shape.cta} aria-label={label} {href} data-shape="cta" data-role={"cta-" + tone} data-field={field}></Button>

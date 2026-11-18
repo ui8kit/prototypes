@@ -6,7 +6,7 @@ Variants are layout-only (same schema, full rendering in every variant). See
 `docs/content-contract.md`.
 
 Blocks: **2**. Content kinds in two or more blocks: `title`, `description`.
-Shared field paths: `title`.
+Shared field paths: `description`, `title`.
 Shared record types: _none yet_.
 
 ## Field budget
@@ -22,7 +22,7 @@ Each contract is **5–10** fields. Counting rule:
 | Block | Fields | Budget | Paths |
 | --- | --- | --- | --- |
 | hero-split | 5 | 5–10 | `title`, `description`, `image`, `actionLabel`, `actionHref` |
-| features-team | 5 | 5–10 | `title`, `members`, `members.avatar`, `members.title`, `members.description` |
+| features-team | 6 | 5–10 | `title`, `description`, `members`, `members.avatar`, `members.title`, `members.description` |
 
 ## Content kinds
 
@@ -32,7 +32,7 @@ counts across the library.
 | Kind | Blocks | Ids | totalDefault |
 | --- | --- | --- | --- |
 | title | 2 | features-team, hero-split | 3 |
-| description | 2 | features-team, hero-split | 4 |
+| description | 2 | features-team, hero-split | 6 |
 | image | 1 | hero-split | 1 |
 | actionLabel | 1 | hero-split | 1 |
 | actionHref | 1 | hero-split | 1 |
@@ -49,7 +49,7 @@ separate record types, not a universal item.
 | --- | --- | --- | --- | --- |
 | actionHref | actionHref | 1 | hero-split | 1 |
 | actionLabel | actionLabel | 1 | hero-split | 1 |
-| description | description | 1 | hero-split | 2 |
+| description | description | 2 | hero-split, features-team | 2 |
 | image | image | 1 | hero-split | 1 |
 | members | record (teamMember) | 1 | features-team | 1–6 (default 3) |
 | members.avatar | avatar | 1 | features-team | 1 |
@@ -84,12 +84,13 @@ separate record types, not a universal item.
 
 - Category: `team`
 - Label: Team
-- Field budget: 5 / 10
+- Field budget: 6 / 10
 - Variants (layout only): `columns-2`, `columns-3` (default), `columns-4`
 - Layout axes: columns=2; columns=3; columns=4
-- Flattened shapes: heading × 4, text-line × 6, avatar × 3
+- Flattened shapes: heading × 4, text-line × 8, avatar × 3
 
 - `title` (title, 1)
+- `description` (description, 2)
 - `members` (record, record teamMember, 1–6 (default 3))
 - `members.avatar` (avatar, 1)
 - `members.title` (title, 1)

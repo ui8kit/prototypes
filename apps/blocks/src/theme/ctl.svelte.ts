@@ -27,6 +27,7 @@ export type WidePanel = null | "palette";
 export const appTheme = $state({
   state: { mode: "light" as Mode, theme: NO_THEME } satisfies ThemeState,
   wide: null as WidePanel,
+  open: false,
 });
 
 let applied: string[] = [];
@@ -48,6 +49,8 @@ export function loadTheme(): void {
 export function applyTheme(): void {
   const root = document.documentElement;
   const { theme, mode } = appTheme.state;
+  root.classList.toggle("dark", mode === "dark");
+  root.style.colorScheme = mode;
   root.setAttribute("data-density", theme.density);
   root.setAttribute("data-section-padding", theme.sectionPadding);
   applied = applyVars(root, cssProperties(theme, mode), applied);
@@ -57,12 +60,6 @@ export function applyTheme(): void {
   } catch {
     /* storage blocked */
   }
-}
-
-export function previewStyle(theme: GlobalTheme, mode: Mode): string {
-  return Object.entries(cssProperties(theme, mode))
-    .map(([k, v]) => `${k}:${v}`)
-    .join(";");
 }
 
 export const themeCtl = {
@@ -77,6 +74,13 @@ export const themeCtl = {
   },
   set wide(v: WidePanel) {
     appTheme.wide = v;
+  },
+  get open(): boolean {
+    return appTheme.open;
+  },
+  set open(v: boolean) {
+    appTheme.open = v;
+    if (!v) appTheme.wide = null;
   },
   setTheme(patch: Partial<GlobalTheme>): void {
     appTheme.state = { ...appTheme.state, theme: patchTheme(appTheme.state.theme, patch) };

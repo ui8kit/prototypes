@@ -7,7 +7,10 @@
   let { alt = ui.media.alt, field }: { alt?: string; field?: string } = $props();
 </script>
 
-<Box tag="figure" class={shape.media} data-shape="media" data-field={field}>
+<Box tag="figure" class={shape.media} data-shape="media" data-role="media" data-field={field}>
   <Image src={MEDIA_LIGHT} {alt} class={shape.mediaLight} />
   <Image src={MEDIA_DARK} {alt} class={shape.mediaDark} />
+  <Box class={shape.mediaOverlay} aria-hidden="true">
+    <Box class={shape.mediaMark}></Box>
+  </Box>
 </Box>

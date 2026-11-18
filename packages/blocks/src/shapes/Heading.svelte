@@ -15,4 +15,4 @@
   const cls = $derived(cn(size === "lg" ? shape.headingLg : shape.heading, width[w]));
 </script>
 
-<Box class={cls} data-shape="heading" data-field={field}></Box>
+<Box class={cls} data-shape="heading" data-role={size === "lg" ? "heading-lg" : "heading"} data-field={field}></Box>

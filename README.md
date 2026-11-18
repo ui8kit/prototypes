@@ -11,7 +11,7 @@ This is not a marketing site and not an idea dump. Blocks are organisms of recta
 | `packages/kit` | Official UI8Kit Svelte primitives (`npx ui8kit@3 add --all`). Do not edit by hand. |
 | `packages/blocks` | Layout shells, placeholder shapes, organism blocks, and typed `*.block.ts` manifests. |
 | `packages/theme` | Palette, skins, density, radius, CSS/JSON. No fonts. |
-| `apps/blocks` | Gallery by category, single-block preview, theme constructor panel. |
+| `apps/blocks` | Feed of every block × every variant; header Theme button → Theme sheet; dark toggle. |
 
 ## Constructor rules
 
@@ -37,6 +37,6 @@ bun run kit:install     # npx ui8kit@3 add --all (Svelte; CDN fallback in docs/k
 
 ## Theme
 
-The constructor in `apps/blocks` lists blocks by category from the registry and live-previews one block at a time (`#/block/<id>/<variant>`) in light and dark. Each organism has one content schema and interchangeable layout variants (`docs/content-contract.md`). Later unification reads which fields repeat (`docs/fields.md`, `bun run fields:summary`). Skins, a colour wheel (9 harmonies, 16 presets, AA/AAA), radius (0–16px), density (`compact` / `default` / `comfortable` on the 8+4 grid), and section padding (`compact` / `default` / `spacious`, even 8px including the lg step) live in `packages/theme`. Export JSON (`prototypes-theme` v1) or CSS variables. Fonts are excluded.
+The constructor in `apps/blocks` renders every block from the registry in every layout variant, one after another, full width. Each organism has one content schema and interchangeable layout variants (`docs/content-contract.md`). Later unification reads which fields repeat (`docs/fields.md`, `bun run fields:summary`). Skins, a colour wheel (9 harmonies, 16 presets, AA/AAA), radius (0–16px), density (`compact` / `default` / `comfortable` on the 8+4 grid), and section padding (`compact` / `default` / `spacious`, even 8px including the lg step) live in `packages/theme`. Export JSON (`prototypes-theme` v1) or CSS variables. Fonts are excluded.
 
-Storage: `prototypes:v1:theme` and `ui8kit-theme` (chrome mode). `Media` swaps hatches with `dark:` utilities scoped to `[data-mode="dark"]` on each preview frame. See `docs/theme.md`.
+Storage: `prototypes:v1:theme` and `ui8kit-theme` (light/dark). Dark mode is the `dark` class on `<html>`; `Media` swaps its light/dark hatch with `dark:hidden` / `dark:block`. Semantic roles (token + height): `docs/blocks.md`. See `docs/theme.md`.

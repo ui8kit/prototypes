@@ -42,9 +42,6 @@ export type PaletteText = {
 export type ThemeText = {
   title: string;
   note: string;
-  mode: string;
-  light: string;
-  dark: string;
   skin: string;
   default: string;
   radius: string;
@@ -53,17 +50,13 @@ export type ThemeText = {
   sectionPadding: string;
   resetAll: string;
   back: string;
-  previewLight: string;
-  previewDark: string;
+  close: string;
   io: ThemeIoText;
 };
 
 export const themeText: ThemeText = {
   title: "Theme",
-  note: "Both block previews follow these settings: mode of the chrome, skin, radius, density, section padding, and a custom palette. Fonts are not part of this constructor.",
-  mode: "Chrome mode",
-  light: "Light",
-  dark: "Dark",
+  note: "Every block in the gallery follows these settings: skin, palette, radius, density and section padding. Light / dark is the toggle in the corner. Fonts are not part of this constructor.",
   skin: "Skin",
   default: "Default",
   radius: "Radius",
@@ -72,8 +65,7 @@ export const themeText: ThemeText = {
   sectionPadding: "Section padding",
   resetAll: "Reset theme",
   back: "Back",
-  previewLight: "Light preview",
-  previewDark: "Dark preview",
+  close: "Close",
   io: {
     title: "Export / import",
     note: "The whole theme as one JSON config (format prototypes-theme, version 1), or the generated CSS variables. Import replaces the theme. Fonts are never stored.",

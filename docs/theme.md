@@ -54,7 +54,7 @@ Stock density is per-element (`data-density-*` + `--pad-*` in kit.css). Radii ma
 - `palette.ts`, `colour-input.ts`, `neutral-tokens.ts`, `skin-neutrals.ts` (MIT, verbatim logic).
 - `SKIN_IDS`, `RADII`, `SKIN_COLORS` from `taste-data`.
 - Wheel, harmonies, presets, Options, contrast AA/AAA, JSON import/export UI.
-- Dual live preview of `FeaturesTeam` and `HeroSplit` in light and dark at once.
+- The header Theme button and the Theme sheet (native modal `Dialog` docked right; palette opens as a wide panel to its left).
 
 ## What differs
 
@@ -65,8 +65,8 @@ Stock density is per-element (`data-density-*` + `--pad-*` in kit.css). Radii ma
 | Density via kit `--pad-*` | App CSS remaps `gap-8` / `h-10` / `w-24` / `h-4` under `[data-density]`. Section padding is a separate token. `--spacing` stays 4px |
 | `magazine-theme` v2 | `prototypes-theme` v1 (still **reads** magazine-theme and `{ v:1, theme }`) |
 | `stock:v1:theme` | `prototypes:v1:theme` |
-| Apply `dark` / `data-theme` on `<html>` | Chrome vars on `<html>`; each preview is `[data-mode=light\|dark]` so `dark:` Media hatches do not leak |
-| Design-system specimen, skin/font pickers as wide sheets | Skin `<select>`, palette panel, dual block preview |
+| Apply `dark` / `data-theme` on `<html>` | Same: tokens on `<html>`, `dark` class from the bottom-right toggle |
+| Design-system specimen, skin/font pickers as wide sheets | Skin `<select>`, palette as the one wide panel |
 | Shadows | None (wireframe) |
 
 ### Density map (8+4)
@@ -93,4 +93,4 @@ Block keeps the class `py-16`. Theme writes `--theme-section-py` and `--theme-se
 
 ## UI
 
-`apps/blocks`: gallery of blocks by category, then `#/block/<id>` for light preview | dark preview | theme panel. Palette opens in the panel (wheel, HSL/Hex, harmonies, ranges, AA/AAA, 16 presets, token chips). Export copies JSON or CSS.
+`apps/blocks`: a feed of every block in every variant; header **Theme** button opens the Theme sheet. Palette opens as a wide panel inside the sheet (wheel, HSL/Hex, harmonies, ranges, AA/AAA, 16 presets, token chips). Export copies JSON or CSS.

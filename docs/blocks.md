@@ -46,20 +46,28 @@ Absorbed as:
 
 | Sketch | Block | Content contract | Variants (layout) | Structure |
 | --- | --- | --- | --- | --- |
-| Team / features row | `FeaturesTeam` | title + `teamMember[]` (avatar, title, description × 2) | `columns-2` / `columns-3` / `columns-4` | `Block` → `Container` → `Stack` → title `Heading` + `Grid` of `Avatar` + `Heading` + two `TextLine`s |
-| Split hero | `HeroSplit` | title, description × 2, image, actionLabel, actionHref | `media-left` / `media-right` / `media-top` | `Block` → `Container` → `Grid` or `Stack` of copy (`Heading`, `TextLine`s, `CtaShape`) and `Media` |
+| Team / features row | `FeaturesTeam` | title, description × 2 + `teamMember[]` (avatar, title, description × 2) | `columns-2` / `columns-3` / `columns-4` | `Block` → `Container` → `Stack` → centred intro (`Heading` lg + two lead `TextLine`s) + `Grid` of centred `Avatar` + `Heading` + two `TextLine`s |
+| Split hero | `HeroSplit` | title, description × 2, image, actionLabel, actionHref | `media-left` / `media-right` / `media-top` | `Block` → `Container` → `Grid` (2 cols, vertically centred) or `Stack` of copy (`Heading` lg, two lead `TextLine`s, gap, `CtaShape`) and `Media` (4:3 with a centred circle) |
 
 The registry (`packages/blocks/src/manifest/registry.ts`) is the gallery source. Content contract: `docs/content-contract.md`. Field budget (5–10) and repetition: `docs/fields.md`. Adding a block: `docs/adding-a-block.md`.
 
-## Shapes
+## Roles
 
-| Shape | Token look |
-| --- | --- |
-| `TextLine` | `bg-muted rounded h-2` + width |
-| `Heading` | `bg-secondary rounded h-4` or `h-6` |
-| `CtaShape` | `Button` `bg-primary rounded h-10 w-24`, named via `aria-label` |
-| `Media` | muted frame, `aspect-video`, light/dark hatched data-URI `Image` |
-| `Avatar` / `Dot` | square (`h-8 w-8` / `h-12 w-12` / `h-16 w-16`) + `rounded-full bg-accent` (accent only here) |
+A wireframe has no words, so meaning is carried by **token + height**. Every role is one shadcn token and (for bars) one height. Source of truth: `role` in `packages/blocks/src/classes.ts`; enforced by `packages/blocks/src/shapes/roles.test.ts` (one token per role, plain `rounded`, bar roles differ by token or height, each shape renders its role and `data-role`) and `packages/theme/src/roles.test.ts` (the default tokens `background`, `muted`, `secondary`, `accent`, `primary` differ by ≥ 0.04 oklch lightness in light **and** dark).
+
+| Role | `data-role` | Shape | Token | Height | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Body text line | `text` | `TextLine` | `bg-muted` | `h-2` (8px) | widths `1/4`…`full` |
+| Lead / subtitle | `lead` | `TextLine size="lead"` | `bg-muted` | `h-2` (8px) | `h-3` is off the 8+4 layout grid (ui8px UI8PX001), so a lead is the same bar drawn **wider** (`full`, `2/3`, `1/2`) under a heading |
+| Heading | `heading` | `Heading` | `bg-secondary` | `h-4` (16px) | card / item titles |
+| Large heading (H1/H2) | `heading-lg` | `Heading size="lg"` | `bg-secondary` | `h-6` (24px) | section titles |
+| Primary CTA | `cta-primary` | `CtaShape` | `bg-primary` | `h-10` (40px, control step) | `w-24`, no text, `aria-label` from `content/en.ts` |
+| Secondary CTA | `cta-secondary` | `CtaShape tone="secondary"` | `bg-secondary` | `h-10` | `w-24`, no text |
+| Accent / emphasis | `accent` | `Avatar` / `Dot` | `bg-accent` | square `h-8`/`h-12`/`h-16` + `rounded-full` | accent only for emphasis (avatar, badge, highlighted item) |
+| Media | `media` | `Media` | `bg-muted` | `aspect-4/3`, `w-full` | base64 light / dark hatch, switched by `dark:hidden` / `dark:block`; centred `bg-background` circle |
+| Card surface | `surface` | `Surface` | `bg-card` + `border border-border` | content | `p-8`; wraps other shapes, not a content field |
+
+Default tokens (no skin, no palette) are wireframe-tuned in `packages/theme/src/css.ts` (`FALLBACK`): light muted 0.955 / secondary 0.90 / accent oklch(0.82 0.08 255) / primary 0.205; dark muted 0.25 / secondary 0.38 / accent oklch(0.45 0.09 255) / primary 0.922. Skins and custom palettes bring their own values.
 
 ## Utilities
 

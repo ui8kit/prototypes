@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
-/* Preview frames own the light/dark Media swap. Chrome uses CSS variables, not html.dark. */
-@custom-variant dark (&:is([data-mode="dark"] *));
+/* Tailwind does not scan node_modules: blocks and kit are workspace links, so name their sources. */
+@source "../../../packages/blocks/src";
+@source "../../../packages/kit/src";
+
+/* Standard dark mode: the `dark` class on <html> (ThemeToggle, stored in localStorage). */
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --radius: 0.25rem;
@@ -13,11 +17,11 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(0.9 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
+  --muted: oklch(0.955 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: oklch(0.82 0.08 255);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -35,6 +39,25 @@
   --theme-cta-w: 96px;
   --theme-heading-h: 16px;
   --theme-line-h: 8px;
+}
+
+/* First paint before the theme script runs; the theme controller then writes the same tokens on <html>. */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.38 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.25 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.45 0.09 255);
+  --accent-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
 }
 
 @theme inline {
@@ -117,110 +140,55 @@ body {
 
 /* Constructor chrome (app-level). Sizes on the 8+4 grid. */
 .ui8-app {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
   min-height: 100vh;
 }
-.ui8-app[data-wide="palette"] {
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 640px);
-}
-.ui8-app[data-view="gallery"] {
-  grid-template-columns: 1fr;
-}
-.ui8-studio {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.ui8-studio-bar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 16px;
+.ui8-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--background);
   border-bottom: 1px solid var(--border);
 }
-.ui8-studio-title {
-  margin: 0;
-  font-size: 16px;
-  line-height: 24px;
+.ui8-header-bar {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 8px 32px;
 }
-.ui8-studio-variants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0 16px 8px;
+.ui8-feed-item + .ui8-feed-item {
+  border-top: 1px dashed var(--border);
 }
-.ui8-gallery {
-  padding: 16px 24px 80px;
-  max-width: 960px;
-}
-.ui8-gallery-title {
-  margin: 0;
-  font-size: 24px;
-  line-height: 32px;
-}
-.ui8-gallery-note {
-  margin: 8px 0 0;
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--muted-foreground);
-}
-.ui8-gallery-category {
-  margin-top: 24px;
-}
-.ui8-gallery-category-title {
-  margin: 0 0 8px;
-  font-size: 16px;
-  line-height: 24px;
-}
-.ui8-gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-}
-.ui8-gallery-card {
-  display: block;
+/* The Theme sheet: the native dialog docked to the right edge, full height (apps/stock .ui8-theme-sheet). */
+.ui8-theme-sheet {
+  margin: 0 0 0 auto;
+  padding: 0;
+  width: fit-content;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--background);
-  color: inherit;
-  text-decoration: none;
-}
-.ui8-gallery-card-preview {
-  pointer-events: none;
-  max-height: 240px;
-  overflow: hidden;
-}
-.ui8-gallery-card-name {
-  margin: 0;
-  padding: 8px 16px;
-  border-top: 1px solid var(--border);
-  font-size: 14px;
-  line-height: 20px;
-}
-.ui8-previews {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  padding: 16px;
-  min-width: 0;
-}
-.ui8-preview {
-  min-width: 0;
-  overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 0;
+  border-left: 1px solid var(--border);
   background: var(--background);
   color: var(--foreground);
+  font-size: 14px;
+  line-height: 20px;
 }
-.ui8-preview-label {
-  margin: 0;
-  padding: 8px 16px;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--muted-foreground);
-  border-bottom: 1px solid var(--border);
+.ui8-theme-sheet::backdrop {
+  background: color-mix(in oklab, var(--foreground) 24%, transparent);
+}
+.ui8-theme-sheet-panels {
+  height: 100%;
+  flex-wrap: nowrap;
+}
+.ui8-theme-panel {
+  width: 320px;
+  flex: none;
+}
+.ui8-palette-panel {
+  width: 640px;
+  min-width: 0;
+  flex: 0 1 auto;
+  border-right: 1px solid var(--border);
 }
 .ui8-theme-panel,
 .ui8-palette-panel {
@@ -228,9 +196,8 @@ body {
   flex-direction: column;
   min-height: 0;
   min-width: 0;
-  height: 100vh;
+  height: 100%;
   background: var(--background);
-  border-left: 1px solid var(--border);
 }
 .ui8-theme-head,
 .ui8-theme-foot {
@@ -534,18 +501,12 @@ body {
   flex-wrap: wrap;
 }
 
-@media (max-width: 960px) {
-  .ui8-app,
-  .ui8-app[data-wide="palette"] {
-    grid-template-columns: 1fr;
-  }
-  .ui8-previews {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 640px) {
   .ui8-theme-panel,
   .ui8-palette-panel {
-    height: auto;
-    border-left: 0;
-    border-top: 1px solid var(--border);
+    width: 100vw;
+  }
+  .ui8-theme-sheet-panels[data-wide="1"] .ui8-theme-panel {
+    display: none;
   }
 }
