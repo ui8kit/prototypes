@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Box, Button, Label, Radio, Select, Text } from "@ui8kit/kit";
   import { Stack, layout } from "@ui8kit/blocks";
-  import { DENSITIES, RADII, SECTION_PADDINGS, SECTION_PADDING_SCALE, SHADOWS, SKIN_IDS } from "@ui8kit/theme";
+  import { DENSITIES, DIRECTIONS, RADII, SECTION_PADDINGS, SECTION_PADDING_SCALE, SHADOWS, SKIN_IDS } from "@ui8kit/theme";
   import { paletteText, skinLabels, themeText } from "../content/theme";
   import { appTheme, themeCtl, type WidePanel } from "./ctl.svelte";
 
@@ -150,6 +150,17 @@
             onchange={() => themeCtl.setField("sectionPadding", p)}
           />
           <Text tag="span">{sectionPaddingLabels[p]}</Text>
+        </Label>
+      {/each}
+    </Box>
+  </Box>
+  <Box class="ui8-theme-field">
+    <Text tag="span" class="ui8-palette-label" id="theme-direction-legend">{themeText.direction}</Text>
+    <Box class="ui8-palette-contrast-row" role="radiogroup" aria-labelledby="theme-direction-legend" data-testid="theme-direction">
+      {#each DIRECTIONS as d (d)}
+        <Label class="ui8-palette-choice">
+          <Radio name="theme-direction" value={d} checked={t.direction === d} onchange={() => themeCtl.setField("direction", d)} />
+          <Text tag="span" lang="en">{themeText.directions[d]}</Text>
         </Label>
       {/each}
     </Box>

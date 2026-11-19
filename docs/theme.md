@@ -14,6 +14,7 @@ Stock keeps a global theme under `stock:v1:theme` as `{ v: 1, theme }`. The mode
 | `radius` | 0, 4, 8, 12, 16 px → `--radius` |
 | `tokens` | **ported verbatim** (`design.ts`): `radius-{badge,button,card,alert,media}`, `density-{badge,button,card,alert}`, `shadow-{card,alert,media}`; alert has no shape here, its tokens are kept |
 | `palette` | optional custom wheel |
+| `direction` | **ours** (`ltr` / `rtl`: `dir` on the preview feed, not the app chrome; exported only when `rtl`; codegen-x ignores it) |
 | `sectionPadding` | **ours** (`compact` / `standard` / `spacious`; exported only when not `standard`; `"default"`, the pre-UPC-6 name, is read as `standard`; codegen-x ignores unknown top-level fields) |
 
 A custom palette (`palette.ts`) is one base colour `{ harmony, h, s, l, contrast? }` plus a harmony. Harmonies and their hue offsets:
@@ -126,4 +127,4 @@ Text bars and headings follow `--radius`; the avatar stays `rounded-full`. Value
 
 ## UI
 
-`apps/blocks`: a feed of every block in every variant; header **Theme** button opens the Theme sheet: skin, radius, radius / density / shadow per element, section padding, and four wide panels (Skins, Palette, Presets, Design system). Export copies JSON (`magazine-theme` v2) or CSS. Native `select` / `input` follow the tokens and `color-scheme` follows the mode, so the dropdown list is dark in dark mode.
+`apps/blocks`: a feed of every block in every variant; header **Theme** button opens the Theme sheet: skin, radius, radius / density / shadow per element, section padding, the writing direction of the preview (LTR / RTL radio group: `dir` on the feed, saved with the theme), and four wide panels (Skins, Palette, Presets, Design system). Export copies JSON (`magazine-theme` v2) or CSS. Native `select` / `input` follow the tokens and `color-scheme` follows the mode, so the dropdown list is dark in dark mode.

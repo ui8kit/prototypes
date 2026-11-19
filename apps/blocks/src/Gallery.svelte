@@ -1,6 +1,7 @@
 <!--
   The catalog feed: every registered block in every layout variant, full width like page sections. Rectangles only: the
-  generated wireframes take the variant axes and the padding setting (wireframeProps), never content.
+  generated wireframes take the variant axes and the padding and align settings (wireframeProps), never content. The theme's
+  direction is `dir` on the feed (the preview root, not the app chrome): align start / end follow it.
 -->
 <script lang="ts">
   import { Box } from "@ui8kit/kit";
@@ -9,10 +10,11 @@
 
   // the theme's section padding is the padding setting (a prop) of every generated block: same names, same classes
   const padding = $derived(appTheme.state.theme.sectionPadding);
+  const direction = $derived(appTheme.state.theme.direction);
   import { galleryText } from "./content/gallery";
 </script>
 
-<Box tag="main" class="ui8-feed" aria-label={galleryText.title} data-testid="gallery">
+<Box tag="main" class="ui8-feed" aria-label={galleryText.title} dir={direction} data-testid="gallery">
   {#each BLOCKS as block (block.id)}
     {@const View = CATALOG[block.id]}
     {#if View}

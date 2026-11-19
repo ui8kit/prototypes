@@ -49,6 +49,8 @@ export type ThemeText = {
   density: string;
   sectionPadding: string;
   sectionPaddings: Record<"compact" | "standard" | "spacious", string>;
+  direction: string;
+  directions: Record<"ltr" | "rtl", string>;
   resetAll: string;
   back: string;
   close: string;
@@ -83,7 +85,7 @@ export type DesignText = {
 
 export const themeText: ThemeText = {
   title: "Theme",
-  note: "Every block in the gallery follows these settings: skin, palette, radius, density, shadow and section padding. Light / dark is the toggle in the corner. Fonts are carried in the config but not drawn.",
+  note: "Every block in the gallery follows these settings: skin, palette, radius, density, shadow, section padding and the writing direction (LTR / RTL). Light / dark is the toggle in the corner. Fonts are carried in the config but not drawn.",
   skin: "Skin",
   default: "Default",
   radius: "Radius",
@@ -91,6 +93,8 @@ export const themeText: ThemeText = {
   density: "Density",
   sectionPadding: "Section padding",
   sectionPaddings: { compact: "Compact", standard: "Standard", spacious: "Spacious" },
+  direction: "Writing direction of the preview",
+  directions: { ltr: "Left to right (LTR)", rtl: "Right to left (RTL)" },
   resetAll: "Reset theme",
   back: "Back",
   close: "Close",

@@ -18,6 +18,12 @@ right-to-left pages.
   `text-start|center|end` on the text shapes (`ShapeText` takes an `align` prop). `start` / `end` follow `dir`.
 - ui8px denies `text-left` / `text-right` with the suggestion `text-start` / `text-end`.
 - The values are codegen-x `TEXT_ALIGN` / `ALIGN` in `generated/classes.json` (one source).
+- A variant may set its own default (UPC-7): the centred composition starts centred. Today only HeroSimple `mediaTop`
+  (the wide picture on top, the copy under it) has `align: "center"`; every other variant starts at `start`. It is the
+  variant's `props` in codegen-x (`blocks-simple.ts`), `variants[].settings` in the contract, `variantSettings()` here;
+  a saved block's `props.align` overrides it. align stays a setting: the feed does not grow.
+- The Theme panel has a writing direction (LTR / RTL, `theme.direction`, saved with the theme) that sets `dir` on the
+  feed, so start / end can be checked in both directions.
 - Tests per value in the wireframes and in every clean runtime, a `dir="rtl"` DOM check and axe.
 
 ## Consequences

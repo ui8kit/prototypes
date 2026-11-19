@@ -14,6 +14,7 @@ export {
   placeOf,
   placesFor,
   resolveVariant,
+  variantSettings,
   wireframeProps,
   type BlockCategory,
   type BlockInstance,

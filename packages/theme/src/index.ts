@@ -77,6 +77,8 @@ export {
   FONT_SCALES,
   FONT_WEIGHTS,
   LEGACY_FORMAT,
+  DIRECTIONS,
+  directionOf,
   MODES,
   NO_THEME,
   TRACKINGS,
@@ -100,6 +102,7 @@ export {
   type Mode,
   type ThemeConfig,
   type ThemeState,
+  type Direction,
 } from "./theme";
 export { ELEMENT_DEFAULTS, FLOOR, applyVars, scopedCss, colorVars, cssProperties, densityVars, exportCss, layoutVars, legibleRoles, parseHslToken, skinColors, skinExtras } from "./css";
 export { PRESETS_ROW1, type Preset } from "./presets";

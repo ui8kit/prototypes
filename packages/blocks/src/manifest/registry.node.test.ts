@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { BLOCKS, BLOCK_BY_ID, FIELD_BUDGET_MAX, FIELD_BUDGET_MIN, MODELS, fieldBudget, modelPaths, validateInstance } from "./registry";
-import { bind, defaultVariantId, placesFor, settingKeys, settingValues, splitProps, wireframeProps } from "./types";
+import { bind, defaultVariantId, placesFor, settingKeys, settingValues, splitProps, variantSettings, wireframeProps } from "./types";
 
 // saved content as a builder stores it (data only: prototypes never render it)
 const hero = { title: "Launch pages from blocks", badge: "New", description: "One small content object.", image: "/hero.png", imageAlt: "A page builder", actionLabel: "Start", actionHref: "https://example.com/start" };
@@ -67,9 +67,10 @@ describe("registry", () => {
     assert.equal(bind(hero, "action").field, "/actionLabel /actionHref");
   });
 
-  it("wireframe props: the variant axes and padding only, no content, id or mode", () => {
+  it("wireframe props: the variant axes, padding and align only (plus the variant's own align default), no content, id or mode", () => {
     const hero = BLOCK_BY_ID["hero-simple"]!;
-    assert.deepEqual(wireframeProps(hero, "mediaTop"), { media: "top" });
+    assert.deepEqual(wireframeProps(hero, "mediaTop"), { media: "top", align: "center" });
+    assert.deepEqual(wireframeProps(hero, "mediaStart"), { media: "start" });
     assert.deepEqual(wireframeProps(hero, "mediaEnd", { level: 2, padding: "compact", landmarkLabel: "x" }), { media: "end", padding: "compact" });
     assert.equal(defaultVariantId(hero), "mediaEnd");
   });
@@ -120,6 +121,15 @@ describe("settings", () => {
     const bad = validateInstance({ id: "x", item: "team-simple", variant: "cols3", props: { ...team, align: "left" as never } });
     assert.deepEqual(bad.issues.map((i) => i.path), ["/props/align"]);
     assert.equal(wireframeProps(BLOCK_BY_ID["hero-simple"]!, "mediaEnd", { align: "end" }).align, "end");
+    // the variant default (contract variants[].settings): the centred composition only; the saved prop wins
+    const hero = BLOCK_BY_ID["hero-simple"]!;
+    assert.deepEqual(BLOCKS.flatMap((b) => b.variants.filter((v) => v.settings).map((v) => [b.id, v.id, v.settings])), [["hero-simple", "mediaTop", { align: "center" }]]);
+    assert.equal(variantSettings(hero, "mediaTop").align, "center");
+    assert.equal(variantSettings(hero, "mediaEnd").align, "start");
+    assert.equal(variantSettings(hero, "mediaTop").padding, "standard");
+    assert.equal(wireframeProps(hero, "mediaTop").align, "center");
+    assert.equal(wireframeProps(hero, "mediaTop", { align: "start" }).align, "start");
+    assert.deepEqual(hero.variants.map((v) => v.id), ["mediaEnd", "mediaStart", "mediaTop"]);
   });
 
   it("settings are props: padding is checked by value at /props/padding and drawn by the wireframe", () => {

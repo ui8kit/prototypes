@@ -22,4 +22,5 @@ what the blocks draw.
 ## Consequences
 
 - A rule change is made once in ui8px-cli, released, and picked up by moving the pin.
-- codegen-x/ui8kit still carries its own full policy; migrating it to `extends: "ui8kit"` is follow-up work.
+- codegen-x/ui8kit keeps its own workspace policy; its simple line (HeroSimple, TeamSimple) has its own gate under the
+  preset (`bun run lint:px:simple`, `packages/tooling/ui8px-simple`, UPC-7), on the same ui8px-cli pin as this repo.

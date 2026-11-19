@@ -6,7 +6,7 @@ import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 import { CATALOG } from "../catalog";
 import { BLOCKS, BLOCK_BY_ID } from "./registry";
-import { bind, wireframeProps, type BlockSettings } from "./types";
+import { bind, variantSettings, wireframeProps, type BlockSettings } from "./types";
 
 function wireframe(item: string, variant: string, settings?: BlockSettings): HTMLElement {
   const { container } = render(CATALOG[item]!, { props: wireframeProps(BLOCK_BY_ID[item]!, variant, settings) });
@@ -68,13 +68,27 @@ describe("team list width", () => {
 describe("align setting (start | center | end, logical: docs/adr/0002-align-as-setting.md)", () => {
   const ITEMS = { start: "items-start", center: "items-center", end: "items-end" } as const;
   it.each(BLOCKS.flatMap((b) => b.variants.flatMap((v) => (["start", "center", "end"] as const).map((a) => [b.id, v.id, a] as const))))("%s / %s / %s", (item, variant, align) => {
-    const s = wireframe(item, variant, align === "start" ? undefined : { align });
+    const s = wireframe(item, variant, { align });
     const title = s.querySelector('[data-place="title"]')!;
     expect(title.parentElement!.classList.contains(ITEMS[align]), title.parentElement!.className).toBe(true);
     for (const text of all(s, '[data-shape="text"]')) expect(text.classList.contains(ITEMS[align]), text.className).toBe(true);
     // logical classes only: nothing pins a physical side
     const tokens = all(s, "[class]").flatMap((e) => [...e.classList]);
     expect(tokens.filter((t) => /^(?:[a-z0-9-]+:)*(?:text-(?:left|right)|-?(?:ml|mr|pl|pr|left|right)-\S+|float-(?:left|right))$/.test(t))).toEqual([]);
+  });
+
+  // the variant default: the centred composition (hero-simple mediaTop) starts centred, every other variant at start;
+  // the saved block's align overrides it
+  it("variant defaults: mediaTop is centred, the rest start; the prop overrides", () => {
+    const centred = BLOCKS.flatMap((b) => b.variants.filter((v) => variantSettings(b, v.id).align === "center").map((v) => `${b.id}/${v.id}`));
+    expect(centred).toEqual(["hero-simple/mediaTop"]);
+    for (const b of BLOCKS) for (const v of b.variants) {
+      const want = variantSettings(b, v.id).align ?? "start";
+      const title = wireframe(b.id, v.id).querySelector('[data-place="title"]')!;
+      expect(title.parentElement!.classList.contains(ITEMS[want as keyof typeof ITEMS]), `${b.id}/${v.id}`).toBe(true);
+    }
+    const start = wireframe("hero-simple", "mediaTop", { align: "start" }).querySelector('[data-place="title"]')!;
+    expect(start.parentElement!.classList.contains("items-start")).toBe(true);
   });
 
   it("dir=rtl: the same DOM (start / end are resolved by the browser, not by the block)", () => {

@@ -117,6 +117,27 @@ describe("section padding stays on the even 8px scale", () => {
   });
 });
 
+describe("writing direction of the preview (ltr | rtl, ours)", () => {
+  it("defaults to ltr, keeps rtl, drops an unknown value, exports only rtl and survives a preset", () => {
+    assert.equal(NO_THEME.direction, "ltr");
+    assert.equal(cleanTheme({}).direction, "ltr");
+    assert.equal(cleanTheme({ direction: "rtl" }).direction, "rtl");
+    assert.equal(cleanTheme({ direction: "up" }).direction, "ltr");
+    const rtl = setThemeField(NO_THEME, "direction", "rtl");
+    assert.equal(rtl.direction, "rtl");
+    assert.equal(isDefault(rtl), false);
+    assert.equal(setThemeField(rtl, "direction", "nope").direction, "ltr");
+    assert.equal(toConfig({ mode: "light", theme: NO_THEME }).direction, undefined);
+    const config = toConfig({ mode: "light", theme: rtl });
+    assert.equal(config.direction, "rtl");
+    const back = fromConfig(JSON.stringify(config));
+    assert.ok(back.ok && back.theme.direction === "rtl" && back.dropped.length === 0);
+    const bad = fromConfig({ format: CONFIG_FORMAT, version: 2, mode: "light", direction: "up" });
+    assert.ok(bad.ok && bad.dropped.includes("direction") && bad.theme.direction === "ltr");
+    assert.equal(presetTheme(PRESETS_ROW1[0]!, rtl).direction, "rtl");
+  });
+});
+
 describe("theme model", () => {
   it("cleans unknown skins, radii, density, and palettes", () => {
     assert.deepEqual(cleanTheme({ skin: "nope", radius: 3, density: "huge", tokens: { "density-card": "huge" }, palette: { harmony: "x" } }), NO_THEME);

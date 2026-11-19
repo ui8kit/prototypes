@@ -1,8 +1,8 @@
-// Every wireframe (block × variant × padding preset, then × the non-default align values) as HTML, one section per line: the DOM snapshot that the kit cn
+// Every wireframe (block × variant × padding preset, then × the align values other than the variant's own default) as HTML, one section per line: the DOM snapshot that the kit cn
 // (packages/blocks/src/manifest/wireframe-dom.test.ts) and the catalog cn (catalog/cn.test.ts) must both produce.
 import { render } from "@testing-library/svelte";
 import { CATALOG } from "../src/catalog";
-import { BLOCKS, wireframeProps } from "../src/manifest";
+import { BLOCKS, variantSettings, wireframeProps } from "../src/manifest";
 
 const PADDINGS = [undefined, "compact", "standard", "spacious"] as const;
 export const SNAPSHOT = "./wireframes.snap.html"; // relative to catalog/cn.test.ts
@@ -18,7 +18,7 @@ export function drawAll(): string {
       }
   for (const b of BLOCKS)
     for (const v of b.variants)
-      for (const align of ["center", "end"] as const) {
+      for (const align of (["start", "center", "end"] as const).filter((a) => a !== (variantSettings(b, v.id).align ?? "start"))) {
         const { container, unmount } = render(CATALOG[b.id]!, { props: wireframeProps(b, v.id, { align }) });
         lines.push(`<!-- ${b.id}/${v.id}/align-${align} -->`, container.innerHTML.replace(/<!---->/g, ""));
         unmount();

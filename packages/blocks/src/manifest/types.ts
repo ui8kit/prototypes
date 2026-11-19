@@ -50,6 +50,9 @@ export type BlockVariant = {
   label: string;
   /** Layout axes only (media side, column count, surface). Never content. Passed to the organism as props. */
   axes: Record<string, string>;
+  /** The variant's own setting defaults, over the contract `settings[*].default` (HeroSimple mediaTop: `align: "center"`,
+   *  the centred composition); a saved block's props override them. Not a variant of its own: the feed does not grow. */
+  settings?: Partial<Record<keyof BlockSettings, string | number | boolean>>;
 };
 
 export type Setting = { type: string; default?: unknown };
@@ -140,11 +143,21 @@ export function resolveVariant(block: BlockManifest, id: string | undefined): Bl
  * takes no content). A saved instance draws the same way: `wireframeProps(block, instance.variant, instance.props)`.
  */
 export function wireframeProps(block: BlockManifest, variantId: string, props?: BlockSettings): Record<string, unknown> {
+  const variant = resolveVariant(block, variantId);
+  // the saved align, else the variant's own default (hero-simple mediaTop: center); unset draws the organism default (start)
+  const align = props?.align ?? variant.settings?.align;
   return {
-    ...resolveVariant(block, variantId).axes,
+    ...variant.axes,
     ...(props?.padding ? { padding: props.padding } : {}),
-    ...(props?.align ? { align: props.align } : {}),
+    ...(align ? { align } : {}),
   };
+}
+
+/** The settings a variant starts with: the contract defaults, then the variant's own (`settings` of the variant). A saved
+ *  block's props override them (`{ ...variantSettings(block, variant), ...splitProps(block, props).settings }`). */
+export function variantSettings(block: BlockManifest, variantId: string): BlockSettings {
+  const base = Object.fromEntries(Object.entries(block.settings).filter(([, s]) => s.default !== undefined).map(([k, s]) => [k, s.default]));
+  return { ...base, ...(resolveVariant(block, variantId).settings ?? {}) } as BlockSettings;
 }
 
 export function placeOf(block: BlockManifest, id: string): Place {

@@ -6,6 +6,8 @@
 //     but not drawn: the wireframe has no text. Font ids are checked by shape only (codegen-x checks them against its font list).
 //   - `sectionPadding` is this constructor's own field. It is exported only when it is not "standard" ("default", its name before UPC-6, is read as "standard"); codegen-x's importer ignores
 //     unknown top-level fields, so the config still applies there.
+//   - `direction` ("ltr" | "rtl") is this constructor's own too: the writing direction of the preview (dir on the feed), to
+//     check the logical alignment of the blocks (align start / end follow it). Exported only when "rtl"; codegen-x ignores it.
 //   - the legacy `prototypes-theme` v1 config and stored themes with `radii` / one global `density` are migrated to tokens.
 import { cleanPalette, type Palette } from "./palette";
 import { RADII, SKIN_IDS, type SkinId } from "./skins";
@@ -27,6 +29,11 @@ import {
 
 export type { SectionPadding };
 
+/** the writing direction of the preview (`dir` on the feed): start / end of the blocks' align setting follow it */
+export const DIRECTIONS = ["ltr", "rtl"] as const;
+export type Direction = (typeof DIRECTIONS)[number];
+export const directionOf = (v: unknown): Direction => (v === "rtl" ? "rtl" : "ltr");
+
 export type Mode = "light" | "dark";
 export const MODES = ["light", "dark"] as const;
 
@@ -44,9 +51,11 @@ export type GlobalTheme = {
   tracking?: number;
   /** this constructor's own: vertical rhythm of every Block */
   sectionPadding: SectionPadding;
+  /** this constructor's own: the writing direction of the preview */
+  direction: Direction;
 };
 
-export const NO_THEME: GlobalTheme = { skin: null, font: null, headingFont: null, radius: null, tokens: {}, sectionPadding: "standard" };
+export const NO_THEME: GlobalTheme = { skin: null, font: null, headingFont: null, radius: null, tokens: {}, sectionPadding: "standard", direction: "ltr" };
 
 // ---- font fields: carried through (codegen-x packages/theme-model/src/type.ts value sets) ----
 export const FONT_SCALES = [80, 85, 90, 95, 100, 105, 110, 115, 120] as const;
@@ -99,6 +108,7 @@ export function cleanTheme(v: unknown): GlobalTheme {
     ...(headingWeight !== null ? { headingWeight } : {}),
     ...(tracking !== null ? { tracking } : {}),
     sectionPadding,
+    direction: directionOf(o.direction),
   };
 }
 
@@ -123,7 +133,8 @@ export const isDefault = (t: GlobalTheme): boolean =>
   t.fontWeight === undefined &&
   t.headingWeight === undefined &&
   t.tracking === undefined &&
-  t.sectionPadding === "standard";
+  t.sectionPadding === "standard" &&
+  t.direction === "ltr";
 
 const local = (): Storage | null => {
   try {
@@ -179,6 +190,7 @@ export const FIELDS: readonly Field[] = [
   { id: "skin", group: "site", values: SKIN_IDS, nullable: true, unset: null, store: "theme" },
   { id: "radius", group: "site", values: RADII, nullable: true, unset: null, store: "theme" },
   { id: "sectionPadding", group: "site", values: SECTION_PADDINGS, nullable: false, unset: "standard", store: "theme" },
+  { id: "direction", group: "site", values: DIRECTIONS, nullable: false, unset: "ltr", store: "theme" },
   ...ELEMENTS.map((e): Field => ({ id: "radius-" + e, group: "radius", element: e, values: RADII, nullable: true, unset: null, store: "tokens", slot: ELEMENT_SLOT[e] })),
   ...DENSITY_ELEMENTS.map((e): Field => ({ id: "density-" + e, group: "density", element: e, values: DENSITIES, nullable: false, unset: "default", store: "tokens", slot: ELEMENT_SLOT[e] })),
   ...SHADOW_ELEMENTS.map((e): Field => ({ id: "shadow-" + e, group: "shadow", element: e, values: SHADOWS, nullable: true, unset: null, store: "tokens", slot: ELEMENT_SLOT[e] })),
@@ -192,7 +204,7 @@ export function fieldValue(s: ThemeState, id: string): FieldValue | null {
   const f = fieldOf(id);
   if (!f) return null;
   if (f.store === "mode") return s.mode;
-  if (f.store === "theme") return (s.theme[id as "skin" | "radius" | "sectionPadding"] as FieldValue | null) ?? f.unset;
+  if (f.store === "theme") return (s.theme[id as "skin" | "radius" | "sectionPadding" | "direction"] as FieldValue | null) ?? f.unset;
   return s.theme.tokens[id] ?? f.unset;
 }
 
@@ -228,6 +240,8 @@ export type ThemeConfig = {
   tracking?: number;
   /** ours; only when not "standard" (codegen-x ignores it) */
   sectionPadding?: SectionPadding;
+  /** ours; only when "rtl" (codegen-x ignores it) */
+  direction?: Direction;
 };
 export type ImportResult = { ok: true; mode: Mode | null; theme: GlobalTheme; dropped: string[] } | { ok: false; error: string };
 
@@ -250,6 +264,7 @@ export function toConfig(s: ThemeState): ThemeConfig {
     ...(t.headingWeight !== undefined ? { headingWeight: t.headingWeight } : {}),
     ...(t.tracking !== undefined ? { tracking: t.tracking } : {}),
     ...(t.sectionPadding !== "standard" ? { sectionPadding: t.sectionPadding } : {}),
+    ...(t.direction !== "ltr" ? { direction: t.direction } : {}),
   };
 }
 
@@ -284,6 +299,7 @@ export function fromConfig(input: unknown): ImportResult {
   }
   if (o.fontWidth !== undefined && o.fontWidth !== null && theme.fontWidth === undefined) dropped.push("fontWidth");
   if (o.sectionPadding !== undefined && sectionPaddingOf(o.sectionPadding) !== o.sectionPadding && o.sectionPadding !== "default") dropped.push("sectionPadding");
+  if (o.direction !== undefined && o.direction !== null && o.direction !== directionOf(o.direction)) dropped.push("direction");
   if (o.tokens && typeof o.tokens === "object" && !Array.isArray(o.tokens)) {
     for (const [k, x] of Object.entries(o.tokens as Record<string, unknown>)) {
       if (!(k in theme.tokens) && !(k.startsWith("density-") && x === "default" && fieldOf(k))) dropped.push(k);
@@ -292,7 +308,7 @@ export function fromConfig(input: unknown): ImportResult {
   return { ok: true, mode, theme, dropped };
 }
 
-/** a brand preset as a theme (skin, fonts, radius, tokens); the custom palette is dropped, section padding stays */
-export function presetTheme(p: Preset, keep: Pick<GlobalTheme, "sectionPadding"> = NO_THEME): GlobalTheme {
-  return cleanTheme({ skin: p.skin, font: p.font, headingFont: p.headingFont, radius: p.radius, tokens: p.tokens, sectionPadding: keep.sectionPadding });
+/** a brand preset as a theme (skin, fonts, radius, tokens); the custom palette is dropped, section padding and direction stay */
+export function presetTheme(p: Preset, keep: Partial<Pick<GlobalTheme, "sectionPadding" | "direction">> = NO_THEME): GlobalTheme {
+  return cleanTheme({ skin: p.skin, font: p.font, headingFont: p.headingFont, radius: p.radius, tokens: p.tokens, sectionPadding: keep.sectionPadding, direction: keep.direction });
 }
