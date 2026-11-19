@@ -7,3 +7,4 @@ coverage
 .ui8px/reports
 .ui8px/telemetry
 .manual/
+.ui8px/extract

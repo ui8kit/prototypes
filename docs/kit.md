@@ -50,19 +50,20 @@ gone; reinstall is CLI-only.
 
 ## ui8px policy for the generated wireframes
 
-`scripts/ui8px-extract.py` lints, next to `classes.ts`, the generated wireframes and shapes
-(`packages/blocks/src/generated/svelte/{blocks,shapes}`) under the layout scope. They are rectangles on the kit `Box`
-with plain layout classes: no composition, no recipe, no state or effect class ships with them (codegen-x
-`packages/prototypes`), so there is no `controls` scope and no recipe file to lint.
+The policy is the ui8px `ui8kit` preset (`"extends": "ui8kit"` in every `.ui8px/policy/*.json`) plus these local deltas:
 
-The only allowlist entry (`.ui8px/policy/allowed.json`) the generated code adds to the bootstrap policy:
+| File | Delta | Why |
+| --- | --- | --- |
+| `allowed.json` | `aspect-3/4` | the portrait ratio of the media shape |
+| `denied.json` | `rounded-sm` … `rounded-3xl`, `shadow`, `shadow-*` | wireframes use only `rounded` / `rounded-full`; elevation is a token (`--shadow-card`) |
+| `scopes.json` | `controls` = CSS selector `[data-shape="badge"]` | the badge density steps are 20 / 24 / 28px (4px steps, a control) |
+| `scopes.json` | `tailwind-preflight` = `::file-selector-button`, `optgroup option` | Tailwind's own form-control defaults in the compiled CSS (4px, 20px) |
+| `scopes.json` | `layout` = `packages/blocks/**`, `.ui8px/extract/**` | everything else: 8px only |
 
-| Utility | Why |
-| --- | --- |
-| `aspect-3/4` | the portrait ratio of the media shape, next to the already allowed `aspect-square`, `aspect-video`, `aspect-4/3` and `aspect-21/9` |
-
-Spacing stays the bootstrap scale (layout `0 2 4 6 8 10 12 16 20 24 32 40`: 32 and 40 are the `lg:` step of the section
-padding presets).
+What is checked (`scripts/ui8px-gate.mjs`): the rendered wireframes (`packages/blocks/catalog/wireframes.snap.html`, every
+block × variant × padding preset, kept equal to the live render by vitest) and the imported `classes.ts` strings
+(`ui8px lint`); the compiled catalog stylesheet and the density steps (`ui8px validate grid`, layout 8px, control 4px).
+Generated wireframe sources are never scanned by regex.
 
 ## The catalog bundle (no tailwind-merge)
 

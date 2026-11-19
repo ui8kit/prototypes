@@ -11,7 +11,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "check:blocks": "python3 scripts/check-blocks.py",
-    "extract:px": "python3 scripts/ui8px-extract.py",
+    "extract:px": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs scripts/px-extract.ts",
     "lint:px": "node scripts/ui8px-gate.mjs",
     "kit:install": "bash scripts/install-kit.sh",
     "test:theme": "node --experimental-strip-types --import ./scripts/ts-ext-register.mjs --test packages/theme/src/*.test.ts",
@@ -29,12 +29,15 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "@tailwindcss/vite": "^4.1.13",
     "@testing-library/svelte": "^5.2.8",
     "@types/node": "^22.10.0",
     "jsdom": "^26.1.0",
     "svelte": "^5.39.6",
+    "tailwindcss": "^4.1.13",
     "typescript": "^5.8.3",
-    "ui8px": "^0.2.5",
+    "ui8px": "github:ui8kit/ui8px-cli#6ae0f0c88bd55b167d10a12698493d41b3a5a4d3",
+    "vite": "^7.1.7",
     "vitest": "^3.2.4"
   }
 }

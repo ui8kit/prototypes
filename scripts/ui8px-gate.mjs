@@ -1,7 +1,16 @@
 #!/usr/bin/env node
 /**
- * Extract Svelte/TS class maps, then run the npm `ui8px` CLI (lint + validate
- * grid/patterns/aria). Blocking rules follow .ui8px/gate.json (max 0).
+ * The ui8px gate (`bun run px`): ui8px lint, validate grid, patterns and aria over what the blocks really draw.
+ *
+ * - lint: the rendered wireframes (`packages/blocks/catalog/wireframes.snap.html`: every block × variant × padding preset,
+ *   checked against the live render by vitest) and the class strings of `classes.ts` (`.ui8px/extract/classes.html`,
+ *   written by scripts/px-extract.ts from the imported module);
+ * - validate grid: the compiled catalog stylesheet (`packages/blocks/catalog/dist/catalog.css`: Tailwind output plus
+ *   tokens.css) and the density steps (`.ui8px/extract/density.css`): 8px in layout scope, 4px in the controls scope
+ *   (`.ui8px/policy/scopes.json`: the badge);
+ * - blocking rules and the ratchet: `.ui8px/gate.json` (max 0).
+ *
+ * `UI8PX_NO_BUILD=1` skips the catalog build (scripts/verify runs it as its own step first).
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -9,81 +18,56 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const gatePath = path.join(root, ".ui8px", "gate.json");
-const lintJsonPath = path.join(root, ".ui8px", "reports", "lint.json");
+const gate = JSON.parse(fs.readFileSync(path.join(root, ".ui8px", "gate.json"), "utf8"));
+const reports = path.join(root, ".ui8px", "reports");
 const runner = path.join(root, "scripts", "ui8px.mjs");
+const SNAPSHOT = "packages/blocks/catalog/wireframes.snap.html";
+const CATALOG_CSS = "packages/blocks/catalog/dist/catalog.css";
+const LINT_INPUTS = [SNAPSHOT, ".ui8px/extract"];
+const GRID_INPUTS = [CATALOG_CSS, ".ui8px/extract/density.css"];
 
-function run(command, args) {
+function run(command, args, quiet = false) {
   const result = spawnSync(command, args, { cwd: root, encoding: "utf8" });
-  if (result.stdout) process.stdout.write(result.stdout);
+  if (!quiet && result.stdout) process.stdout.write(result.stdout);
   if (result.stderr) process.stderr.write(result.stderr);
-  return { status: result.status ?? 1, stdout: result.stdout ?? "", stderr: result.stderr ?? "" };
+  return { status: result.status ?? 1, stdout: result.stdout ?? "" };
 }
-
-function fail(message, code = 1) {
-  console.error(message);
-  process.exit(code);
+function fail(message) {
+  console.error(`ui8px gate: ${message}`);
+  process.exit(1);
 }
+const ui8px = (args, quiet) => run(process.execPath, [runner, ...args], quiet);
 
-const extract = run("python3", [path.join(root, "scripts", "ui8px-extract.py")]);
-if (extract.status !== 0) fail("ui8px extract failed");
+if (run(process.execPath, ["--experimental-strip-types", "--import", "./scripts/ts-ext-register.mjs", "scripts/px-extract.ts"]).status !== 0) fail("px:extract failed");
+if (process.env.UI8PX_NO_BUILD !== "1" || !fs.existsSync(path.join(root, CATALOG_CSS))) {
+  if (run("node", ["scripts/catalog-size.mjs"]).status !== 0) fail("catalog build failed");
+}
+fs.mkdirSync(reports, { recursive: true });
 
-const gate = JSON.parse(fs.readFileSync(gatePath, "utf8"));
 const max = Number(process.env.UI8PX_MAX ?? gate.max ?? 0);
-const blocking = new Set(gate.blocking ?? ["UI8PX001", "UI8PX003", "UI8PX005", "GRID"]);
+const blocking = new Set(gate.blocking);
 
-fs.mkdirSync(path.dirname(lintJsonPath), { recursive: true });
-
-const lintJson = run(process.execPath, [runner, "lint", ".ui8px/extract", "--json"]);
-let lintResult = { diagnostics: [] };
+const lint = ui8px(["lint", ...LINT_INPUTS, "--json"], true);
+let diagnostics;
 try {
-  lintResult = JSON.parse(lintJson.stdout.trim() || "{}");
+  diagnostics = JSON.parse(lint.stdout.trim() || "{}").diagnostics ?? [];
 } catch {
-  fail(`ui8px lint did not return JSON\n${lintJson.stdout}\n${lintJson.stderr}`, 2);
+  fail(`ui8px lint did not return JSON\n${lint.stdout}`);
 }
-fs.writeFileSync(lintJsonPath, `${JSON.stringify(lintResult, null, 2)}\n`);
-console.log("--- ui8px lint ---");
-run(process.execPath, [runner, "lint", ".ui8px/extract"]);
+fs.writeFileSync(path.join(reports, "lint.json"), `${JSON.stringify({ diagnostics }, null, 2)}\n`);
+ui8px(["lint", ...LINT_INPUTS]);
+const blocked = diagnostics.filter((d) => blocking.has(d.rule));
+console.log(`ui8px lint: ${diagnostics.length} diagnostics, ${blocked.length} blocking`);
+if (blocked.length > max) fail(`lint over max ${max}: ${blocked.length} blocking findings`);
 
-const blockedLint = (lintResult.diagnostics ?? []).filter((item) => blocking.has(item.rule));
-console.log(`ui8px lint: ${lintResult.diagnostics?.length ?? 0} diagnostics, ${blockedLint.length} blocking`);
-if (blockedLint.length > max) {
-  fail(`ui8px lint over max ${max}: ${blockedLint.length} blocking findings`);
-}
-
-const grid = run(process.execPath, [
-  runner,
-  "validate",
-  "grid",
-  "--input",
-  ".ui8px/class-map.json",
-  "--output",
-  ".ui8px/reports/class-map.backlog.json",
-]);
-if (grid.status !== 0 && blocking.has("GRID")) {
-  fail("ui8px validate grid failed");
+for (const input of GRID_INPUTS) {
+  const out = path.join(".ui8px", "reports", `grid.${path.basename(input)}.json`);
+  const grid = ui8px(["validate", "grid", "--input", input, "--output", out, "--verbose"]);
+  if (grid.status !== 0 && blocking.has("GRID")) fail(`validate grid failed on ${input} (${out})`);
 }
 
-const patterns = run(process.execPath, [
-  runner,
-  "validate",
-  "patterns",
-  ".ui8px/extract",
-  "--min-count",
-  "2",
-  "--output",
-  ".ui8px/reports/patterns.json",
-]);
-console.log(`ui8px validate patterns exit ${patterns.status}`);
+const patterns = ui8px(["validate", "patterns", ...LINT_INPUTS, "--min-count", "2", "--output", ".ui8px/reports/patterns.json"], true);
+console.log(`ui8px validate patterns exit ${patterns.status} (report only)`);
 
-const aria = run(process.execPath, [
-  runner,
-  "validate",
-  "aria",
-  ".ui8px/extract",
-  "--package",
-  "package.json",
-]);
-if (aria.status !== 0) fail("ui8px validate aria failed");
-
+if (ui8px(["validate", "aria", ...LINT_INPUTS, "--package", "package.json"]).status !== 0) fail("validate aria failed");
 console.log("ui8px gate: ok");

@@ -24,7 +24,7 @@ Wireframe constructor on top of `ui8kit/contract`. **Prototypes are rectangle-on
 | --- | --- |
 | `node --experimental-strip-types scripts/sync-codegen.ts --check` (`bun run check:codegen`) | `src/generated` = its manifest (sha256 per file, no extra file) = `codegen.lock.json` = codegen-x at the locked commit (sparse fetch; `--offline` skips it) |
 | `python3 scripts/check-blocks.py` | Hand-written files: Block root, no nested/looped Block, no bare HTML, no literal copy, no inline style, forbidden radius/shadow/palette, max raw utilities = 0, sibling `*.block.ts`, `blockRoot` in sync, no interactive kit |
-| `node scripts/ui8px-gate.mjs` | Extract class maps from `classes.ts`, the generated wireframes and shapes (layout scope; allowlist: `docs/kit.md`), `ui8px lint`, `validate grid`, `validate patterns`, `validate aria`. Gate `max: 0`, blocking `UI8PX001`, `UI8PX003`, `UI8PX005`, `GRID` |
+| `node scripts/ui8px-gate.mjs` (`bun run lint:px`) | The ui8px gate over what the blocks really draw: `ui8px lint` of the rendered wireframes (`packages/blocks/catalog/wireframes.snap.html`) and of the imported `classes.ts` strings (`scripts/px-extract.ts` → `.ui8px/extract/classes.html`); `validate grid` of the compiled `catalog/dist/catalog.css` (Tailwind output + `tokens.css`) and of every density step (`.ui8px/extract/density.css`): **8px in layout scope, 4px only in the `controls` scope (the badge)**; `validate patterns` (report), `validate aria`. Policy: `extends: "ui8kit"` + local deltas (`.ui8px/policy`). Gate `max: 0`, blocking `UI8PX001`, `UI8PX002`, `UI8PX003`, `UI8PX005`, `GRID` |
 | `node --experimental-strip-types --test packages/theme/src/*.test.ts packages/blocks/src/manifest/*.node.test.ts` | Palette WCAG, density 8+4, CSS/JSON export; registry = generated items; variants layout-only; places ↔ model paths; field budget 5–10; saved instances valid, issues by pointer |
 | `tsc --noEmit` | TS of apps, packages, scripts |
 | `bun run build:catalog` | The embeddable catalog bundle `packages/blocks/catalog/dist` (wireframes + contracts + tokens), kit `cn` aliased to the codegen `--cn join` output (`kitCn` in `codegen.lock.json`); fails on tailwind-merge; prints JS/CSS gzip (`docs/kit.md`) |
@@ -37,7 +37,7 @@ Kit sources are not extracted: control recipes (`size-3`, `pr-2`) would trip lay
 - `@ui8kit/contract` Codex v0.4 / `codex:validate` is not wired here; it runs in codegen-x, where the models and organisms are generated. `packages/blocks/src/content/en.ts` holds only the app's interface text.
 - `codegen-x/ui8kit` `packages/tooling` and `packages/ui-gates` are private and not copied. `check-blocks.py` is the local structural stand-in.
 - Official `npx ui8kit@3` loads `@ui8kit/registry` from npm via CDN (unpkg → jsDelivr). Retry with `--retry` / `--registry-url`; do not copy primitives by hand (`docs/kit.md`).
-- `ui8px` is a devDependency (`^0.2.5`). Run it via `bun` / `npx` (`scripts/ui8px.mjs`). Do not vendor it.
+- `ui8px` is a devDependency pinned to a ui8kit/ui8px-cli commit (`github:ui8kit/ui8px-cli#<sha>`, 0.3.0 not on npm yet). `scripts/ui8px.mjs` builds its `dist` with this repo's TypeScript on first run. Do not vendor it. Install with `bun install --frozen-lockfile` (`bun.lock` is committed; CI runs Bun 1.2.21 and 1.4.4).
 
 ## Do not
 

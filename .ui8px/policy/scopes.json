@@ -1,13 +1,22 @@
 {
+  "extends": "ui8kit",
   "defaultScope": "layout",
   "scopes": [
     {
+      "name": "controls",
+      "files": [],
+      "selectors": ["\\[data-shape=\"badge\"\\]"],
+      "spacing": "control"
+    },
+    {
+      "name": "tailwind-preflight",
+      "files": [],
+      "selectors": ["^::file-selector-button$", "optgroup option$"],
+      "spacing": "control"
+    },
+    {
       "name": "layout",
-      "files": [
-        "packages/blocks/**",
-        ".ui8px/extract/**",
-        ".ui8px/extract/*.html"
-      ],
+      "files": ["packages/blocks/**", ".ui8px/extract/**"],
       "spacing": "layout"
     }
   ]
