@@ -3,5 +3,18 @@
   "commit": "f95339049104d3451730596447d272e2b2f3755e",
   "path": "packages/prototypes/out",
   "target": "packages/blocks/src/generated",
-  "manifest": "bac0f01b33d46eed3630e34a9af663254668559da0dfb3f8f93cd3f8c41a1b33"
+  "manifest": "bac0f01b33d46eed3630e34a9af663254668559da0dfb3f8f93cd3f8c41a1b33",
+  "kitCn": {
+    "repo": "https://github.com/ui8kit/codegen.git",
+    "commit": "42d94efc403aaa59cae53d6c5cc0ee1c05077519",
+    "generate": [
+      "--runtimes",
+      "svelte",
+      "--cn",
+      "join"
+    ],
+    "file": "utils/cn.ts",
+    "target": "packages/blocks/catalog/kit-cn.ts",
+    "sha256": "dfb86ba2e7516596680b8a4570a52f8b98f436c3c36add6b03d2110850c04ebc"
+  }
 }

@@ -63,3 +63,18 @@ The only allowlist entry (`.ui8px/policy/allowed.json`) the generated code adds 
 
 Spacing stays the bootstrap scale (layout `0 2 4 6 8 10 12 16 20 24 32 40`: 32 and 40 are the `lg:` step of the section
 padding presets).
+
+## The catalog bundle (no tailwind-merge)
+
+`bun run build:catalog` (`scripts/catalog-size.mjs`, also part of `bun run build`) builds
+`packages/blocks/catalog/dist/catalog.{js,css}`: the generated wireframes, their contracts and models, the per-element
+tokens, for embedding in constructors and admin panels. Its one difference from the app build: the kit's
+`utils/cn.ts` (clsx + tailwind-merge, as `ui8kit add` installs it) resolves to `packages/blocks/catalog/kit-cn.ts`, the
+`cn` that ui8kit/codegen emits with `generate --runtimes svelte --cn join` (a dependency-free join, no conflict
+resolution). It is pinned in `codegen.lock.json` `kitCn` (codegen commit, generate flags, sha256) and synced/checked by
+`scripts/sync-codegen.ts` (`--update-kit-cn <ref>`). `packages/kit` is never edited and the registry is unchanged; the app
+build keeps the kit's merging `cn` (its chrome overrides recipe classes).
+
+Same DOM: `catalog/wireframes.snap.html` holds every block × variant × padding preset; `src/manifest/wireframe-dom.test.ts`
+renders it with the kit cn, `catalog/cn.test.ts` with kit-cn.ts, both must match. `catalog-size.mjs` fails if the bundle
+pulls tailwind-merge or the kit's `utils/cn.ts` (clsx stays: the Svelte runtime uses it itself).

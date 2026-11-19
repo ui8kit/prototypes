@@ -1,0 +1,6 @@
+/* The catalog bundle's CSS: the utilities of the generated wireframes and the kit Box, and the per-element tokens. */
+@import "tailwindcss" source(none);
+@source "../src/generated/svelte";
+@source "../../kit/src/ui/box";
+@import "../src/tokens.css";
+@custom-variant dark (&:where(.dark, .dark *));

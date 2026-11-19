@@ -27,6 +27,7 @@ Wireframe constructor on top of `ui8kit/contract`. **Prototypes are rectangle-on
 | `node scripts/ui8px-gate.mjs` | Extract class maps from `classes.ts`, the generated wireframes and shapes (layout scope; allowlist: `docs/kit.md`), `ui8px lint`, `validate grid`, `validate patterns`, `validate aria`. Gate `max: 0`, blocking `UI8PX001`, `UI8PX003`, `UI8PX005`, `GRID` |
 | `node --experimental-strip-types --test packages/theme/src/*.test.ts packages/blocks/src/manifest/*.node.test.ts` | Palette WCAG, density 8+4, CSS/JSON export; registry = generated items; variants layout-only; places ↔ model paths; field budget 5–10; saved instances valid, issues by pointer |
 | `tsc --noEmit` | TS of apps, packages, scripts |
+| `bun run build:catalog` | The embeddable catalog bundle `packages/blocks/catalog/dist` (wireframes + contracts + tokens), kit `cn` aliased to the codegen `--cn join` output (`kitCn` in `codegen.lock.json`); fails on tailwind-merge; prints JS/CSS gzip (`docs/kit.md`) |
 | `vitest run` | Every item × variant as a wireframe: every place of the contract is a shape with `data-place` / `data-field`, no words / images / links, padding presets, team width; roles and tokens. `vitest.config.ts` pins `resolve.conditions: ["browser"]` and exact-match aliases |
 
 Kit sources are not extracted: control recipes (`size-3`, `pr-2`) would trip layout 8+4.

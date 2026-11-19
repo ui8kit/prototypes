@@ -8,6 +8,11 @@
  *   node --experimental-strip-types scripts/sync-codegen.ts --update <ref>   # pin a new commit (sha or branch), then sync
  *   node --experimental-strip-types scripts/sync-codegen.ts --check          # CI: target == manifest == lock, and == upstream
  *   node --experimental-strip-types scripts/sync-codegen.ts --check --offline  # the same without the upstream fetch
+ *
+ * `kitCn` (optional): the catalog build's `cn` (packages/blocks/catalog). ui8kit/codegen at `kitCn.commit` emits it with
+ * `generate --runtimes svelte --cn join` (utils/cn.ts: a clsx-style join, no tailwind-merge); the file is copied byte for
+ * byte to `kitCn.target` and pinned by `kitCn.sha256`. Synced and checked with the rest (`--update-kit-cn <ref>` pins a
+ * new codegen commit). The kit in packages/kit is never touched: only the catalog build aliases its utils/cn to it.
  */
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -16,7 +21,8 @@ import { tmpdir } from "node:os";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
-type Lock = { repo: string; commit: string; path: string; target: string; manifest: string };
+type KitCn = { repo: string; commit: string; generate: string[]; file: string; target: string; sha256: string };
+type Lock = { repo: string; commit: string; path: string; target: string; manifest: string; kitCn?: KitCn };
 type Manifest = { generator: string; version: number; items: Array<{ item: string }>; files: Record<string, string> };
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -25,6 +31,8 @@ const args = process.argv.slice(2);
 const check = args.includes("--check");
 const offline = args.includes("--offline");
 const updateAt = args.indexOf("--update");
+const kitAt = args.indexOf("--update-kit-cn");
+const updateKit = kitAt >= 0 ? args[kitAt + 1] : undefined;
 const update = updateAt >= 0 ? args[updateAt + 1] : undefined;
 if (updateAt >= 0 && !update) fail("--update needs a commit sha or a branch");
 
@@ -84,7 +92,52 @@ function fetchAt(lock: Lock, ref: string): { dir: string; commit: string; cleanu
   }
 }
 
+/** ui8kit/codegen at `ref`, its emitter run with kitCn.generate: the emitted kitCn.file and the resolved commit */
+function emitKitCn(k: KitCn, ref: string): { body: Buffer; commit: string } {
+  const tmp = mkdtempSync(join(tmpdir(), "sync-kit-cn-"));
+  try {
+    git(tmp, "init", "-q");
+    git(tmp, "remote", "add", "origin", k.repo);
+    git(tmp, "fetch", "-q", "--depth", "1", "origin", ref);
+    git(tmp, "checkout", "-q", "FETCH_HEAD");
+    const commit = git(tmp, "rev-parse", "HEAD");
+    // the emitted text does not depend on the installed versions (generate only imports clsx / tailwind-merge), so no frozen lockfile:
+    // the consumer's bun may not read the codegen lockfile format
+    execFileSync("bun", ["install", "--production", "--ignore-scripts", "--no-save"], { cwd: tmp, stdio: ["ignore", "ignore", "pipe"] });
+    execFileSync("bun", ["src/infrastructure/cli.ts", "generate", ...k.generate, "--out", "out"], { cwd: tmp, stdio: ["ignore", "ignore", "pipe"] });
+    return { body: readFileSync(join(tmp, "out", k.file)), commit };
+  } catch (e) {
+    fail(`emit ${k.repo} ${ref} (${k.generate.join(" ")}): ${(e as Error).message}`);
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+}
+
 const lock = JSON.parse(readFileSync(LOCK, "utf8")) as Lock;
+const kit = lock.kitCn;
+if (kit) {
+  for (const k of ["repo", "commit", "generate", "file", "target"] as const) if (!kit[k]) fail(`codegen.lock.json: kitCn has no ${k}`);
+  const kitTarget = join(ROOT, kit.target);
+  if (check) {
+    if (!existsSync(kitTarget) || sha256(readFileSync(kitTarget)) !== kit.sha256) fail(`${kit.target} is not the locked kitCn sha256; run the sync`);
+    if (!offline) {
+      const up = emitKitCn(kit, kit.commit);
+      if (up.commit !== kit.commit) fail(`kitCn upstream resolved ${up.commit}, locked ${kit.commit}`);
+      if (sha256(up.body) !== kit.sha256) fail(`kitCn: ${kit.repo}@${kit.commit.slice(0, 12)} emits ${kit.file} with sha256 ${sha256(up.body)}, locked ${kit.sha256}`);
+    }
+    console.log(`sync-codegen: ${kit.target} matches ${kit.repo.replace(/\.git$/, "")}@${kit.commit.slice(0, 12)} generate ${kit.generate.join(" ")}${offline ? " (offline)" : ""}`);
+  } else if (updateKit || !existsSync(kitTarget) || sha256(readFileSync(kitTarget)) !== kit.sha256) {
+    const up = emitKitCn(kit, updateKit ?? kit.commit);
+    if (!updateKit && sha256(up.body) !== kit.sha256) fail(`kitCn: upstream emits sha256 ${sha256(up.body)}, locked ${kit.sha256}`);
+    if (/^\s*import\b|\bfrom\s+["']/m.test(up.body.toString("utf8"))) fail(`kitCn: ${kit.file} imports a module; the catalog cn must be dependency-free`);
+    mkdirSync(dirname(kitTarget), { recursive: true });
+    writeFileSync(kitTarget, up.body);
+    lock.kitCn = { ...kit, commit: up.commit, sha256: sha256(up.body) };
+    writeFileSync(LOCK, `${JSON.stringify(lock, null, 2)}\n`);
+    console.log(`sync-codegen: ${kit.file} from ${kit.repo.replace(/\.git$/, "")}@${up.commit.slice(0, 12)} (${kit.generate.join(" ")}) -> ${kit.target}`);
+  }
+  if (updateKit && !update) process.exit(0);
+}
 for (const k of ["repo", "commit", "path", "target"] as const) if (!lock[k]) fail(`codegen.lock.json: no ${k}`);
 const target = join(ROOT, lock.target);
 
@@ -117,7 +170,7 @@ try {
     cpSync(join(up.dir, f), join(target, f));
   }
   verifyTree(target, lock.target);
-  const next: Lock = { ...lock, commit: up.commit, manifest: src.digest };
+  const next: Lock = { ...JSON.parse(readFileSync(LOCK, "utf8")), commit: up.commit, manifest: src.digest };
   writeFileSync(LOCK, `${JSON.stringify(next, null, 2)}\n`);
   console.log(`sync-codegen: ${Object.keys(src.manifest.files).length} files from ${up.commit.slice(0, 12)} -> ${lock.target} (manifest ${src.digest.slice(0, 12)})`);
 } finally {

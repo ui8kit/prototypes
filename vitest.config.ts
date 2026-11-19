@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [svelte({ hot: false }), svelteTesting()],
   test: {
     environment: "jsdom",
-    include: ["packages/blocks/src/**/*.test.ts"],
+    include: ["packages/blocks/src/**/*.test.ts", "packages/blocks/catalog/**/*.test.ts"],
     exclude: ["packages/blocks/src/**/*.node.test.ts"],
     server: {
       deps: {

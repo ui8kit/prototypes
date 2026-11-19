@@ -6,7 +6,8 @@
   "packageManager": "bun@1.2.21",
   "scripts": {
     "dev": "bun run --filter @ui8kit/blocks-app dev",
-    "build": "bun run --filter @ui8kit/blocks-app build",
+    "build": "bun run --filter @ui8kit/blocks-app build && node scripts/catalog-size.mjs",
+    "build:catalog": "node scripts/catalog-size.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "check:blocks": "python3 scripts/check-blocks.py",
