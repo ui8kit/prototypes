@@ -1,12 +1,13 @@
 /**
  * A page saved by the catalog is a @ui8kit/contract page-spec v2 document: blocks `{ id, item, variant, props }` with the
  * settings inside `props` (docs/adr/0001-settings-in-props.md). The schema is the published one (`@ui8kit/contract`
- * 0.3 `schemas/page-spec-v2.schema.json`, which references `page-spec.schema.json` for safe text); the host checks of
- * the spec (`unknown_item`, `unknown_variant`, `props_invalid`) are `validateInstance`.
+ * 0.4 `schemas/page-spec-v2.schema.json`, which references `page-spec.schema.json` for safe text); the host checks of
+ * the spec (`unknown_item`, `unknown_variant`, `props_invalid`) are `validateInstance`. The synced block contracts are
+ * block-contract/v1 documents (`schemas/block-contract.schema.json`, 0.4: `variants[].settings`).
  */
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { describe, it } from "node:test";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import { BLOCKS, validateInstance } from "./registry";
@@ -41,5 +42,18 @@ describe("page-spec v2 (@ui8kit/contract)", () => {
     const legacy = { ...first!, options: { padding: "compact" } } as unknown as BlockInstance;
     assert.equal(validatePage(page([legacy])), false);
     assert.ok(validatePage.errors!.some((e) => e.keyword === "additionalProperties" && e.params.additionalProperty === "options"));
+  });
+});
+
+describe("block-contract/v1 (@ui8kit/contract 0.4)", () => {
+  const validateContract = ajv.compile(schema("block-contract"));
+  const dir = new URL("../generated/contracts/", import.meta.url);
+  const items = readdirSync(dir).filter((d) => !d.endsWith(".json"));
+  it("every synced contract validates, variants[].settings included", () => {
+    assert.deepEqual(items.sort(), BLOCKS.map((b) => b.id).sort());
+    for (const item of items) {
+      const c = JSON.parse(readFileSync(new URL(`${item}/1.json`, dir), "utf8"));
+      assert.ok(validateContract(c), `${item}: ${JSON.stringify(validateContract.errors)}`);
+    }
   });
 });

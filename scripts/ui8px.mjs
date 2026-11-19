@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Run the ui8px CLI. It is a git-pinned devDependency (`github:ui8kit/ui8px-cli#<commit>`, not published to npm yet):
+ * Run the ui8px CLI. It is a git-pinned devDependency (`github:ui8kit/ui8px-cli#v0.3.0`, a GitHub release tag; not on npm yet):
  * a git install carries the TypeScript sources only, so the first run builds `node_modules/ui8px/dist` with this repo's
  * TypeScript. Do not vendor its sources.
  */

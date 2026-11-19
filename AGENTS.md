@@ -40,7 +40,7 @@ Kit sources are not extracted: control recipes (`size-3`, `pr-2`) would trip lay
 - `@ui8kit/contract` Codex v0.4 / `codex:validate` is not wired here; it runs in codegen-x, where the models and organisms are generated. The page-spec v2 schemas are (devDependency pinned to a ui8kit/contract commit: the published 0.3.0 has no `page-spec*.schema.json`). `packages/blocks/src/content/en.ts` holds only the app's interface text.
 - `codegen-x/ui8kit` `packages/tooling` and `packages/ui-gates` are private and not copied. `check-blocks.ts` is the local structural stand-in.
 - Official `npx ui8kit@3` loads `@ui8kit/registry` from npm via CDN (unpkg → jsDelivr). Retry with `--retry` / `--registry-url`; do not copy primitives by hand (`docs/kit.md`).
-- `ui8px` is a devDependency pinned to a ui8kit/ui8px-cli commit (`github:ui8kit/ui8px-cli#<sha>`, 0.3.0 not on npm yet). `scripts/ui8px.mjs` builds its `dist` with this repo's TypeScript on first run. Do not vendor it. Install with `bun install --frozen-lockfile` (`bun.lock` is committed; CI runs Bun 1.2.21 and 1.4.4).
+- `ui8px` is a devDependency pinned to a ui8kit/ui8px-cli release tag (`github:ui8kit/ui8px-cli#v0.3.0`, GitHub release; not on npm yet); `@ui8kit/contract` likewise (`github:ui8kit/contract#v0.4.0`: the page-spec/v2 and block-contract/v1 schemas). `scripts/ui8px.mjs` builds its `dist` with this repo's TypeScript on first run. Do not vendor it. Install with `bun install --frozen-lockfile` (`bun.lock` is committed; CI runs Bun 1.2.21 and 1.4.4).
 
 ## Do not
 

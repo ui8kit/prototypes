@@ -1,6 +1,6 @@
 {
   "repo": "https://github.com/ui8kit/contract.git",
-  "commit": "20d0853fba892410dd42a92ac9adfa8241d0880a",
+  "commit": "999621963a8ddfd2c96c30d46d69056af0e69df1",
   "files": {
     ".cursor/rules/00-ui8kit-core.mdc": "dbceea66c7ffc494a06ec7926185afd5a6ed6d55dff9315bc8d55839bbf90d9d",
     ".cursor/rules/01-block-root.mdc": "f2c74ec9999fb0ac47807df607377b1684dd47eabad2d7d7a1d69b4281dfd4c0",
