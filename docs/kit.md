@@ -60,7 +60,7 @@ The policy is the ui8px `ui8kit` preset (`"extends": "ui8kit"` in every `.ui8px/
 | `scopes.json` | `tailwind-preflight` = `::file-selector-button`, `optgroup option` | Tailwind's own form-control defaults in the compiled CSS (4px, 20px) |
 | `scopes.json` | `layout` = `packages/blocks/**`, `.ui8px/extract/**` | everything else: 8px only |
 
-What is checked (`scripts/ui8px-gate.mjs`): the rendered wireframes (`packages/blocks/catalog/wireframes.snap.html`, every
+What is checked (`scripts/ui8px-gate.mjs`): the rendered wireframes (`packages/blocks/catalog/snapshots/<item>.snap.html`, every
 block × variant × padding preset, kept equal to the live render by vitest) and the imported `classes.ts` strings
 (`ui8px lint`); the compiled catalog stylesheet and the density steps (`ui8px validate grid`, layout 8px, control 4px).
 Generated wireframe sources are never scanned by regex.
@@ -76,6 +76,6 @@ resolution). It is pinned in `codegen.lock.json` `kitCn` (codegen commit, genera
 `scripts/sync-codegen.ts` (`--update-kit-cn <ref>`). `packages/kit` is never edited and the registry is unchanged; the app
 build keeps the kit's merging `cn` (its chrome overrides recipe classes).
 
-Same DOM: `catalog/wireframes.snap.html` holds every block × variant × padding preset; `src/manifest/wireframe-dom.test.ts`
+Same DOM: `catalog/snapshots/<item>.snap.html` (one file per block) holds every variant × padding preset; `src/manifest/wireframe-dom.test.ts`
 renders it with the kit cn, `catalog/cn.test.ts` with kit-cn.ts, both must match. `catalog-size.mjs` fails if the bundle
 pulls tailwind-merge or the kit's `utils/cn.ts` (clsx stays: the Svelte runtime uses it itself).

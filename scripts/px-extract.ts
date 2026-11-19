@@ -7,7 +7,7 @@
  *   CSS the shapes get (`tokens.css`: --h-* / --w-* -> height / width, --pad-card -> padding), so `validate grid` checks
  *   the px values (badge steps under the controls scope, `.ui8px/policy/scopes.json`).
  *
- * The generated wireframes are linted as rendered (`packages/blocks/catalog/wireframes.snap.html`, checked against the
+ * The generated wireframes are linted as rendered (`packages/blocks/catalog/snapshots/<item>.snap.html`, checked against the
  * live render by vitest), never by scanning their source.
  */
 import { mkdirSync, writeFileSync } from "node:fs";

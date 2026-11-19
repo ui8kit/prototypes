@@ -2,7 +2,7 @@
 /**
  * The ui8px gate (`bun run px`): ui8px lint, validate grid, patterns and aria over what the blocks really draw.
  *
- * - lint: the rendered wireframes (`packages/blocks/catalog/wireframes.snap.html`: every block × variant × padding preset,
+ * - lint: the rendered wireframes (`packages/blocks/catalog/snapshots/<item>.snap.html`: every block × variant × padding preset,
  *   checked against the live render by vitest) and the class strings of `classes.ts` (`.ui8px/extract/classes.html`,
  *   written by scripts/px-extract.ts from the imported module);
  * - validate grid: the compiled catalog stylesheet (`packages/blocks/catalog/dist/catalog.css`: Tailwind output plus
@@ -21,9 +21,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const gate = JSON.parse(fs.readFileSync(path.join(root, ".ui8px", "gate.json"), "utf8"));
 const reports = path.join(root, ".ui8px", "reports");
 const runner = path.join(root, "scripts", "ui8px.mjs");
-const SNAPSHOT = "packages/blocks/catalog/wireframes.snap.html";
+const SNAPSHOTS = "packages/blocks/catalog/snapshots"; // one <item>.snap.html per block
 const CATALOG_CSS = "packages/blocks/catalog/dist/catalog.css";
-const LINT_INPUTS = [SNAPSHOT, ".ui8px/extract"];
+const LINT_INPUTS = [SNAPSHOTS, ".ui8px/extract"];
 const GRID_INPUTS = [CATALOG_CSS, ".ui8px/extract/density.css"];
 
 function run(command, args, quiet = false) {

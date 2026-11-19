@@ -1,17 +1,17 @@
-import heroSimple from "../generated/contracts/hero-simple/1.json" with { type: "json" };
-import teamSimple from "../generated/contracts/team-simple/1.json" with { type: "json" };
-import { model as heroModel, validateHeroContent } from "../generated/models/hero@1";
-import { model as teamModel, validateTeamContent } from "../generated/models/team@1";
+import { CATEGORIES, CONTRACTS, MODELS as GENERATED_MODELS } from "../generated/registry";
 import type { Issue, ModelField, ModelSpec } from "../generated/models/validate";
 import { settingValues, splitProps, type BlockCategory, type BlockInstance, type BlockManifest, type Contract } from "./types";
 
-/** Generated contracts (codegen-x/ui8kit packages/prototypes, synced by scripts/sync-codegen.ts) plus a catalog category. */
-const manifest = (contract: unknown, category: BlockCategory): BlockManifest => {
+/**
+ * Generated contracts with their catalog category (codegen-x/ui8kit packages/prototypes `out/registry.ts`, synced by
+ * scripts/sync-codegen.ts). Nothing here names a block: a synced block is registered by the sync.
+ */
+const manifest = (contract: unknown): BlockManifest => {
   const c = contract as Contract;
-  return { ...c, id: c.item, category };
+  return { ...c, id: c.item, category: CATEGORIES[c.item] as BlockCategory };
 };
 
-export const BLOCKS: readonly BlockManifest[] = [manifest(heroSimple, "hero"), manifest(teamSimple, "team")];
+export const BLOCKS: readonly BlockManifest[] = CONTRACTS.map(manifest);
 
 /** Registry keyed by the stable item id. */
 export const BLOCK_BY_ID: Readonly<Record<string, BlockManifest>> = Object.fromEntries(BLOCKS.map((b) => [b.id, b]));
@@ -19,10 +19,7 @@ export const BLOCK_BY_ID: Readonly<Record<string, BlockManifest>> = Object.fromE
 export type ContentModel = { spec: ModelSpec; validate: (value: unknown) => Issue[] };
 
 /** Every content model, keyed `id@version`. Blocks reference these; the count grows with content models, not variants. */
-export const MODELS: Readonly<Record<string, ContentModel>> = {
-  "hero@1": { spec: heroModel as unknown as ModelSpec, validate: validateHeroContent },
-  "team@1": { spec: teamModel as unknown as ModelSpec, validate: validateTeamContent },
-};
+export const MODELS: Readonly<Record<string, ContentModel>> = GENERATED_MODELS;
 
 export function blocksIn(category: BlockCategory): BlockManifest[] {
   return BLOCKS.filter((b) => b.category === category);

@@ -1,6 +1,6 @@
 /**
  * The generated wireframes of the catalog: rectangles only. Every block × variant draws every place of its contract as a
- * shape with data-place / data-field (the inspector), no words, no image, no link; the padding setting and the team width.
+ * shape with data-place / data-field (the inspector), no words, no image, no link; the padding setting and the list width.
  */
 import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
@@ -41,7 +41,9 @@ describe.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)
     const s = wireframe(item, variant);
     expect((s.textContent ?? "").trim()).toBe("");
     expect(all(s, "img, a, button, h1, h2, h3, p")).toHaveLength(0);
-    if (item === "team-simple") expect(all(s, "ul > li")).toHaveLength(block.wireframe.items);
+    // a list place is drawn once per wireframe item (block.wireframe.items), in a list
+    for (const p of block.places.filter((x) => x.list)) expect(all(s, `li [data-place="${p.place}"], li[data-place="${p.place}"]`), p.place).toHaveLength(block.wireframe.items);
+    if (block.places.some((x) => x.list)) expect(all(s, "ul > li")).toHaveLength(block.wireframe.items);
   });
 });
 
@@ -56,9 +58,11 @@ describe("section padding (theme → padding setting)", () => {
   });
 });
 
-describe("team list width", () => {
-  it.each(BLOCK_BY_ID["team-simple"]!.variants.map((v) => v.id))("%s: the list is a full-width grid in a stretching column", (variant) => {
-    const ul = wireframe("team-simple", variant).querySelector("ul")!;
+// every block with a list place: the list is a full-width grid in a stretching column
+const LISTS = BLOCKS.filter((b) => b.places.some((p) => p.list)).flatMap((b) => b.variants.map((v) => [b.id, v.id] as const));
+describe.runIf(LISTS.length > 0)("list width", () => {
+  it.each(LISTS)("%s / %s: the list is a full-width grid in a stretching column", (item, variant) => {
+    const ul = wireframe(item, variant).querySelector("ul")!;
     expect(ul.classList.contains("w-full")).toBe(true);
     expect(ul.classList.contains("grid")).toBe(true);
     expect(ul.parentElement!.classList.contains("items-stretch")).toBe(true);
@@ -77,18 +81,18 @@ describe("align setting (start | center | end, logical: docs/adr/0002-align-as-s
     expect(tokens.filter((t) => /^(?:[a-z0-9-]+:)*(?:text-(?:left|right)|-?(?:ml|mr|pl|pr|left|right)-\S+|float-(?:left|right))$/.test(t))).toEqual([]);
   });
 
-  // the variant default: the centred composition (hero-simple mediaTop) starts centred, every other variant at start;
-  // the saved block's align overrides it
-  it("variant defaults: mediaTop is centred, the rest start; the prop overrides", () => {
-    const centred = BLOCKS.flatMap((b) => b.variants.filter((v) => variantSettings(b, v.id).align === "center").map((v) => `${b.id}/${v.id}`));
-    expect(centred).toEqual(["hero-simple/mediaTop"]);
-    for (const b of BLOCKS) for (const v of b.variants) {
-      const want = variantSettings(b, v.id).align ?? "start";
-      const title = wireframe(b.id, v.id).querySelector('[data-place="title"]')!;
-      expect(title.parentElement!.classList.contains(ITEMS[want as keyof typeof ITEMS]), `${b.id}/${v.id}`).toBe(true);
+  // the variant default (contract variants[].settings.align, e.g. a centred composition) is drawn when no align is saved,
+  // the contract default (start) otherwise; every saved align overrides it
+  it.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)))("%s / %s: the variant default, then the prop", (item, variant) => {
+    const b = BLOCK_BY_ID[item]!;
+    const want = variantSettings(b, variant).align ?? "start";
+    expect(want).toBe(b.variants.find((v) => v.id === variant)!.settings?.align ?? b.settings.align!.default);
+    const title = wireframe(item, variant).querySelector('[data-place="title"]')!;
+    expect(title.parentElement!.classList.contains(ITEMS[want as keyof typeof ITEMS]), title.parentElement!.className).toBe(true);
+    for (const a of ["start", "center", "end"] as const) {
+      const t = wireframe(item, variant, { align: a }).querySelector('[data-place="title"]')!;
+      expect(t.parentElement!.classList.contains(ITEMS[a]), `${a}`).toBe(true);
     }
-    const start = wireframe("hero-simple", "mediaTop", { align: "start" }).querySelector('[data-place="title"]')!;
-    expect(start.parentElement!.classList.contains("items-start")).toBe(true);
   });
 
   it("dir=rtl: the same DOM (start / end are resolved by the browser, not by the block)", () => {

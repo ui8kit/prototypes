@@ -53,7 +53,7 @@ container padding is `px-4` (16px, an 8px multiple), one value from codegen-x `C
 | Team row | `TeamSimple` (generated) | `team@1`: title, description, `members: SimpleMember[]` (id, avatar, title, description) | `cols3` / `cols2` / `cols4` / `cards3` (axes `cols`, `surface`) | `section` → container → heading + text → `ul` of `li` (portrait, name, line); the wireframe draws 3 members |
 | Simple hero | `HeroSimple` (generated) | `hero@1`: badge, title, description, image, imageAlt, imageDark, actionLabel, actionHref | `mediaEnd` / `mediaStart` / `mediaTop` (axis `media`) | `section` → container → grid of copy (badge, heading, text, link) and the picture (4:3, 21:9 on top) |
 
-The registry (`packages/blocks/src/manifest/registry.ts`, over `src/generated/contracts`) is the gallery source. Content contract: `docs/content-contract.md`. Adding a block: `docs/adding-a-block.md`.
+The registry (`packages/blocks/src/manifest/registry.ts`, a thin re-export of the generated `src/generated/registry.ts`) is the gallery source. Content contract: `docs/content-contract.md`. Adding a block: `docs/adding-a-block.md`.
 
 ## Roles
 

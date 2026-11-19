@@ -1,9 +1,8 @@
 export { Grid, Group, Stack } from "./layout";
 export { Badge, Heading, Media, Surface, TextLine } from "./shapes";
-export { default as HeroSimple } from "./generated/svelte/blocks/hero-simple.svelte";
-export { default as TeamSimple } from "./generated/svelte/blocks/team-simple.svelte";
-export type { HeroContent } from "./generated/models/hero@1";
-export type { SimpleMember, TeamContent } from "./generated/models/team@1";
+// every generated wireframe by its organism name (HeroSimple, TeamSimple, …) and every content type (HeroContent, …)
+export * from "./generated/catalog";
+export type * from "./generated/models/index";
 export { app, layout, role, shape, width, type MediaRatio, type SectionPadding } from "./classes";
 export { ui } from "./content/en";
 export { CATALOG, catalogIds } from "./catalog";
