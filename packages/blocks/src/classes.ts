@@ -1,17 +1,17 @@
 /**
- * The only place raw Tailwind utilities live for the constructor.
+ * The only place raw Tailwind utilities live for the hand-written part of the catalog.
  * Layout shells and placeholder shapes read from here; block files stay class-free.
+ *
+ * One source per value: the role table, Stack `align` / `justify`, the `padding` setting presets and the container are
+ * codegen-x/ui8kit packages/prototypes `ROLE` / `ALIGN` / `JUSTIFY` / `PADDING` / `CONTAINER`, synced verbatim as
+ * `generated/classes.json` (pinned by codegen.lock.json). Only the gallery's own extras (the secondary CTA bar, widths,
+ * grid columns, the app shell) are written here.
  */
+import generated from "./generated/classes.json" with { type: "json" };
+
+const R = generated.roles;
 
 export const layout = {
-  block: "w-full",
-  /** Section padding (theme setting, `Block`): every step a multiple of 8px. */
-  section: {
-    compact: "py-8 lg:py-16",
-    default: "py-16 lg:py-32",
-    spacious: "py-24 lg:py-40",
-  },
-  container: "mx-auto w-full max-w-6xl px-8",
   stack: "flex flex-col",
   group: "flex flex-row flex-wrap",
   grid: "grid w-full grid-cols-1",
@@ -30,20 +30,11 @@ export const layout = {
     "10": "gap-10",
     "12": "gap-12",
   },
-  align: {
-    start: "items-start",
-    center: "items-center",
-    end: "items-end",
-    stretch: "items-stretch",
-  },
-  justify: {
-    start: "justify-start",
-    center: "justify-center",
-    end: "justify-end",
-    between: "justify-between",
-    around: "justify-around",
-    evenly: "justify-evenly",
-  },
+  align: generated.align,
+  justify: generated.justify,
+  /** the block `padding` setting (every step a multiple of 8px); generated blocks render it themselves */
+  padding: generated.padding,
+  container: generated.container,
 } as const;
 
 /**
@@ -51,18 +42,18 @@ export const layout = {
  * in light and dark. Documented in docs/blocks.md ("Roles"); enforced by shapes/roles.test.ts.
  */
 export const role = {
-  text: "bg-muted rounded h-2",
+  text: R.text,
   /** 8+4 forbids h-3 in layout scope: a lead is a body bar drawn wider (w-full, 2/3, 1/2). */
-  lead: "bg-muted rounded h-2",
-  heading: "bg-secondary rounded h-4",
-  headingLg: "bg-secondary rounded h-6",
-  ctaPrimary: "bg-primary rounded h-10",
+  lead: R.text,
+  heading: R.heading,
+  headingLg: R["heading-lg"],
+  ctaPrimary: R["cta-primary"],
+  /** gallery-only: the theme panels' secondary button bar */
   ctaSecondary: "bg-secondary rounded h-10",
-  accent: "bg-accent",
   /** accent pill; its corner follows `--radius-badge` (unset: the pill) */
-  badge: "bg-accent rounded-full h-6",
-  media: "bg-muted rounded",
-  surface: "bg-card border border-border rounded",
+  badge: R.badge,
+  media: R.media,
+  surface: R.surface,
 } as const;
 
 export const shape = {
@@ -72,10 +63,6 @@ export const shape = {
   headingLg: role.headingLg,
   cta: `${role.ctaPrimary} w-24 shrink-0`,
   ctaSecondary: `${role.ctaSecondary} w-24 shrink-0`,
-  avatar: `rounded-full ${role.accent} shrink-0`,
-  avatarSm: "h-8 w-8",
-  avatarMd: "h-12 w-12",
-  avatarLg: "h-16 w-16",
   badge: `${role.badge} w-16 shrink-0`,
   media: `relative flex items-center justify-center overflow-hidden ${role.media} w-full`,
   mediaRatio: {
@@ -110,10 +97,9 @@ export const app = {
 export type Space = keyof typeof layout.gap;
 export type Align = keyof typeof layout.align;
 export type Justify = keyof typeof layout.justify;
-export type SectionPadding = keyof typeof layout.section;
+export type SectionPadding = keyof typeof layout.padding;
 export type MediaRatio = keyof typeof shape.mediaRatio;
 export type Width = keyof typeof width;
 export type GridColumns = keyof typeof layout.gridMd;
 export type Role = keyof typeof role;
-export type AvatarSize = "sm" | "md" | "lg";
 export type HeadingLevel = 1 | 2 | 3 | 4;

@@ -94,9 +94,9 @@ describe("legacy prototypes-theme v1 migrates to tokens", () => {
 
 describe("section padding stays on the even 8px scale", () => {
   it("three levels, every step a multiple of 8, matching py-8/16/24 and lg:py-16/32/40", () => {
-    assert.deepEqual([...SECTION_PADDINGS], ["compact", "default", "spacious"]);
+    assert.deepEqual([...SECTION_PADDINGS], ["compact", "standard", "spacious"]);
     assert.deepEqual(SECTION_PADDING_SCALE.compact, { py: 32, pyLg: 64 });
-    assert.deepEqual(SECTION_PADDING_SCALE.default, { py: 64, pyLg: 128 });
+    assert.deepEqual(SECTION_PADDING_SCALE.standard, { py: 64, pyLg: 128 });
     assert.deepEqual(SECTION_PADDING_SCALE.spacious, { py: 96, pyLg: 160 });
     for (const id of SECTION_PADDINGS) {
       const s = SECTION_PADDING_SCALE[id];
@@ -120,9 +120,15 @@ describe("section padding stays on the even 8px scale", () => {
 describe("theme model", () => {
   it("cleans unknown skins, radii, density, and palettes", () => {
     assert.deepEqual(cleanTheme({ skin: "nope", radius: 3, density: "huge", tokens: { "density-card": "huge" }, palette: { harmony: "x" } }), NO_THEME);
-    assert.equal(cleanTheme({ skin: "nope", sectionPadding: "huge" }).sectionPadding, "default");
+    assert.equal(cleanTheme({ skin: "nope", sectionPadding: "huge" }).sectionPadding, "standard");
     assert.equal(cleanTheme({ skin: "claude", radius: 8, density: "compact" }).skin, "claude");
     assert.equal(cleanTheme({ sectionPadding: "spacious" }).sectionPadding, "spacious");
+    // "default" is the name of `standard` before UPC-6 (saved themes and exports keep loading, nothing reported dropped)
+    assert.equal(cleanTheme({ sectionPadding: "default" }).sectionPadding, "standard");
+    const legacy = fromConfig({ format: "prototypes-theme", version: 2, mode: "light", sectionPadding: "default" });
+    assert.ok(legacy.ok && legacy.theme.sectionPadding === "standard" && !legacy.dropped.includes("sectionPadding"));
+    const unknown = fromConfig({ format: "prototypes-theme", version: 2, mode: "light", sectionPadding: "huge" });
+    assert.ok(unknown.ok && unknown.dropped.includes("sectionPadding"));
     assert.equal(cleanTheme({ radius: 12 }).radius, 12);
     assert.ok(RADII.includes(0) && RADII.includes(16));
     assert.equal(SKIN_IDS.length, 16);

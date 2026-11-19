@@ -3,7 +3,7 @@ import teamSimple from "../generated/contracts/team-simple/1.json" with { type: 
 import { model as heroModel, validateHeroContent } from "../generated/models/hero@1";
 import { model as teamModel, validateTeamContent } from "../generated/models/team@1";
 import type { Issue, ModelField, ModelSpec } from "../generated/models/validate";
-import { settingValues, type BlockCategory, type BlockInstance, type BlockManifest, type Contract } from "./types";
+import { settingValues, splitProps, type BlockCategory, type BlockInstance, type BlockManifest, type Contract } from "./types";
 
 /** Generated contracts (codegen-x/ui8kit packages/prototypes, synced by scripts/sync-codegen.ts) plus a catalog category. */
 const manifest = (contract: unknown, category: BlockCategory): BlockManifest => {
@@ -43,22 +43,23 @@ export function modelPaths(fields: Record<string, ModelField>, base = ""): strin
 }
 export const fieldBudget = (block: BlockManifest): number => modelPaths(MODELS[block.model]!.spec.fields).length;
 
-type Code = "unknownItem" | "unknownVariant" | "unknownOption" | "optionValue";
+type Code = "unknownItem" | "unknownVariant" | "settingValue";
 export type InstanceCheck = { ok: boolean; issues: Array<Issue | { path: string; code: Code }> };
 
-/** Check a saved block `{ id, item, variant, options?, props }`: known item, variant and settings, props valid for the model. */
-export function validateInstance(instance: BlockInstance<unknown>): InstanceCheck {
+/**
+ * Check a saved block `{ id, item, variant, props }`: known item and variant, valid setting values in props, and the
+ * rest of props valid for the item's model (an unknown key is the model's `unknown field`).
+ */
+export function validateInstance(instance: Omit<BlockInstance, "props"> & { props: unknown }): InstanceCheck {
   const block = BLOCK_BY_ID[instance.item];
   if (!block) return { ok: false, issues: [{ path: "/item", code: "unknownItem" }] };
   const issues: InstanceCheck["issues"] = [];
   if (!block.variants.some((v) => v.id === instance.variant)) issues.push({ path: "/variant", code: "unknownVariant" });
-  for (const [k, v] of Object.entries(instance.options ?? {})) {
-    if (!(k in block.settings) || k === "id") issues.push({ path: `/options/${k}`, code: "unknownOption" });
-    else {
-      const allowed = settingValues(block.settings[k]!);
-      if (allowed ? !allowed.includes(v as never) : typeof v !== "string") issues.push({ path: `/options/${k}`, code: "optionValue" });
-    }
+  const { settings, content } = splitProps(block, instance.props);
+  for (const [k, v] of Object.entries(settings)) {
+    const allowed = settingValues(block.settings[k]!);
+    if (allowed ? !allowed.includes(v as never) : typeof v !== "string") issues.push({ path: `/props/${k}`, code: "settingValue" });
   }
-  issues.push(...MODELS[block.model]!.validate(instance.props).map((i) => ({ ...i, path: `/props${i.path}` })));
+  issues.push(...MODELS[block.model]!.validate(content).map((i) => ({ ...i, path: `/props${i.path}` })));
   return { ok: issues.length === 0, issues };
 }

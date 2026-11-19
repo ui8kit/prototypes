@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { BLOCKS, BLOCK_BY_ID, FIELD_BUDGET_MAX, FIELD_BUDGET_MIN, MODELS, fieldBudget, modelPaths, validateInstance } from "./registry";
-import { bind, defaultVariantId, paddingOf, placesFor, settingValues, wireframeProps } from "./types";
+import { bind, defaultVariantId, placesFor, settingKeys, settingValues, splitProps, wireframeProps } from "./types";
 
 // saved content as a builder stores it (data only: prototypes never render it)
 const hero = { title: "Launch pages from blocks", badge: "New", description: "One small content object.", image: "/hero.png", imageAlt: "A page builder", actionLabel: "Start", actionHref: "https://example.com/start" };
@@ -77,22 +77,21 @@ describe("registry", () => {
 
 describe("saved instances", () => {
   it("saved content is valid for the model of every block", () => {
-    for (const b of BLOCKS) assert.deepEqual(validateInstance({ id: "x", item: b.id, variant: defaultVariantId(b), options: { level: 1 }, props: CONTENT[b.id] }).issues, [], b.id);
+    for (const b of BLOCKS) assert.deepEqual(validateInstance({ id: "x", item: b.id, variant: defaultVariantId(b), props: { ...CONTENT[b.id], level: 1, padding: "compact", landmarkLabel: "Intro" } }).issues, [], b.id);
   });
 
-  it("flags unknown items, variants, options, bad levels and invalid content by pointer", () => {
+  it("flags unknown items, variants, settings values, unknown props and invalid content by pointer", () => {
     assert.equal(validateInstance({ id: "x", item: "nope", variant: "a", props: {} }).issues[0]!.path, "/item");
     const bad = validateInstance({
       id: "x",
       item: "team-simple",
       variant: "cols5",
-      options: { level: 4 as never, headingLevel: 1 } as never,
-      props: { title: "T", members: [{ id: "a", title: "" }, { title: "B" }] },
+      props: { title: "T", members: [{ id: "a", title: "" }, { title: "B" }], level: 4 as never, headingLevel: 1 } as never,
     });
     const paths = bad.issues.map((i) => i.path);
     assert.ok(paths.includes("/variant"));
-    assert.ok(paths.includes("/options/level"));
-    assert.ok(paths.includes("/options/headingLevel"));
+    assert.ok(paths.includes("/props/level"));
+    assert.ok(paths.includes("/props/headingLevel"));
     assert.ok(paths.includes("/props/members/1/id"), paths.join(" "));
     assert.equal(bad.ok, false);
     const many = validateInstance({ id: "x", item: "team-simple", variant: "cols3", props: { title: "T", members: [] } });
@@ -112,12 +111,18 @@ describe("settings", () => {
     }
   });
 
-  it("padding is checked as an option and maps from the theme step (default → standard)", () => {
-    const ok = validateInstance({ id: "x", item: "team-simple", variant: "cols3", options: { padding: "spacious" }, props: team });
+  it("settings are props: padding is checked by value at /props/padding and drawn by the wireframe", () => {
+    const ok = validateInstance({ id: "x", item: "team-simple", variant: "cols3", props: { ...team, padding: "spacious" } });
     assert.deepEqual(ok.issues, []);
-    const bad = validateInstance({ id: "x", item: "team-simple", variant: "cols3", options: { padding: "huge" as never }, props: team });
-    assert.deepEqual(bad.issues.map((i) => i.path), ["/options/padding"]);
-    assert.deepEqual(["compact", "default", "spacious"].map((s) => paddingOf(s as never)), ["compact", "standard", "spacious"]);
+    const bad = validateInstance({ id: "x", item: "team-simple", variant: "cols3", props: { ...team, padding: "huge" as never } });
+    assert.deepEqual(bad.issues.map((i) => i.path), ["/props/padding"]);
     assert.equal(wireframeProps(BLOCK_BY_ID["hero-simple"]!, "mediaEnd", { padding: "compact" }).padding, "compact");
+  });
+
+  it("splitProps: the contract settings (minus id) are settings, the rest is content", () => {
+    for (const b of BLOCKS) assert.deepEqual(settingKeys(b), ["level", "padding", "landmarkLabel"]);
+    const { settings, content } = splitProps(BLOCK_BY_ID["team-simple"]!, { ...team, level: 3, id: "nope" });
+    assert.deepEqual(settings, { level: 3 });
+    assert.deepEqual(content, { ...team, id: "nope" });
   });
 });

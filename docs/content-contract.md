@@ -17,17 +17,22 @@ version (`hero@2`).
 ## Saved block
 
 ```ts
-{ id: "b1", item: "hero-simple", variant: "mediaEnd", options: { level: 1 }, props: { title: "…", … } }
+{ id: "b1", item: "hero-simple", variant: "mediaEnd", props: { title: "…", …, level: 1, padding: "compact" } }
 ```
 
 - `item`: the contract's `item`; `variant`: one of its `variants[].id` (layout axes only, never content).
-- `options`: the contract's `settings`: `level` (heading level 1–3, default 2; list item titles one level below),
-  `padding` (`compact` py-8 lg:py-16, `standard` py-16 lg:py-32 (default), `spacious` py-24 lg:py-40; a setting, not a
-  variant axis) and `landmarkLabel` (replaces `aria-labelledby` with `aria-label`).
-- `props`: content valid for the model (`validateInstance()`; issues carry JSON pointers such as `/props/members/1/id`).
+This is a block of `@ui8kit/contract` page-spec v2 (`{ id, item, variant, props }`, no other key); a saved page is
+`{ version: 2, slug, title, locale, blocks }` and `manifest/page-spec.node.test.ts` validates one with the published schema.
+
+- `props`: the content, valid for the model, plus the contract's `settings` (`docs/adr/0001-settings-in-props.md`):
+  `level` (heading level 1–3, default 2; list item titles one level below), `padding` (`compact` py-8 lg:py-16,
+  `standard` py-16 lg:py-32 (default), `spacious` py-24 lg:py-40; a setting, not a variant axis) and `landmarkLabel`
+  (replaces `aria-labelledby` with `aria-label`). `splitProps()` tells them apart; `validateInstance()` checks a
+  setting's value at `/props/<setting>` and the rest against the model (issues carry JSON pointers such as
+  `/props/members/1/id`; an unknown key is the model's `unknown field`).
 - `id`: the instance; the heading id is `<id>-title`.
 
-`wireframeProps(block, variant, options)` gives the props of a wireframe (the variant axes and `padding`; no content).
+`wireframeProps(block, variant, props)` gives the props of a wireframe (the variant axes and `padding`; no content).
 Prototypes never render `props`: a saved block is data the builder validates (`validateInstance()`) and hands to the
 real block from the registry.
 

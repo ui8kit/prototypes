@@ -20,10 +20,10 @@ In the wireframe everything is a **rectangle** or a **text bar** (`Heading`, `Te
 | Copy | `Heading` / `TextLine` rectangles |
 | Image or video | `Media`: hatched `Image` **inside** a muted rectangle |
 | Avatar | Square (`h-N w-N` equal sides) with `rounded-full` |
-| CTA | `CtaShape`: a bar (`data-slot="button"`), not interactive; the page draws the link |
+| CTA | `ShapeCta` (generated): a bar (`data-slot="button"`), not interactive; the page draws the link |
 | Accordion, tabs, carousel, dialog, form, select, … | **Not implemented.** Draw them as `Stack` / `Group` / `Grid` of rectangles |
 
-`scripts/check-blocks.py` forbids interactive kit primitives in the hand-written part of `packages/blocks`; `Image` only in `shapes/Media.svelte`. `src/generated` is checked by `scripts/sync-codegen.ts --check` (sha256 per file) and by the codegen-x gates.
+`scripts/check-blocks.ts` forbids interactive kit primitives in the hand-written part of `packages/blocks`; `Image` only in `shapes/Media.svelte`. `src/generated` is checked by `scripts/sync-codegen.ts --check` (sha256 per file) and by the codegen-x gates.
 
 ## Sketch mapping
 
@@ -41,17 +41,12 @@ Typical marketing markup:
 
 Absorbed as:
 
-```svelte
-<Block tag="section" py="16">
-  <Container>
-    <Stack gap="8" align="center">
-      …
-    </Stack>
-  </Container>
-</Block>
-```
+a generated organism (codegen-x `packages/prototypes`): a `section` with the `padding` setting's class pair, the
+container `mx-auto w-full max-w-6xl px-4` and a `Stack` with `gap` / `align`.
 
-`py-16 lg:py-32` is the theme's section padding (Standard); `Block` gets the step from the theme, organisms pass no padding. Container padding is `px-8` (even step). `text-center` is unnecessary: there is no text.
+`py-16 lg:py-32` is the `padding` setting `standard` (the gallery passes the theme's section padding as that prop). The
+container padding is `px-4` (16px, an 8px multiple), one value from codegen-x `CONTAINER` (`generated/classes.json`).
+`text-center` is unnecessary: there is no text.
 
 | Sketch | Block | Content contract | Variants (layout) | Structure |
 | --- | --- | --- | --- | --- |
@@ -70,9 +65,9 @@ A wireframe has no words, so meaning is carried by **token + height**. Every rol
 | Lead / subtitle | `lead` | `TextLine size="lead"` | `bg-muted` | `h-2` (8px) | `h-3` is off the 8+4 layout grid (ui8px UI8PX001), so a lead is the same bar drawn **wider** (`full`, `2/3`, `1/2`) under a heading |
 | Heading | `heading` | `Heading` | `bg-secondary` | `h-4` (16px) | card / item titles |
 | Large heading (H1/H2) | `heading-lg` | `Heading size="lg"` | `bg-secondary` | `h-6` (24px) | section titles |
-| Primary CTA | `cta-primary` | `CtaShape` (`data-slot="button"`) | `bg-primary` | `h-10` (40px, control step) | `w-24`, no text, `aria-hidden` |
-| Secondary CTA | `cta-secondary` | `CtaShape tone="secondary"` | `bg-secondary` | `h-10` | `w-24`, no text |
-| Accent / emphasis | `accent` | `Avatar` / `Dot` | `bg-accent` | square `h-8`/`h-12`/`h-16` + `rounded-full` | accent only for emphasis (avatar, badge, highlighted item) |
+| Primary CTA | `cta-primary` | `ShapeCta` (generated; theme panels: `shape.cta`) (`data-slot="button"`) | `bg-primary` | `h-10` (40px, control step) | `w-24`, no text, `aria-hidden` |
+| Secondary CTA | `cta-secondary` | `shape.ctaSecondary` (theme panels only) | `bg-secondary` | `h-10` | `w-24`, no text |
+| Avatar | `avatar` | `ShapeAvatar` (generated) | `bg-accent` | square `h-16 w-16` + `rounded-full` | accent only for emphasis (avatar, badge) |
 | Badge | `badge` | `Badge` | `bg-accent` | `h-6` (24px), `w-16` | eyebrow / tag; `rounded-full` + `data-slot="badge"` (theme badge radius, unset: pill) |
 | Media | `media` | `Media` | `bg-muted` | `ratio`: `4/3` (default), `video`, `21/9` (full-width rows, e.g. hero media-top) | base64 light / dark hatch (16px diagonal tiles, no stretching at any size), switched by `dark:hidden` / `dark:block`; centred `bg-background` circle; `data-slot="media-frame"` |
 | Card surface | `surface` | `Surface` (`data-slot="card"`) | `bg-card` + `border border-border` | content | `p-8`; wraps other shapes, not a content field |
@@ -88,6 +83,6 @@ background and the card (WCAG 1.4.11 asks 3:1), dark at least 7.21:1 and 4.81:1.
 
 ## Utilities
 
-All raw class strings: `packages/blocks/src/classes.ts`. Layout/shape components read maps. Organism files must report **0** raw utilities (`scripts/check-blocks.py`).
+All raw class strings: `packages/blocks/src/classes.ts`. Layout/shape components read maps. Hand-written `.svelte` files must report **0** raw utilities (`scripts/check-blocks.ts`). The role table, `align` / `justify`, the `padding` presets and the container are codegen-x `ROLE` / `ALIGN` / `JUSTIFY` / `PADDING` / `CONTAINER` (`src/generated/classes.json`); `classes.ts` reads them, `manifest/classes.node.test.ts` pins the rest.
 
-Density is per element (badge, button, card) and read by `packages/blocks/src/tokens.css` on the shapes only; shadow per element (card, media) too. Section padding is a real class pair from the theme: on the hand-written `Block` by context, on the generated blocks through their `padding` setting (`compact` / `standard` / `spacious`; the app maps the theme step with `paddingOf()`): compact `py-8 lg:py-16` (32/64), standard `py-16 lg:py-32` (64/128), spacious `py-24 lg:py-40` (96/160). Radius per element (badge, button, card, media) rides on `data-slot` + `tokens.css`. See `docs/theme.md`.
+Density is per element (badge, button, card) and read by `packages/blocks/src/tokens.css` on the shapes only; shadow per element (card, media) too. Section padding is a real class pair from the theme, passed to the generated blocks as their `padding` setting (`compact` / `standard` / `spacious`, the same names in the theme): compact `py-8 lg:py-16` (32/64), standard `py-16 lg:py-32` (64/128), spacious `py-24 lg:py-40` (96/160). Radius per element (badge, button, card, media) rides on `data-slot` + `tokens.css`. See `docs/theme.md`.

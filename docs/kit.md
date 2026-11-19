@@ -67,7 +67,7 @@ Generated wireframe sources are never scanned by regex.
 
 ## The catalog bundle (no tailwind-merge)
 
-`bun run build:catalog` (`scripts/catalog-size.mjs`, also part of `bun run build`) builds
+`bun run catalog:build` (`scripts/catalog-size.mjs`, also a `verify` step and part of `bun run build`; fails over the gzip `BUDGET`) builds
 `packages/blocks/catalog/dist/catalog.{js,css}`: the generated wireframes, their contracts and models, the per-element
 tokens, for embedding in constructors and admin panels. Its one difference from the app build: the kit's
 `utils/cn.ts` (clsx + tailwind-merge, as `ui8kit add` installs it) resolves to `packages/blocks/catalog/kit-cn.ts`, the

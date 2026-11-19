@@ -1,0 +1,19 @@
+{
+  "repo": "https://github.com/ui8kit/contract.git",
+  "commit": "20d0853fba892410dd42a92ac9adfa8241d0880a",
+  "files": {
+    ".cursor/rules/00-ui8kit-core.mdc": "dbceea66c7ffc494a06ec7926185afd5a6ed6d55dff9315bc8d55839bbf90d9d",
+    ".cursor/rules/01-block-root.mdc": "f2c74ec9999fb0ac47807df607377b1684dd47eabad2d7d7a1d69b4281dfd4c0",
+    ".cursor/rules/02-primitives-html-aria.mdc": "715c90b275c5cd0d020a45fe98293bba56c50e67b59cb71fc492682e29e3060c",
+    ".cursor/rules/03-style-8-4-tokens.mdc": "d17707c124996d95e63ba9383898bbdee25897114ad0f0b75e45a341a3485636",
+    ".cursor/rules/04-text-from-content.mdc": "7437e6f4a74cb271997029c42f9f4755ae75d79dedef428dd0a824325a77fa4d",
+    ".cursor/rules/05-checks-baselines.mdc": "34fefffaf726a582f1a3fd112ac1bdb06186c159b57b03a958025ae99b598637",
+    ".cursor/rules/10-contract-package.mdc": "38b287bca8e3e26f21072b842033e15a7b7a097e676b611a863ec131b136d2dd",
+    ".cursor/skills/ui8kit-new-block/SKILL.md": "ee812063ea7a23f66970ad0b2f121f8a13df013201d0a146596839d1b27a736a",
+    ".cursor/skills/ui8kit-rule-checks/SKILL.md": "8685ee8e6dade08b1e6eed4d9df4e861fd73ec363bc211abb9f4a183f0a9e321",
+    ".cursor/skills/ui8kit-spacing-ui8px/SKILL.md": "2bc670b308b5c11a95aad9b7516538d2f6ecffa2b4a49bdd3709723ef1a972a6"
+  },
+  "local": [
+    ".cursor/rules/ui8kit-primitives.mdc"
+  ]
+}

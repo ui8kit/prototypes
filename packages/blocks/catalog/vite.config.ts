@@ -1,5 +1,5 @@
 /**
- * The catalog bundle (`bun run build:catalog` -> packages/blocks/catalog/dist): an ES module for constructors and admin
+ * The catalog bundle (`bun run catalog:build` -> packages/blocks/catalog/dist): an ES module for constructors and admin
  * panels. Its one difference from the app build: the kit's `utils/cn` (clsx + tailwind-merge, as `ui8kit add` installs it)
  * resolves to `kit-cn.ts`, the `cn` ui8kit/codegen emits with `generate --cn join` (pinned in codegen.lock.json kitCn).
  * The wireframe class lists never conflict, so the join gives the same classes (tested in catalog/cn.test.ts); the kit

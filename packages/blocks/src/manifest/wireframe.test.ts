@@ -6,10 +6,10 @@ import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 import { CATALOG } from "../catalog";
 import { BLOCKS, BLOCK_BY_ID } from "./registry";
-import { bind, wireframeProps, type BlockOptions } from "./types";
+import { bind, wireframeProps, type BlockSettings } from "./types";
 
-function wireframe(item: string, variant: string, options?: BlockOptions): HTMLElement {
-  const { container } = render(CATALOG[item]!, { props: wireframeProps(BLOCK_BY_ID[item]!, variant, options) });
+function wireframe(item: string, variant: string, settings?: BlockSettings): HTMLElement {
+  const { container } = render(CATALOG[item]!, { props: wireframeProps(BLOCK_BY_ID[item]!, variant, settings) });
   return container.querySelector("section") as HTMLElement;
 }
 const all = (root: Element, sel: string) => [...root.querySelectorAll(sel)];

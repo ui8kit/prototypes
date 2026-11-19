@@ -13,7 +13,7 @@ export function drawAll(): string {
     for (const v of b.variants)
       for (const padding of PADDINGS) {
         const { container, unmount } = render(CATALOG[b.id]!, { props: wireframeProps(b, v.id, padding ? { padding } : undefined) });
-        lines.push(`<!-- ${b.id}/${v.id}/${padding ?? "default"} -->`, container.innerHTML.replace(/<!---->/g, ""));
+        lines.push(`<!-- ${b.id}/${v.id}/${padding ?? "unset"} -->`, container.innerHTML.replace(/<!---->/g, ""));
         unmount();
       }
   return lines.join("\n") + "\n";

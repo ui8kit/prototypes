@@ -48,6 +48,7 @@ export type ThemeText = {
   resetRadius: string;
   density: string;
   sectionPadding: string;
+  sectionPaddings: Record<"compact" | "standard" | "spacious", string>;
   resetAll: string;
   back: string;
   close: string;
@@ -89,6 +90,7 @@ export const themeText: ThemeText = {
   resetRadius: "Reset radius",
   density: "Density",
   sectionPadding: "Section padding",
+  sectionPaddings: { compact: "Compact", standard: "Standard", spacious: "Spacious" },
   resetAll: "Reset theme",
   back: "Back",
   close: "Close",

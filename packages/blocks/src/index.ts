@@ -1,5 +1,5 @@
-export { Block, Container, Grid, Group, SectionScope, Stack, provideSectionPadding, sectionPadding } from "./layout";
-export { Avatar, Badge, CtaShape, Dot, Heading, Media, Surface, TextLine } from "./shapes";
+export { Grid, Group, Stack } from "./layout";
+export { Badge, Heading, Media, Surface, TextLine } from "./shapes";
 export { default as HeroSimple } from "./generated/svelte/blocks/hero-simple.svelte";
 export { default as TeamSimple } from "./generated/svelte/blocks/team-simple.svelte";
 export type { HeroContent } from "./generated/models/hero@1";

@@ -39,6 +39,7 @@ export { formatHsl, hslToHex, parseColour, parseHex, parseHsl, rgbToHsl } from "
 export {
   SECTION_PADDINGS,
   SECTION_PADDING_SCALE,
+  sectionPaddingOf,
   sectionPaddingVars,
   type SectionPadding,
   type SectionPaddingScale,

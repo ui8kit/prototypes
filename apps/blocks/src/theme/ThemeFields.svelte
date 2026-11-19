@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Box, Button, Label, Radio, Select, Text } from "@ui8kit/kit";
-  import { Stack } from "@ui8kit/blocks";
-  import { DENSITIES, RADII, SECTION_PADDINGS, SHADOWS, SKIN_IDS } from "@ui8kit/theme";
+  import { Stack, layout } from "@ui8kit/blocks";
+  import { DENSITIES, RADII, SECTION_PADDINGS, SECTION_PADDING_SCALE, SHADOWS, SKIN_IDS } from "@ui8kit/theme";
   import { paletteText, skinLabels, themeText } from "../content/theme";
   import { appTheme, themeCtl, type WidePanel } from "./ctl.svelte";
 
@@ -19,11 +19,13 @@
   const t = $derived(appTheme.state.theme);
   const custom = $derived(!!t.palette);
   const skinValue = $derived(custom ? "custom" : (t.skin ?? ""));
-  const sectionPaddingLabels: Record<string, string> = {
-    compact: "Compact · py-8 lg:py-16 · 32 / 64 px",
-    default: "Standard · py-16 lg:py-32 · 64 / 128 px",
-    spacious: "Spacious · py-24 lg:py-40 · 96 / 160 px",
-  };
+  // the step's classes are the blocks' `padding` setting (codegen-x PADDING); the px are the theme scale (pinned equal by a test)
+  const sectionPaddingLabels: Record<string, string> = Object.fromEntries(
+    SECTION_PADDINGS.map((p) => {
+      const s = SECTION_PADDING_SCALE[p];
+      return [p, `${themeText.sectionPaddings[p]} · ${layout.padding[p]} · ${s.py} / ${s.pyLg} px`];
+    }),
+  );
 
   function onSkin(raw: string): void {
     if (raw === "custom") return;

@@ -8,3 +8,4 @@ coverage
 .ui8px/telemetry
 .manual/
 .ui8px/extract
+.ui8px/class-map.json

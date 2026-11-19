@@ -4,11 +4,11 @@
 -->
 <script lang="ts">
   import { Box } from "@ui8kit/kit";
-  import { BLOCKS, CATALOG, paddingOf, wireframeProps } from "@ui8kit/blocks";
+  import { BLOCKS, CATALOG, wireframeProps } from "@ui8kit/blocks";
   import { appTheme } from "./theme/ctl.svelte";
 
-  // the theme's section padding drives the padding setting of every generated block
-  const padding = $derived(paddingOf(appTheme.state.theme.sectionPadding));
+  // the theme's section padding is the padding setting (a prop) of every generated block: same names, same classes
+  const padding = $derived(appTheme.state.theme.sectionPadding);
   import { galleryText } from "./content/gallery";
 </script>
 

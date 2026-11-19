@@ -4,12 +4,12 @@
 // Differences, all lossless:
 //   - fonts (font, headingFont, fontScale, fontWidth, fontWeight, headingWeight, tracking) are carried through and exported again,
 //     but not drawn: the wireframe has no text. Font ids are checked by shape only (codegen-x checks them against its font list).
-//   - `sectionPadding` is this constructor's own field. It is exported only when it is not "default"; codegen-x's importer ignores
+//   - `sectionPadding` is this constructor's own field. It is exported only when it is not "standard" ("default", its name before UPC-6, is read as "standard"); codegen-x's importer ignores
 //     unknown top-level fields, so the config still applies there.
 //   - the legacy `prototypes-theme` v1 config and stored themes with `radii` / one global `density` are migrated to tokens.
 import { cleanPalette, type Palette } from "./palette";
 import { RADII, SKIN_IDS, type SkinId } from "./skins";
-import { SECTION_PADDINGS, type SectionPadding } from "./section-padding";
+import { SECTION_PADDINGS, sectionPaddingOf, type SectionPadding } from "./section-padding";
 import type { Preset } from "./presets";
 import {
   cleanTokens,
@@ -46,7 +46,7 @@ export type GlobalTheme = {
   sectionPadding: SectionPadding;
 };
 
-export const NO_THEME: GlobalTheme = { skin: null, font: null, headingFont: null, radius: null, tokens: {}, sectionPadding: "default" };
+export const NO_THEME: GlobalTheme = { skin: null, font: null, headingFont: null, radius: null, tokens: {}, sectionPadding: "standard" };
 
 // ---- font fields: carried through (codegen-x packages/theme-model/src/type.ts value sets) ----
 export const FONT_SCALES = [80, 85, 90, 95, 100, 105, 110, 115, 120] as const;
@@ -80,10 +80,7 @@ export function cleanTheme(v: unknown): GlobalTheme {
   const radius = typeof o.radius === "number" && (RADII as readonly number[]).includes(o.radius) ? o.radius : null;
   const palette = cleanPalette(o.palette);
   const tokens = o.tokens !== undefined ? cleanTokens(o.tokens) : legacyTokens(o);
-  const sectionPadding =
-    typeof o.sectionPadding === "string" && (SECTION_PADDINGS as readonly string[]).includes(o.sectionPadding)
-      ? (o.sectionPadding as SectionPadding)
-      : "default";
+  const sectionPadding = sectionPaddingOf(o.sectionPadding);
   const fontScale = cleanScale(o.fontScale);
   const fontWidth = cleanWidth(font, o.fontWidth);
   const fontWeight = cleanWeight(o.fontWeight);
@@ -126,7 +123,7 @@ export const isDefault = (t: GlobalTheme): boolean =>
   t.fontWeight === undefined &&
   t.headingWeight === undefined &&
   t.tracking === undefined &&
-  t.sectionPadding === "default";
+  t.sectionPadding === "standard";
 
 const local = (): Storage | null => {
   try {
@@ -181,7 +178,7 @@ export const FIELDS: readonly Field[] = [
   { id: "mode", group: "site", values: MODES, nullable: false, unset: null, store: "mode" },
   { id: "skin", group: "site", values: SKIN_IDS, nullable: true, unset: null, store: "theme" },
   { id: "radius", group: "site", values: RADII, nullable: true, unset: null, store: "theme" },
-  { id: "sectionPadding", group: "site", values: SECTION_PADDINGS, nullable: false, unset: "default", store: "theme" },
+  { id: "sectionPadding", group: "site", values: SECTION_PADDINGS, nullable: false, unset: "standard", store: "theme" },
   ...ELEMENTS.map((e): Field => ({ id: "radius-" + e, group: "radius", element: e, values: RADII, nullable: true, unset: null, store: "tokens", slot: ELEMENT_SLOT[e] })),
   ...DENSITY_ELEMENTS.map((e): Field => ({ id: "density-" + e, group: "density", element: e, values: DENSITIES, nullable: false, unset: "default", store: "tokens", slot: ELEMENT_SLOT[e] })),
   ...SHADOW_ELEMENTS.map((e): Field => ({ id: "shadow-" + e, group: "shadow", element: e, values: SHADOWS, nullable: true, unset: null, store: "tokens", slot: ELEMENT_SLOT[e] })),
@@ -229,7 +226,7 @@ export type ThemeConfig = {
   fontWeight?: number;
   headingWeight?: number;
   tracking?: number;
-  /** ours; only when not "default" (codegen-x ignores it) */
+  /** ours; only when not "standard" (codegen-x ignores it) */
   sectionPadding?: SectionPadding;
 };
 export type ImportResult = { ok: true; mode: Mode | null; theme: GlobalTheme; dropped: string[] } | { ok: false; error: string };
@@ -252,7 +249,7 @@ export function toConfig(s: ThemeState): ThemeConfig {
     ...(t.fontWeight !== undefined ? { fontWeight: t.fontWeight } : {}),
     ...(t.headingWeight !== undefined ? { headingWeight: t.headingWeight } : {}),
     ...(t.tracking !== undefined ? { tracking: t.tracking } : {}),
-    ...(t.sectionPadding !== "default" ? { sectionPadding: t.sectionPadding } : {}),
+    ...(t.sectionPadding !== "standard" ? { sectionPadding: t.sectionPadding } : {}),
   };
 }
 
@@ -286,7 +283,7 @@ export function fromConfig(input: unknown): ImportResult {
     if (o[k] !== undefined && o[k] !== null && theme[k] === undefined && !(k === "fontWeight" && o[k] === 400) && !(k === "tracking" && o[k] === 0)) dropped.push(k);
   }
   if (o.fontWidth !== undefined && o.fontWidth !== null && theme.fontWidth === undefined) dropped.push("fontWidth");
-  if (o.sectionPadding !== undefined && o.sectionPadding !== "default" && theme.sectionPadding === "default") dropped.push("sectionPadding");
+  if (o.sectionPadding !== undefined && sectionPaddingOf(o.sectionPadding) !== o.sectionPadding && o.sectionPadding !== "default") dropped.push("sectionPadding");
   if (o.tokens && typeof o.tokens === "object" && !Array.isArray(o.tokens)) {
     for (const [k, x] of Object.entries(o.tokens as Record<string, unknown>)) {
       if (!(k in theme.tokens) && !(k.startsWith("density-") && x === "default" && fieldOf(k))) dropped.push(k);

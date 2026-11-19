@@ -14,7 +14,7 @@ Stock keeps a global theme under `stock:v1:theme` as `{ v: 1, theme }`. The mode
 | `radius` | 0, 4, 8, 12, 16 px → `--radius` |
 | `tokens` | **ported verbatim** (`design.ts`): `radius-{badge,button,card,alert,media}`, `density-{badge,button,card,alert}`, `shadow-{card,alert,media}`; alert has no shape here, its tokens are kept |
 | `palette` | optional custom wheel |
-| `sectionPadding` | **ours** (exported only when not `default`; codegen-x ignores unknown top-level fields) |
+| `sectionPadding` | **ours** (`compact` / `standard` / `spacious`; exported only when not `standard`; `"default"`, the pre-UPC-6 name, is read as `standard`; codegen-x ignores unknown top-level fields) |
 
 A custom palette (`palette.ts`) is one base colour `{ harmony, h, s, l, contrast? }` plus a harmony. Harmonies and their hue offsets:
 
@@ -91,7 +91,7 @@ Font ids are checked by shape here (`[a-z0-9-]`); codegen-x checks them against 
 
 ### Shadow per element
 
-`shadow-card` / `shadow-media` (and `shadow-alert`, kept): `none` / `sm` / `md` → `--shadow-<element>: 0 0 #0000 | var(--shadow-sm) | var(--shadow-md)`. The skin brings its own `--shadow-sm` / `--shadow-md` per mode. `tokens.css` applies `box-shadow: var(--shadow-card)` on `Surface` and `var(--shadow-media)` on `Media`. No shadow utility class anywhere: ui8px and `check-blocks.py` still forbid `shadow-*` in markup; elevation is a theme token only.
+`shadow-card` / `shadow-media` (and `shadow-alert`, kept): `none` / `sm` / `md` → `--shadow-<element>: 0 0 #0000 | var(--shadow-sm) | var(--shadow-md)`. The skin brings its own `--shadow-sm` / `--shadow-md` per mode. `tokens.css` applies `box-shadow: var(--shadow-card)` on `Surface` and `var(--shadow-media)` on `Media`. No shadow utility class anywhere: ui8px and `check-blocks.ts` still forbid `shadow-*` in markup; elevation is a theme token only.
 
 ### Brand presets
 
@@ -103,12 +103,12 @@ Each card is a miniature page of the real shapes (`MiniPage.svelte`) under `data
 
 ### Section padding (even 8px, independent of density)
 
-Blocks render the real class pair. `layout.section` in `packages/blocks/src/classes.ts` maps the step to classes; `Block` reads the step from the app (`provideSectionPadding(() => theme.sectionPadding)` or `<SectionScope padding>`), default `default`, and writes `data-section-padding`. Steps 32 and 40 are even 8px steps, so the project ui8px policy (`.ui8px/policy/allowed.json`, `spacing.layout`) lists them after 24. `--theme-section-py` / `--theme-section-py-lg` stay in exported CSS only.
+Blocks render the real class pair. The theme step is the `padding` setting of every generated block (the gallery passes `theme.sectionPadding` as the `padding` prop; same names, default `standard`); the classes are codegen-x `PADDING` (`packages/blocks/src/generated/classes.json`, `layout.padding`) and `SECTION_PADDING_SCALE` is pinned to them by `manifest/classes.node.test.ts`. The app writes `data-section-padding` on `<html>`. Steps 32 and 40 are even 8px steps (ui8px preset `ui8kit` layout scope). `--theme-section-py` / `--theme-section-py-lg` stay in exported CSS only.
 
 | Preset | Base | lg (1024px+) | Tailwind pair |
 | --- | --- | --- | --- |
 | compact | 32px | 64px | `py-8` / `lg:py-16` |
-| default (Standard) | 64px | 128px | `py-16` / `lg:py-32` |
+| standard | 64px | 128px | `py-16` / `lg:py-32` |
 | spacious | 96px | 160px | `py-24` / `lg:py-40` |
 
 ### Radius per element
@@ -118,7 +118,7 @@ Ported from `codegen-x/ui8kit` (`packages/theme-model/src/design.ts` `ELEMENTS`,
 | Element | Shape | `data-slot` | Variable | Unset |
 | --- | --- | --- | --- | --- |
 | badge | `Badge` | `badge` | `--radius-badge` | the pill |
-| button | `CtaShape` | `button` | `--radius-button` | `--radius` |
+| button | `ShapeCta` / `shape.cta` | `button` | `--radius-button` | `--radius` |
 | card | `Surface` | `card` | `--radius-card` | `--radius` |
 | media | `Media` | `media-frame` | `--radius-media` | `--radius` |
 
