@@ -9,7 +9,7 @@ import { SECTION_PADDINGS, SECTION_PADDING_SCALE } from "../../../theme/src/sect
 import generated from "../generated/classes.json" with { type: "json" };
 import { layout, role } from "../classes";
 import { BLOCKS } from "./registry";
-import { SECTION_PADDING_PRESETS, settingValues } from "./types";
+import { BLOCK_ALIGNS, SECTION_PADDING_PRESETS, settingValues } from "./types";
 
 const PX_PER_STEP = 4;
 const step = (cls: string, prefix: string): number => {
@@ -39,6 +39,13 @@ describe("one source: generated/classes.json", () => {
   it("the container padding is one value and an 8px multiple", () => {
     assert.equal(layout.container, generated.container);
     assert.equal(step(generated.container, "px-") % 8, 0);
+  });
+
+  it("the align setting values are the text-align table, all logical", () => {
+    assert.deepEqual([...BLOCK_ALIGNS], Object.keys(generated.textAlign));
+    for (const b of BLOCKS) assert.deepEqual(settingValues(b.settings.align!), [...BLOCK_ALIGNS], b.id);
+    assert.deepEqual(Object.values(generated.textAlign), ["text-start", "text-center", "text-end"]);
+    assert.equal(layout.textAlign, generated.textAlign);
   });
 
   it("roles, align and justify are read from codegen-x, not restated", () => {

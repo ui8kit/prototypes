@@ -27,7 +27,7 @@ function page(blocks: BlockInstance[]): unknown {
   return { version: 2, slug: "home", title: "Home", locale: "en", blocks };
 }
 const saved = (): BlockInstance[] =>
-  BLOCKS.map((b, i) => ({ id: `${b.id}-${i}`, item: b.id, variant: defaultVariantId(b), props: { ...CONTENT[b.id], level: 2, padding: "spacious", landmarkLabel: b.id } }));
+  BLOCKS.map((b, i) => ({ id: `${b.id}-${i}`, item: b.id, variant: defaultVariantId(b), props: { ...CONTENT[b.id], level: 2, padding: "spacious", align: "center", landmarkLabel: b.id } }));
 
 describe("page-spec v2 (@ui8kit/contract)", () => {
   it("a saved page with settings in props is valid for the schema and for the registry", () => {

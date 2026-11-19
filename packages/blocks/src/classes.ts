@@ -32,6 +32,8 @@ export const layout = {
   },
   align: generated.align,
   justify: generated.justify,
+  /** the block `align` setting on text (logical; text-left / text-right are denied by ui8px) */
+  textAlign: generated.textAlign,
   /** the block `padding` setting (every step a multiple of 8px); generated blocks render it themselves */
   padding: generated.padding,
   container: generated.container,

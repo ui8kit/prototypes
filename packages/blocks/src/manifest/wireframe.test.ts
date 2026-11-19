@@ -64,3 +64,28 @@ describe("team list width", () => {
     expect(ul.parentElement!.classList.contains("items-stretch")).toBe(true);
   });
 });
+
+describe("align setting (start | center | end, logical: docs/adr/0002-align-as-setting.md)", () => {
+  const ITEMS = { start: "items-start", center: "items-center", end: "items-end" } as const;
+  it.each(BLOCKS.flatMap((b) => b.variants.flatMap((v) => (["start", "center", "end"] as const).map((a) => [b.id, v.id, a] as const))))("%s / %s / %s", (item, variant, align) => {
+    const s = wireframe(item, variant, align === "start" ? undefined : { align });
+    const title = s.querySelector('[data-place="title"]')!;
+    expect(title.parentElement!.classList.contains(ITEMS[align]), title.parentElement!.className).toBe(true);
+    for (const text of all(s, '[data-shape="text"]')) expect(text.classList.contains(ITEMS[align]), text.className).toBe(true);
+    // logical classes only: nothing pins a physical side
+    const tokens = all(s, "[class]").flatMap((e) => [...e.classList]);
+    expect(tokens.filter((t) => /^(?:[a-z0-9-]+:)*(?:text-(?:left|right)|-?(?:ml|mr|pl|pr|left|right)-\S+|float-(?:left|right))$/.test(t))).toEqual([]);
+  });
+
+  it("dir=rtl: the same DOM (start / end are resolved by the browser, not by the block)", () => {
+    for (const b of BLOCKS) for (const align of ["start", "end"] as const) {
+      const ltr = wireframe(b.id, b.defaultVariant, { align }).outerHTML;
+      document.documentElement.setAttribute("dir", "rtl");
+      try {
+        expect(wireframe(b.id, b.defaultVariant, { align }).outerHTML).toBe(ltr);
+      } finally {
+        document.documentElement.removeAttribute("dir");
+      }
+    }
+  });
+});

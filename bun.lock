@@ -14,7 +14,7 @@
         "svelte": "^5.39.6",
         "tailwindcss": "^4.1.13",
         "typescript": "^5.8.3",
-        "ui8px": "github:ui8kit/ui8px-cli#6ae0f0c88bd55b167d10a12698493d41b3a5a4d3",
+        "ui8px": "github:ui8kit/ui8px-cli#05f4a3edd0054c33e0358e5552a9829442237ed8",
         "vite": "^7.1.7",
         "vitest": "^3.2.4",
       },
@@ -478,7 +478,7 @@
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
-    "ui8px": ["ui8px@github:ui8kit/ui8px-cli#6ae0f0c", { "bin": { "ui8px": "./dist/index.js" } }, "ui8kit-ui8px-cli-6ae0f0c"],
+    "ui8px": ["ui8px@github:ui8kit/ui8px-cli#05f4a3e", { "bin": { "ui8px": "./dist/index.js" } }, "ui8kit-ui8px-cli-05f4a3e"],
 
     "undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 

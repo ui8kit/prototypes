@@ -9,7 +9,7 @@
  *   places    where each value is drawn: a place binds JSON-pointer templates (`*` = list index) to one spot
  *   variants  layout-only alternatives (axes); any valid `props` renders fully in every variant
  *   settings  presentation props next to the content: `level` (heading level 1–3), `padding` (section padding preset),
- *             `landmarkLabel`; a key of `props` is a setting when the contract lists it under `settings`, else content
+ *             `align` (start | center | end), `landmarkLabel`; a key of `props` is a setting when the contract lists it under `settings`, else content
  */
 import generated from "../generated/classes.json" with { type: "json" };
 
@@ -87,8 +87,12 @@ export const TITLE_LEVELS: readonly TitleLevel[] = [1, 2, 3];
 export type SectionPaddingPreset = keyof typeof generated.padding;
 export const SECTION_PADDING_PRESETS = Object.keys(generated.padding) as readonly SectionPaddingPreset[];
 
+/** The `align` setting (codegen-x `TEXT_ALIGN`, `generated/classes.json` `textAlign`): start | center | end, logical (docs/adr/0002-align-as-setting.md). */
+export type BlockAlign = keyof typeof generated.textAlign;
+export const BLOCK_ALIGNS = Object.keys(generated.textAlign) as readonly BlockAlign[];
+
 /** Block settings: presentation choices per placed block (not content, not a variant axis), saved inside `props`. */
-export type BlockSettings = { level?: TitleLevel; padding?: SectionPaddingPreset; landmarkLabel?: string };
+export type BlockSettings = { level?: TitleLevel; padding?: SectionPaddingPreset; align?: BlockAlign; landmarkLabel?: string };
 
 /** The values a setting allows, from its contract type (`1 | 2 | 3`, `"compact" | "standard"`); undefined: any string. */
 export function settingValues(setting: Setting): Array<string | number> | undefined {
@@ -132,11 +136,15 @@ export function resolveVariant(block: BlockManifest, id: string | undefined): Bl
 }
 
 /**
- * The props of a wireframe: the layout axes of the variant and the padding setting, nothing else (a wireframe takes no
- * content). A saved instance draws the same way: `wireframeProps(block, instance.variant, instance.props)`.
+ * The props of a wireframe: the layout axes of the variant and the padding and align settings, nothing else (a wireframe
+ * takes no content). A saved instance draws the same way: `wireframeProps(block, instance.variant, instance.props)`.
  */
 export function wireframeProps(block: BlockManifest, variantId: string, props?: BlockSettings): Record<string, unknown> {
-  return { ...resolveVariant(block, variantId).axes, ...(props?.padding ? { padding: props.padding } : {}) };
+  return {
+    ...resolveVariant(block, variantId).axes,
+    ...(props?.padding ? { padding: props.padding } : {}),
+    ...(props?.align ? { align: props.align } : {}),
+  };
 }
 
 export function placeOf(block: BlockManifest, id: string): Place {

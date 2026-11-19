@@ -3,7 +3,7 @@
 The organisms are **generated**: `HeroSimple` (`hero-simple`, model `hero@1`) and `TeamSimple` (`team-simple`, model
 `team@1`) come from codegen-x/ui8kit `packages/prototypes` (the simple line) and are synced into
 `packages/blocks/src/generated` by `scripts/sync-codegen.ts`, pinned by `codegen.lock.json`. Never edit them here.
-**Rectangles only**: they are wireframes (the only mode) and take the variant axes and the padding setting, never
+**Rectangles only**: they are wireframes (the only mode) and take the variant axes and the padding and align settings, never
 content: bars, pills, discs and frames on the kit `Box`, each shape with `data-place` / `data-field` for the builder's
 inspector. No clean block, composition or recipe is in this repository: the real blocks are the registry's
 (`https://registry.buildy.tw`). Data contract: [content-contract.md](./content-contract.md).
@@ -83,6 +83,6 @@ background and the card (WCAG 1.4.11 asks 3:1), dark at least 7.21:1 and 4.81:1.
 
 ## Utilities
 
-All raw class strings: `packages/blocks/src/classes.ts`. Layout/shape components read maps. Hand-written `.svelte` files must report **0** raw utilities (`scripts/check-blocks.ts`). The role table, `align` / `justify`, the `padding` presets and the container are codegen-x `ROLE` / `ALIGN` / `JUSTIFY` / `PADDING` / `CONTAINER` (`src/generated/classes.json`); `classes.ts` reads them, `manifest/classes.node.test.ts` pins the rest.
+All raw class strings: `packages/blocks/src/classes.ts`. Layout/shape components read maps. Hand-written `.svelte` files must report **0** raw utilities (`scripts/check-blocks.ts`). The role table, `align` / `justify`, the `padding` presets and the container are codegen-x `ROLE` / `ALIGN` / `JUSTIFY` / `TEXT_ALIGN` / `PADDING` / `CONTAINER` (`src/generated/classes.json`); `classes.ts` reads them, `manifest/classes.node.test.ts` pins the rest.
 
 Density is per element (badge, button, card) and read by `packages/blocks/src/tokens.css` on the shapes only; shadow per element (card, media) too. Section padding is a real class pair from the theme, passed to the generated blocks as their `padding` setting (`compact` / `standard` / `spacious`, the same names in the theme): compact `py-8 lg:py-16` (32/64), standard `py-16 lg:py-32` (64/128), spacious `py-24 lg:py-40` (96/160). Radius per element (badge, button, card, media) rides on `data-slot` + `tokens.css`. See `docs/theme.md`.

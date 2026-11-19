@@ -44,7 +44,7 @@
     "svelte": "^5.39.6",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.8.3",
-    "ui8px": "github:ui8kit/ui8px-cli#6ae0f0c88bd55b167d10a12698493d41b3a5a4d3",
+    "ui8px": "github:ui8kit/ui8px-cli#05f4a3edd0054c33e0358e5552a9829442237ed8",
     "vite": "^7.1.7",
     "vitest": "^3.2.4"
   }

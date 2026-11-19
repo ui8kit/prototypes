@@ -16,7 +16,7 @@ Bun workspaces, Vite, Svelte 5 runes, TypeScript. Not a marketing site and not a
 ## Constructor rules
 
 - Organisms are generated in codegen-x/ui8kit (`packages/prototypes`) and synced; never edited here.
-- A saved block is page-spec v2 of `@ui8kit/contract`: `{ id, item, variant, props }`, the settings (`level`, `padding`, `landmarkLabel`) inside `props` (`docs/adr/0001-settings-in-props.md`).
+- A saved block is page-spec v2 of `@ui8kit/contract`: `{ id, item, variant, props }`, the settings (`level`, `padding`, `align`, `landmarkLabel`) inside `props` (`docs/adr/0001-settings-in-props.md`).
 - No bare HTML in composition. Retag with `tag` on kit primitives / layout shells.
 - No copy, no raster images, no unique colors or gradients. Media is a hatched data-URI `Image`.
 - Wireframes are rectangles and text bars only. Accordion, tabs, carousel: stacks of rectangles, not kit widgets.

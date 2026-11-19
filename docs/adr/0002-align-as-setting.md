@@ -1,6 +1,6 @@
 # 0002. `align` is a block setting
 
-- Status: accepted (UPC-6 plan), implemented in Stage C (codegen-x `packages/prototypes` + this repo).
+- Status: accepted (UPC-6 plan), implemented (UPC-6 Stage C: codegen-x `a513d18`, ui8px-cli `7a6a7d1` / `05f4a3e`, this repo).
 
 ## Context
 
@@ -13,7 +13,8 @@ right-to-left pages.
 
 - `align` is a setting next to `level` / `padding` (in `props`, ADR 0001): `start` | `center` | `end`, default `start`,
   one value per block.
-- It renders with logical classes only: `items-start|center|end` on the block's content stack (team: the outer stack),
+- It renders with logical classes only: `items-start|center|end` on the block's content stack (team: the head, placed with `self-*`, and each member; the
+  outer stack stays `items-stretch` so the grid keeps the full width),
   `text-start|center|end` on the text shapes (`ShapeText` takes an `align` prop). `start` / `end` follow `dir`.
 - ui8px denies `text-left` / `text-right` with the suggestion `text-start` / `text-end`.
 - The values are codegen-x `TEXT_ALIGN` / `ALIGN` in `generated/classes.json` (one source).

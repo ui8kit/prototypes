@@ -111,6 +111,17 @@ describe("settings", () => {
     }
   });
 
+  it("align is a setting: start | center | end (default start), checked at /props/align, drawn by the wireframe", () => {
+    for (const b of BLOCKS) {
+      assert.deepEqual(settingValues(b.settings.align!), ["start", "center", "end"]);
+      assert.equal(b.settings.align!.default, "start");
+    }
+    assert.deepEqual(validateInstance({ id: "x", item: "team-simple", variant: "cols3", props: { ...team, align: "center" } }).issues, []);
+    const bad = validateInstance({ id: "x", item: "team-simple", variant: "cols3", props: { ...team, align: "left" as never } });
+    assert.deepEqual(bad.issues.map((i) => i.path), ["/props/align"]);
+    assert.equal(wireframeProps(BLOCK_BY_ID["hero-simple"]!, "mediaEnd", { align: "end" }).align, "end");
+  });
+
   it("settings are props: padding is checked by value at /props/padding and drawn by the wireframe", () => {
     const ok = validateInstance({ id: "x", item: "team-simple", variant: "cols3", props: { ...team, padding: "spacious" } });
     assert.deepEqual(ok.issues, []);
@@ -120,7 +131,7 @@ describe("settings", () => {
   });
 
   it("splitProps: the contract settings (minus id) are settings, the rest is content", () => {
-    for (const b of BLOCKS) assert.deepEqual(settingKeys(b), ["level", "padding", "landmarkLabel"]);
+    for (const b of BLOCKS) assert.deepEqual(settingKeys(b), ["level", "padding", "align", "landmarkLabel"]);
     const { settings, content } = splitProps(BLOCK_BY_ID["team-simple"]!, { ...team, level: 3, id: "nope" });
     assert.deepEqual(settings, { level: 3 });
     assert.deepEqual(content, { ...team, id: "nope" });
