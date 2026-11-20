@@ -98,12 +98,19 @@ describe("registry", () => {
   });
 });
 
+/** the settings a block has, out of a wanted set (the header has no padding; the frame blocks without a heading have no level) */
+const has = (b: (typeof BLOCKS)[number], s: Record<string, unknown>) => Object.fromEntries(Object.entries(s).filter(([k]) => k in b.settings));
+// wave 2: no heading -> no level (figure, footer, header, pull quote); the header is a fixed slim band (no padding); the footer is compact
+const NO_LEVEL = ["figure-simple", "footer-simple", "header-simple", "pull-quote-simple"];
+const NO_PADDING = ["header-simple"];
+const NO_ALIGN = ["figure-simple", "footer-simple", "header-simple", "pull-quote-simple", "purchase-simple", "rating-simple", "split-simple"];
+
 describe("saved instances", () => {
   it("saved content (full and required-only, from the model) is valid for every block and variant", () => {
     for (const b of BLOCKS)
       for (const v of b.variants)
         for (const fill of ["full", "required"] as const)
-          assert.deepEqual(validateInstance({ id: "x", item: b.id, variant: v.id, props: { ...contentOf(b, fill), level: 1, padding: "compact", landmarkLabel: "Intro" } }).issues, [], `${b.id}/${v.id} ${fill}`);
+          assert.deepEqual(validateInstance({ id: "x", item: b.id, variant: v.id, props: { ...contentOf(b, fill), ...has(b, { level: 1, padding: "compact" }), landmarkLabel: "Intro" } }).issues, [], `${b.id}/${v.id} ${fill}`);
   });
 
   it("flags an unknown item and an unknown variant", () => {
@@ -129,19 +136,23 @@ describe("saved instances", () => {
         const bad = validateInstance({ id: "x", item: b.id, variant: b.defaultVariant, props: { ...contentOf(b), [k]: "zz-not-a-value" } as never });
         assert.deepEqual(bad.issues.map((i) => i.path), [`/props/${k}`], `${b.id}: ${k}`);
       }
-      const many = validateInstance({ id: "x", item: b.id, variant: "zzNoVariant", props: { ...contentOf(b), level: 4, zzUnknown: 1 } as never });
+      const many = validateInstance({ id: "x", item: b.id, variant: "zzNoVariant", props: { ...contentOf(b), ...has(b, { level: 4 }), zzUnknown: 1 } as never });
       const paths = many.issues.map((i) => i.path);
-      for (const p of ["/variant", "/props/level", "/props/zzUnknown"]) assert.ok(paths.includes(p), `${b.id}: ${p} in ${paths.join(" ")}`);
+      for (const p of ["/variant", ...("level" in b.settings ? ["/props/level"] : []), "/props/zzUnknown"]) assert.ok(paths.includes(p), `${b.id}: ${p} in ${paths.join(" ")}`);
     }
   });
 });
 
 describe("settings", () => {
   it("every block has level 1–3 and padding compact | standard | spacious (default standard)", () => {
+    assert.deepEqual(BLOCKS.filter((b) => !b.settings.level).map((b) => b.id).sort(), NO_LEVEL);
+    assert.deepEqual(BLOCKS.filter((b) => !b.settings.padding).map((b) => b.id).sort(), NO_PADDING);
     for (const b of BLOCKS) {
-      assert.deepEqual(settingValues(b.settings.level!), [1, 2, 3]);
-      assert.deepEqual(settingValues(b.settings.padding!), ["compact", "standard", "spacious"]);
-      assert.equal(b.settings.padding!.default, "standard");
+      if (b.settings.level) assert.deepEqual(settingValues(b.settings.level), [1, 2, 3]);
+      if (b.settings.padding) {
+        assert.deepEqual(settingValues(b.settings.padding), ["compact", "standard", "spacious"]);
+        assert.equal(b.settings.padding.default, b.id === "footer-simple" ? "compact" : "standard");
+      }
       assert.equal(settingValues(b.settings.landmarkLabel!), undefined);
     }
   });
@@ -157,7 +168,7 @@ describe("settings", () => {
 
   it("align is a setting: start | center | end (the block default is one of them); a variant default is a known setting value; the saved prop wins", () => {
     // split-simple has no align setting (its copy is fixed at the start): a saved align is an unknown field there
-    assert.deepEqual(BLOCKS.filter((b) => !b.settings.align).map((b) => b.id), ["split-simple"]);
+    assert.deepEqual(BLOCKS.filter((b) => !b.settings.align).map((b) => b.id).sort(), NO_ALIGN);
     for (const b of BLOCKS.filter((x) => x.settings.align)) {
       assert.deepEqual(settingValues(b.settings.align!), ["start", "center", "end"]);
       // the block default comes from codegen-x (hero-simple start, team-simple center); it is one of the values, never absent
@@ -170,7 +181,7 @@ describe("settings", () => {
         }
         const s = variantSettings(b, v.id);
         assert.equal(s.align, v.settings?.align ?? b.settings.align!.default, `${b.id}/${v.id}`);
-        assert.equal(s.padding, v.settings?.padding ?? b.settings.padding!.default, `${b.id}/${v.id}`);
+        if (b.settings.padding) assert.equal(s.padding, v.settings?.padding ?? b.settings.padding.default, `${b.id}/${v.id}`);
         for (const a of settingValues(b.settings.align!)!) assert.equal(wireframeProps(b, v.id, { align: a as never }).align, a, `${b.id}/${v.id}: ${a}`);
       }
     }
@@ -178,10 +189,10 @@ describe("settings", () => {
 
   it("splitProps: the contract settings (minus id) are settings, the rest is content", () => {
     for (const b of BLOCKS) {
-      assert.deepEqual(settingKeys(b), ["level", "padding", ...(b.settings.align ? ["align"] : []), "landmarkLabel"]);
+      assert.deepEqual(settingKeys(b), ["level", "padding", "align", "landmarkLabel"].filter((k) => k in b.settings));
       const content = contentOf(b);
-      const { settings, content: rest } = splitProps(b, { ...content, level: 3, id: "nope" });
-      assert.deepEqual(settings, { level: 3 }, b.id);
+      const { settings, content: rest } = splitProps(b, { ...content, ...has(b, { level: 3 }), id: "nope" });
+      assert.deepEqual(settings, has(b, { level: 3 }), b.id);
       assert.deepEqual(rest, { ...content, id: "nope" }, b.id);
     }
   });

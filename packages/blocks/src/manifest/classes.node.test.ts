@@ -23,7 +23,7 @@ describe("one source: generated/classes.json", () => {
     const names = Object.keys(generated.padding);
     assert.deepEqual([...SECTION_PADDING_PRESETS], names);
     assert.deepEqual([...SECTION_PADDINGS], names);
-    for (const b of BLOCKS) assert.deepEqual(settingValues(b.settings.padding!), names, b.id);
+    for (const b of BLOCKS.filter((x) => x.settings.padding)) assert.deepEqual(settingValues(b.settings.padding!), names, b.id);
     assert.equal(layout.padding, generated.padding);
   });
 

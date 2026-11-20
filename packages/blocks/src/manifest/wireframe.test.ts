@@ -10,7 +10,8 @@ import { bind, variantSettings, wireItems, wireframeProps, type BlockSettings } 
 
 function wireframe(item: string, variant: string, settings?: BlockSettings): HTMLElement {
   const { container } = render(CATALOG[item]!, { props: wireframeProps(BLOCK_BY_ID[item]!, variant, settings) });
-  return container.querySelector("section") as HTMLElement;
+  // the root landmark of the block: a section, or the header / footer of the page frame (header-simple, footer-simple)
+  return container.querySelector("section, header, footer") as HTMLElement;
 }
 const all = (root: Element, sel: string) => [...root.querySelectorAll(sel)];
 
@@ -62,14 +63,15 @@ describe("section padding (theme → padding setting)", () => {
   const PRESETS = { compact: ["py-8", "lg:py-16"], standard: ["py-16", "lg:py-32"], spacious: ["py-24", "lg:py-40"] } as const;
   // the preset sits on the section, or (a frame whose picture runs to the edge of the screen: split) on the one column of the copy
   const padded = (s: Element, cls: readonly string[]) => [s, ...all(s, "*")].filter((e) => cls.every((c) => e.classList.contains(c)));
-  it.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)))("%s / %s: every preset", (item, variant) => {
+  // the header has no padding setting (a fixed slim band); the footer sits compact by default
+  it.each(BLOCKS.filter((b) => b.settings.padding).flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)))("%s / %s: every preset", (item, variant) => {
     for (const [padding, cls] of Object.entries(PRESETS)) {
       const s = wireframe(item, variant, { padding: padding as never });
       const on = padded(s, cls);
       expect(on, `${padding} ${cls.join(" ")}`).toHaveLength(1);
       if (on[0] !== s) expect(s.getAttribute("class") ?? "", `${padding}: the section of a split frame has no padding of its own`).not.toMatch(/\bpy-/);
     }
-    expect(padded(wireframe(item, variant), PRESETS.standard)).toHaveLength(1);
+    expect(padded(wireframe(item, variant), PRESETS[BLOCK_BY_ID[item]!.settings.padding!.default as keyof typeof PRESETS])).toHaveLength(1);
   });
 });
 
@@ -80,7 +82,9 @@ describe.runIf(LISTS.length > 0)("list width", () => {
   it.each(LISTS)("%s / %s: the list is a full-width grid (or a wrapping row) in its column", (item, variant) => {
     const list = wireframe(item, variant).querySelector("ul, ol")!;
     expect(list.classList.contains("w-full")).toBe(true);
-    expect(list.classList.contains("grid") || list.classList.contains("flex-wrap")).toBe(true);
+    // or a column of rows that are grids themselves (compare-simple: one row per property, a column per product)
+    const rows = list.classList.contains("flex-col") && [...list.children].every((li) => li.classList.contains("grid"));
+    expect(list.classList.contains("grid") || list.classList.contains("flex-wrap") || rows).toBe(true);
   });
 });
 
@@ -88,11 +92,12 @@ describe("align setting (start | center | end, logical: docs/adr/0002-align-as-s
   const ITEMS = { start: "items-start", center: "items-center", end: "items-end" } as const;
   // the blocks with the align setting; split-simple has none: its copy is fixed at the start, a saved align changes nothing
   const ALIGNED = BLOCKS.filter((b) => b.settings.align);
+  // the fixed compositions (split, header, footer, figure, pull quote, rating, purchase): a saved align changes nothing;
+  // the split keeps its copy at the start
   it.each(BLOCKS.filter((b) => !b.settings.align).flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)))("%s / %s: no align setting, the copy at the start", (item, variant) => {
-    for (const a of [undefined, "center", "end"] as const) {
-      const t = wireframe(item, variant, a ? { align: a } : undefined).querySelector('[data-place="title"]')!;
-      expect(t.parentElement!.classList.contains("items-start"), `${a}`).toBe(true);
-    }
+    const base = wireframe(item, variant).outerHTML;
+    for (const a of ["center", "end"] as const) expect(wireframe(item, variant, { align: a } as never).outerHTML, a).toBe(base);
+    if (item === "split-simple") expect(wireframe(item, variant).querySelector('[data-place="title"]')!.parentElement!.classList.contains("items-start")).toBe(true);
   });
   it.each(ALIGNED.flatMap((b) => b.variants.flatMap((v) => (["start", "center", "end"] as const).map((a) => [b.id, v.id, a] as const))))("%s / %s / %s", (item, variant, align) => {
     const s = wireframe(item, variant, { align });
