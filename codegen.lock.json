@@ -1,9 +1,9 @@
 {
   "repo": "https://github.com/codegen-x/ui8kit.git",
-  "commit": "44b70307459ab4dcac991d4a3a7a6048e6ca6ada",
+  "commit": "d1b34d962335dab54b3f41554993ab360a11fc9b",
   "path": "packages/prototypes/out",
   "target": "packages/blocks/src/generated",
-  "manifest": "67e99e0db944e995c201aeb7a823985f6e84f8ce2fc1d33a9c4571ff9417ea4a",
+  "manifest": "a9cb7e48a66b5dc760f14d87ac043af66033833d9e9080952df3f194f443a002",
   "kitCn": {
     "repo": "https://github.com/ui8kit/codegen.git",
     "commit": "42d94efc403aaa59cae53d6c5cc0ee1c05077519",
