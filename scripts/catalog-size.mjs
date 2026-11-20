@@ -2,14 +2,15 @@
 // Build the catalog bundle and report its size (raw and gzip, JS and CSS). Fails if the bundle pulls tailwind-merge or the
 // kit's utils/cn.ts (the catalog's cn is kit-cn.ts, a dependency-free join) or anything of the app chrome. clsx stays: the
 // Svelte 5 runtime itself uses it for class attributes (svelte/internal), not the kit. Fails over the size budget
-// (`BUDGET`, gzip level 9: about 15% over the UPC-6 build of JS 27.4 / CSS 2.3 KiB); raise it only on purpose.
+// (`BUDGET`, gzip level 9: about 15% over the UPC-6 build of JS 27.4 / CSS 2.3 KiB; JS raised to 44 with the 13 blocks of
+// the simple line at codegen-x 4d672d8, JS 38.4 KiB); raise it only on purpose.
 import { execFileSync } from "node:child_process";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 
 /** gzip KiB ceilings of the catalog bundle (`bun run catalog:build`, also a step of `bun run verify`) */
-export const BUDGET = { jsGzipKiB: 32, cssGzipKiB: 3 };
+export const BUDGET = { jsGzipKiB: 44, cssGzipKiB: 3 };
 const DIST = join(import.meta.dirname, "../packages/blocks/catalog/dist");
 execFileSync("npx", ["vite", "build", "-c", "packages/blocks/catalog/vite.config.ts", "--logLevel", "warn"], { stdio: "inherit" });
 const modules = JSON.parse(readFileSync(join(DIST, "modules.json"), "utf8"));

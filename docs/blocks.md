@@ -1,7 +1,7 @@
 # Blocks
 
-The organisms are **generated**: `HeroSimple` (`hero-simple`, model `hero@1`), `SplitSimple` (`split-simple`, model `split@1`) and `TeamSimple` (`team-simple`, model
-`team@1`) come from codegen-x/ui8kit `packages/prototypes` (the simple line) and are synced into
+The organisms are **generated**: `HeroSimple` (`hero-simple`, model `hero@1`), `SplitSimple` (`split-simple`, model `split@1`), `TeamSimple` (`team-simple`, model
+`team@1`) and `IntroSimple` (`intro-simple`, `intro@1`), `GalleryHero` (`gallery-hero`, `gallery@1`), `FeaturesSimple` (`features-simple`, `features@1`), `StatsSimple` (`stats-simple`, `stats@1`), `StoriesSimple` (`stories-simple`, `stories@1`), `PhotosSimple` (`photos-simple`, `photos@1`), `TestimonialsSimple` (`testimonials-simple`, `testimonials@1`), `LogosSimple` (`logos-simple`, `logos@1`), `FaqSimple` (`faq-simple`, `faq@1`), `StepsSimple` (`steps-simple`, `steps@1`) come from codegen-x/ui8kit `packages/prototypes` (the simple line) and are synced into
 `packages/blocks/src/generated` by `scripts/sync-codegen.ts`, pinned by `codegen.lock.json`. Never edit them here.
 **Rectangles only**: they are wireframes (the only mode) and take the variant axes and the padding and align settings, never
 content: bars, pills, discs and frames on the kit `Box`, each shape with `data-place` / `data-field` for the builder's
@@ -51,8 +51,18 @@ container padding is `px-4` (16px, an 8px multiple), one value from codegen-x `C
 | Sketch | Block | Content contract | Variants (layout) | Structure |
 | --- | --- | --- | --- | --- |
 | Team row | `TeamSimple` (generated) | `team@1`: title, description, `members: SimpleMember[]` (id, avatar, title, description) | `cols3` / `cols2` / `cols4` / `cards3` (axes `cols`, `surface`) | `section` → container → heading + text → `ul` of `li` (portrait, name, line); the wireframe draws 3 members |
-| Simple hero | `HeroSimple` (generated) | `hero@1`: badge, title, description, image, imageAlt, imageDark, actionLabel, actionHref, secondaryActionLabel, secondaryActionHref | `mediaEnd` / `mediaStart` / `mediaTop` (axis `media`) | `section` → container → grid of copy (badge, heading, text, a row of up to two links: primary, then secondary) and the picture (4:3, 21:9 on top) |
+| Simple hero | `HeroSimple` (generated) | `hero@1`: badge, title, description, image, imageAlt, imageDark, actionLabel, actionHref, secondaryActionLabel, secondaryActionHref | `mediaEnd` / `mediaStart` / `mediaTop` / `mediaBottom` / `mediaEndPortrait` / `mediaStartPortrait` (axes `media`, `ratio`) | `section` → container → grid of copy (badge, heading, text, a row of up to two links: primary, then secondary) and the picture (4:3 beside, 21:9 on top or at the bottom; portrait: narrow and tall from `md`) |
 | Split | `SplitSimple` (generated) | `split@1`: title, description, image, imageAlt, imageDark, actionLabel, actionHref, secondaryActionLabel, secondaryActionHref (video / a sign-in form: a later version) | `mediaEnd` / `mediaStart` (axis `media`) | `section` → two halves: the copy (heading, text, up to two links; fixed at the start, no `align` setting; the `padding` preset on this column) and the picture filling its half (`rounded-none`, 4:3 on small screens, full height from `md`: `ShapeMedia fill="half"`) |
+| Intro | `IntroSimple` (generated) | `intro@1`: badge, title, description, two actions | `center` / `start` / `bottomStart` / `bottomCenter` (axis `place`) | text only: badge, large heading, text, links; in the middle or low in a tall section |
+| Gallery hero | `GalleryHero` (generated) | `gallery@1`: title, description, two actions, `photos` (3–4: id, image, imageAlt) | `photos3` / `photos4` / `photos3Start` / `photos4Start` / `photos3Bottom` / `photos4Bottom` (axes `media`, `count`) | copy beside (or above) a grid of photos |
+| Features | `FeaturesSimple` (generated) | `features@1`: title, description, `items` (id, image, title, description) | `cols3` / `cols2` / `cols4` / `summaryRow` / `summaryGrid` / `inlineGrid` / `checklist` (axes `layout`, `cols`, `marker`) | head + `ul` grid, the head beside the grid (`aside`), the icon on top or at the side |
+| Stats | `StatsSimple` (generated) | `stats@1`: title, description, `items` (id, value, title, description) | `cols4` / `cols3` / `cols2` / `cards4` (axes `cols`, `surface`) | head + `ul` of numbers |
+| Stories | `StoriesSimple` (generated) | `stories@1`: title, description, `stories` (id, image, title, description, href) | `cols3` / `duo` / `related3` (axes `layout`, `cols`) | head + `ul` of story cards (compact: picture at the side) |
+| Photos | `PhotosSimple` (generated) | `photos@1`: title, description, `photos` (id, image, imageAlt) | `row4` / `grid3` / `diptych` (axis `cols`) | head + `ul` grid of pictures |
+| Testimonials | `TestimonialsSimple` (generated) | `testimonials@1`: title, description, `quotes` (id, quote, avatar, title, description) | `cols3` / `cards2` / `portraitRows` / `centered` (axes `layout`, `cols`) | head + `ul` of quotes with a portrait, name and role |
+| Logos | `LogosSimple` (generated) | `logos@1`: title, `logos` (id, image, title as the alt) | `row` / `cards` (axis `surface`) | small heading + a wrapping row (or a grid of cards) of logos |
+| FAQ | `FaqSimple` (generated) | `faq@1`: title, description, `items` (id, title, description) | `grid2` / `list` (axis `columns`) | head + `ul` of questions and answers |
+| Steps | `StepsSimple` (generated) | `steps@1`: title, description, `steps` (id, label, title, description) | `row4` / `row3` / `column` (axes `layout`, `cols`) | head + `ol` of steps with a label badge |
 
 The registry (`packages/blocks/src/manifest/registry.ts`, a thin re-export of the generated `src/generated/registry.ts`) is the gallery source. Content contract: `docs/content-contract.md`. Adding a block: `docs/adding-a-block.md`.
 

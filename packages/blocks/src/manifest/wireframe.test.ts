@@ -44,7 +44,7 @@ describe.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)
     // a list place is drawn once per column of the variant (wireItems: the count axis, else wireframe.items), in a list
     const items = wireItems(block, variant);
     for (const p of block.places.filter((x) => x.list)) expect(all(s, `li [data-place="${p.place}"], li[data-place="${p.place}"]`), p.place).toHaveLength(items);
-    if (block.places.some((x) => x.list)) expect(all(s, "ul > li")).toHaveLength(items);
+    if (block.places.some((x) => x.list)) expect(all(s, "ul > li, ol > li")).toHaveLength(items);
   });
 });
 
@@ -73,14 +73,14 @@ describe("section padding (theme → padding setting)", () => {
   });
 });
 
-// every block with a list place: the list is a full-width grid in a stretching column
+// every block with a list place: the list fills its column (w-full) and lays its members out as a grid or a wrapping row
+// (logos-simple plain: flex-wrap); a member grid in a column of its own also stretches that column (team-simple)
 const LISTS = BLOCKS.filter((b) => b.places.some((p) => p.list)).flatMap((b) => b.variants.map((v) => [b.id, v.id] as const));
 describe.runIf(LISTS.length > 0)("list width", () => {
-  it.each(LISTS)("%s / %s: the list is a full-width grid in a stretching column", (item, variant) => {
-    const ul = wireframe(item, variant).querySelector("ul")!;
-    expect(ul.classList.contains("w-full")).toBe(true);
-    expect(ul.classList.contains("grid")).toBe(true);
-    expect(ul.parentElement!.classList.contains("items-stretch")).toBe(true);
+  it.each(LISTS)("%s / %s: the list is a full-width grid (or a wrapping row) in its column", (item, variant) => {
+    const list = wireframe(item, variant).querySelector("ul, ol")!;
+    expect(list.classList.contains("w-full")).toBe(true);
+    expect(list.classList.contains("grid") || list.classList.contains("flex-wrap")).toBe(true);
   });
 });
 

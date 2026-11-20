@@ -45,6 +45,16 @@ real block from the registry.
 - `split@1`: `title` (required), `description`, `image`, `imageAlt`, `imageDark`, `actionLabel`, `actionHref`, `secondaryActionLabel`, `secondaryActionHref` (9 fields; block `split-simple`, category `split`, settings `level`, `padding`, `landmarkLabel`: no `align`, the copy is fixed at the start; video or a sign-in form in place of the picture is a later model version).
 - `team@1`: `title` (required), `description`, `members` (1–12 `SimpleMember`: `id` (required), `avatar`, `title`
   (required), `description`). Members render as `ul` / `li`.
+- `intro@1`: `badge`, `title` (required), `description`, `actionLabel`, `actionHref`, `secondaryActionLabel`, `secondaryActionHref` (7).
+- `gallery@1`: `title` (required), `description`, the two actions, `photos` (3–4 `GalleryPhoto`: `id`, `image` (required), `imageAlt` (required)) (10 paths).
+- `features@1`: `title`, `description`, `items` (`SimpleFeature`: `id`, `image`, `title`, `description`; up to 8).
+- `stats@1`: `title`, `description`, `items` (`SimpleStat`: `id`, `value`, `title`, `description`; up to 4).
+- `stories@1`: `title`, `description`, `stories` (`SimpleStory`: `id`, `image`, `title`, `description`, `href`; up to 6).
+- `photos@1`: `title`, `description`, `photos` (`SimplePhoto`: `id`, `image`, `imageAlt`; up to 12).
+- `testimonials@1`: `title`, `description`, `quotes` (`SimpleQuote`: `id`, `quote`, `avatar`, `title`, `description`; up to 6).
+- `logos@1`: `title`, `logos` (`SimpleLogo`: `id`, `image`, `title`: the name is the alt text; up to 8).
+- `faq@1`: `title`, `description`, `items` (`SimpleQuestion`: `id`, `title`, `description` (required); up to 12).
+- `steps@1`: `title`, `description`, `steps` (`SimpleStep`: `id`, `label`, `title`, `description`; up to 6). Steps render as `ol` / `li`.
 
 Field budget: 5–10 model paths per model (a list counts one plus its item fields), checked in
 `manifest/registry.node.test.ts`.
