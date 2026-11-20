@@ -10,6 +10,7 @@ import CollectionsSimple from "./svelte/blocks/collections-simple.svelte";
 import CompareSimple from "./svelte/blocks/compare-simple.svelte";
 import ContactsSimple from "./svelte/blocks/contacts-simple.svelte";
 import CourseOutline from "./svelte/blocks/course-outline.svelte";
+import CtaSimple from "./svelte/blocks/cta-simple.svelte";
 import ErrorSimple from "./svelte/blocks/error-simple.svelte";
 import EventIntro from "./svelte/blocks/event-intro.svelte";
 import FaqSimple from "./svelte/blocks/faq-simple.svelte";
@@ -23,6 +24,7 @@ import HeroSimple from "./svelte/blocks/hero-simple.svelte";
 import IntroSimple from "./svelte/blocks/intro-simple.svelte";
 import LocationsSimple from "./svelte/blocks/locations-simple.svelte";
 import LogosSimple from "./svelte/blocks/logos-simple.svelte";
+import MenuSimple from "./svelte/blocks/menu-simple.svelte";
 import OffersSimple from "./svelte/blocks/offers-simple.svelte";
 import PhotosSimple from "./svelte/blocks/photos-simple.svelte";
 import PricingSimple from "./svelte/blocks/pricing-simple.svelte";
@@ -30,6 +32,7 @@ import ProductReviews from "./svelte/blocks/product-reviews.svelte";
 import ProductSimple from "./svelte/blocks/product-simple.svelte";
 import ProductsSimple from "./svelte/blocks/products-simple.svelte";
 import ProfileIntro from "./svelte/blocks/profile-intro.svelte";
+import PromoSimple from "./svelte/blocks/promo-simple.svelte";
 import PullQuoteSimple from "./svelte/blocks/pull-quote-simple.svelte";
 import PurchaseSimple from "./svelte/blocks/purchase-simple.svelte";
 import RatingSimple from "./svelte/blocks/rating-simple.svelte";
@@ -43,7 +46,7 @@ import TeamSimple from "./svelte/blocks/team-simple.svelte";
 import TestimonialsSimple from "./svelte/blocks/testimonials-simple.svelte";
 import TopicsSimple from "./svelte/blocks/topics-simple.svelte";
 
-export { ArticleLead, ArticleSimple, ChaptersSimple, ChoiceLinks, CollectionsSimple, CompareSimple, ContactsSimple, CourseOutline, ErrorSimple, EventIntro, FaqSimple, FeatureShowcaseSimple, FeaturesSimple, FigureSimple, FooterSimple, GalleryHero, HeaderSimple, HeroSimple, IntroSimple, LocationsSimple, LogosSimple, OffersSimple, PhotosSimple, PricingSimple, ProductReviews, ProductSimple, ProductsSimple, ProfileIntro, PullQuoteSimple, PurchaseSimple, RatingSimple, SpecsSimple, SplitSimple, StatsSimple, StepsSimple, StorePolicies, StoriesSimple, TeamSimple, TestimonialsSimple, TopicsSimple };
+export { ArticleLead, ArticleSimple, ChaptersSimple, ChoiceLinks, CollectionsSimple, CompareSimple, ContactsSimple, CourseOutline, CtaSimple, ErrorSimple, EventIntro, FaqSimple, FeatureShowcaseSimple, FeaturesSimple, FigureSimple, FooterSimple, GalleryHero, HeaderSimple, HeroSimple, IntroSimple, LocationsSimple, LogosSimple, MenuSimple, OffersSimple, PhotosSimple, PricingSimple, ProductReviews, ProductSimple, ProductsSimple, ProfileIntro, PromoSimple, PullQuoteSimple, PurchaseSimple, RatingSimple, SpecsSimple, SplitSimple, StatsSimple, StepsSimple, StorePolicies, StoriesSimple, TeamSimple, TestimonialsSimple, TopicsSimple };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const CATALOG: Record<string, Component<any>> = {
@@ -55,6 +58,7 @@ export const CATALOG: Record<string, Component<any>> = {
   "compare-simple": CompareSimple,
   "contacts-simple": ContactsSimple,
   "course-outline": CourseOutline,
+  "cta-simple": CtaSimple,
   "error-simple": ErrorSimple,
   "event-intro": EventIntro,
   "faq-simple": FaqSimple,
@@ -68,6 +72,7 @@ export const CATALOG: Record<string, Component<any>> = {
   "intro-simple": IntroSimple,
   "locations-simple": LocationsSimple,
   "logos-simple": LogosSimple,
+  "menu-simple": MenuSimple,
   "offers-simple": OffersSimple,
   "photos-simple": PhotosSimple,
   "pricing-simple": PricingSimple,
@@ -75,6 +80,7 @@ export const CATALOG: Record<string, Component<any>> = {
   "product-simple": ProductSimple,
   "products-simple": ProductsSimple,
   "profile-intro": ProfileIntro,
+  "promo-simple": PromoSimple,
   "pull-quote-simple": PullQuoteSimple,
   "purchase-simple": PurchaseSimple,
   "rating-simple": RatingSimple,

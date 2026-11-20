@@ -9,6 +9,7 @@ import collectionsSimple from "./contracts/collections-simple/1.json" with { typ
 import compareSimple from "./contracts/compare-simple/1.json" with { type: "json" };
 import contactsSimple from "./contracts/contacts-simple/1.json" with { type: "json" };
 import courseOutline from "./contracts/course-outline/1.json" with { type: "json" };
+import ctaSimple from "./contracts/cta-simple/1.json" with { type: "json" };
 import errorSimple from "./contracts/error-simple/1.json" with { type: "json" };
 import eventIntro from "./contracts/event-intro/1.json" with { type: "json" };
 import faqSimple from "./contracts/faq-simple/1.json" with { type: "json" };
@@ -22,6 +23,7 @@ import heroSimple from "./contracts/hero-simple/1.json" with { type: "json" };
 import introSimple from "./contracts/intro-simple/1.json" with { type: "json" };
 import locationsSimple from "./contracts/locations-simple/1.json" with { type: "json" };
 import logosSimple from "./contracts/logos-simple/1.json" with { type: "json" };
+import menuSimple from "./contracts/menu-simple/1.json" with { type: "json" };
 import offersSimple from "./contracts/offers-simple/1.json" with { type: "json" };
 import photosSimple from "./contracts/photos-simple/1.json" with { type: "json" };
 import pricingSimple from "./contracts/pricing-simple/1.json" with { type: "json" };
@@ -29,6 +31,7 @@ import productReviews from "./contracts/product-reviews/1.json" with { type: "js
 import productSimple from "./contracts/product-simple/1.json" with { type: "json" };
 import productsSimple from "./contracts/products-simple/1.json" with { type: "json" };
 import profileIntro from "./contracts/profile-intro/1.json" with { type: "json" };
+import promoSimple from "./contracts/promo-simple/1.json" with { type: "json" };
 import pullQuoteSimple from "./contracts/pull-quote-simple/1.json" with { type: "json" };
 import purchaseSimple from "./contracts/purchase-simple/1.json" with { type: "json" };
 import ratingSimple from "./contracts/rating-simple/1.json" with { type: "json" };
@@ -48,6 +51,7 @@ import { model as choices1, validateChoicesContent } from "./models/choices@1";
 import { model as collections1, validateCollectionsContent } from "./models/collections@1";
 import { model as compare1, validateCompareContent } from "./models/compare@1";
 import { model as contacts1, validateContactsContent } from "./models/contacts@1";
+import { model as cta1, validateCtaContent } from "./models/cta@1";
 import { model as curriculum1, validateCurriculumContent } from "./models/curriculum@1";
 import { model as error1, validateErrorContent } from "./models/error@1";
 import { model as event1, validateEventContent } from "./models/event@1";
@@ -62,12 +66,14 @@ import { model as hero1, validateHeroContent } from "./models/hero@1";
 import { model as intro1, validateIntroContent } from "./models/intro@1";
 import { model as locations1, validateLocationsContent } from "./models/locations@1";
 import { model as logos1, validateLogosContent } from "./models/logos@1";
+import { model as menu1, validateMenuContent } from "./models/menu@1";
 import { model as offers1, validateOffersContent } from "./models/offers@1";
 import { model as photos1, validatePhotosContent } from "./models/photos@1";
 import { model as pricing1, validatePricingContent } from "./models/pricing@1";
 import { model as product1, validateProductContent } from "./models/product@1";
 import { model as products1, validateProductsContent } from "./models/products@1";
 import { model as profile1, validateProfileContent } from "./models/profile@1";
+import { model as promo1, validatePromoContent } from "./models/promo@1";
 import { model as pullQuote1, validatePullQuoteContent } from "./models/pull-quote@1";
 import { model as purchase1, validatePurchaseContent } from "./models/purchase@1";
 import { model as rating1, validateRatingContent } from "./models/rating@1";
@@ -84,7 +90,7 @@ import { model as topics1, validateTopicsContent } from "./models/topics@1";
 import type { Issue, ModelSpec } from "./models/validate";
 
 /** the contracts (out/contracts/<item>/<version>.json), in manifest order */
-export const CONTRACTS: readonly unknown[] = [articleLead, articleSimple, chaptersSimple, choiceLinks, collectionsSimple, compareSimple, contactsSimple, courseOutline, errorSimple, eventIntro, faqSimple, featureShowcaseSimple, featuresSimple, figureSimple, footerSimple, galleryHero, headerSimple, heroSimple, introSimple, locationsSimple, logosSimple, offersSimple, photosSimple, pricingSimple, productReviews, productSimple, productsSimple, profileIntro, pullQuoteSimple, purchaseSimple, ratingSimple, specsSimple, splitSimple, statsSimple, stepsSimple, storePolicies, storiesSimple, teamSimple, testimonialsSimple, topicsSimple];
+export const CONTRACTS: readonly unknown[] = [articleLead, articleSimple, chaptersSimple, choiceLinks, collectionsSimple, compareSimple, contactsSimple, courseOutline, ctaSimple, errorSimple, eventIntro, faqSimple, featureShowcaseSimple, featuresSimple, figureSimple, footerSimple, galleryHero, headerSimple, heroSimple, introSimple, locationsSimple, logosSimple, menuSimple, offersSimple, photosSimple, pricingSimple, productReviews, productSimple, productsSimple, profileIntro, promoSimple, pullQuoteSimple, purchaseSimple, ratingSimple, specsSimple, splitSimple, statsSimple, stepsSimple, storePolicies, storiesSimple, teamSimple, testimonialsSimple, topicsSimple];
 
 /** item -> catalog category (the id of its content model) */
 export const CATEGORIES: Readonly<Record<string, string>> = {
@@ -96,6 +102,7 @@ export const CATEGORIES: Readonly<Record<string, string>> = {
   "compare-simple": "compare",
   "contacts-simple": "contacts",
   "course-outline": "curriculum",
+  "cta-simple": "cta",
   "error-simple": "error",
   "event-intro": "event",
   "faq-simple": "faq",
@@ -109,6 +116,7 @@ export const CATEGORIES: Readonly<Record<string, string>> = {
   "intro-simple": "intro",
   "locations-simple": "locations",
   "logos-simple": "logos",
+  "menu-simple": "menu",
   "offers-simple": "offers",
   "photos-simple": "photos",
   "pricing-simple": "pricing",
@@ -116,6 +124,7 @@ export const CATEGORIES: Readonly<Record<string, string>> = {
   "product-simple": "product",
   "products-simple": "products",
   "profile-intro": "profile",
+  "promo-simple": "promo",
   "pull-quote-simple": "pull-quote",
   "purchase-simple": "purchase",
   "rating-simple": "rating",
@@ -139,6 +148,7 @@ export const MODELS: Readonly<Record<string, { spec: ModelSpec; validate: (value
   "collections@1": { spec: collections1 as unknown as ModelSpec, validate: validateCollectionsContent },
   "compare@1": { spec: compare1 as unknown as ModelSpec, validate: validateCompareContent },
   "contacts@1": { spec: contacts1 as unknown as ModelSpec, validate: validateContactsContent },
+  "cta@1": { spec: cta1 as unknown as ModelSpec, validate: validateCtaContent },
   "curriculum@1": { spec: curriculum1 as unknown as ModelSpec, validate: validateCurriculumContent },
   "error@1": { spec: error1 as unknown as ModelSpec, validate: validateErrorContent },
   "event@1": { spec: event1 as unknown as ModelSpec, validate: validateEventContent },
@@ -153,12 +163,14 @@ export const MODELS: Readonly<Record<string, { spec: ModelSpec; validate: (value
   "intro@1": { spec: intro1 as unknown as ModelSpec, validate: validateIntroContent },
   "locations@1": { spec: locations1 as unknown as ModelSpec, validate: validateLocationsContent },
   "logos@1": { spec: logos1 as unknown as ModelSpec, validate: validateLogosContent },
+  "menu@1": { spec: menu1 as unknown as ModelSpec, validate: validateMenuContent },
   "offers@1": { spec: offers1 as unknown as ModelSpec, validate: validateOffersContent },
   "photos@1": { spec: photos1 as unknown as ModelSpec, validate: validatePhotosContent },
   "pricing@1": { spec: pricing1 as unknown as ModelSpec, validate: validatePricingContent },
   "product@1": { spec: product1 as unknown as ModelSpec, validate: validateProductContent },
   "products@1": { spec: products1 as unknown as ModelSpec, validate: validateProductsContent },
   "profile@1": { spec: profile1 as unknown as ModelSpec, validate: validateProfileContent },
+  "promo@1": { spec: promo1 as unknown as ModelSpec, validate: validatePromoContent },
   "pull-quote@1": { spec: pullQuote1 as unknown as ModelSpec, validate: validatePullQuoteContent },
   "purchase@1": { spec: purchase1 as unknown as ModelSpec, validate: validatePurchaseContent },
   "rating@1": { spec: rating1 as unknown as ModelSpec, validate: validateRatingContent },

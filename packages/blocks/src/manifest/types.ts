@@ -51,6 +51,8 @@ export const BLOCK_CATEGORIES = [
   "purchase",
   "store-policy",
   "reviews",
+  "menu",
+  "promo",
   "team",
   "cta",
   "pricing",
