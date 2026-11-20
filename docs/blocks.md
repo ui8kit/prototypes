@@ -1,6 +1,6 @@
 # Blocks
 
-The organisms are **generated**: `HeroSimple` (`hero-simple`, model `hero@1`) and `TeamSimple` (`team-simple`, model
+The organisms are **generated**: `HeroSimple` (`hero-simple`, model `hero@1`), `SplitSimple` (`split-simple`, model `split@1`) and `TeamSimple` (`team-simple`, model
 `team@1`) come from codegen-x/ui8kit `packages/prototypes` (the simple line) and are synced into
 `packages/blocks/src/generated` by `scripts/sync-codegen.ts`, pinned by `codegen.lock.json`. Never edit them here.
 **Rectangles only**: they are wireframes (the only mode) and take the variant axes and the padding and align settings, never
@@ -51,7 +51,8 @@ container padding is `px-4` (16px, an 8px multiple), one value from codegen-x `C
 | Sketch | Block | Content contract | Variants (layout) | Structure |
 | --- | --- | --- | --- | --- |
 | Team row | `TeamSimple` (generated) | `team@1`: title, description, `members: SimpleMember[]` (id, avatar, title, description) | `cols3` / `cols2` / `cols4` / `cards3` (axes `cols`, `surface`) | `section` → container → heading + text → `ul` of `li` (portrait, name, line); the wireframe draws 3 members |
-| Simple hero | `HeroSimple` (generated) | `hero@1`: badge, title, description, image, imageAlt, imageDark, actionLabel, actionHref, secondaryActionLabel, secondaryActionHref | `mediaEnd` / `mediaStart` / `mediaTop` / `splitEnd` / `splitStart` (axes `media`, `frame`: box \| split) | `section` → container → grid of copy (badge, heading, text, a row of up to two links: primary, then secondary) and the picture (4:3, 21:9 on top); split: two halves, the picture to the edge of the screen, the padding on the copy |
+| Simple hero | `HeroSimple` (generated) | `hero@1`: badge, title, description, image, imageAlt, imageDark, actionLabel, actionHref, secondaryActionLabel, secondaryActionHref | `mediaEnd` / `mediaStart` / `mediaTop` (axis `media`) | `section` → container → grid of copy (badge, heading, text, a row of up to two links: primary, then secondary) and the picture (4:3, 21:9 on top) |
+| Split | `SplitSimple` (generated) | `split@1`: title, description, image, imageAlt, imageDark, actionLabel, actionHref, secondaryActionLabel, secondaryActionHref (video / a sign-in form: a later version) | `mediaEnd` / `mediaStart` (axis `media`) | `section` → two halves: the copy (heading, text, up to two links; fixed at the start, no `align` setting; the `padding` preset on this column) and the picture filling its half (`rounded-none`, 4:3 on small screens, full height from `md`: `ShapeMedia fill="half"`) |
 
 The registry (`packages/blocks/src/manifest/registry.ts`, a thin re-export of the generated `src/generated/registry.ts`) is the gallery source. Content contract: `docs/content-contract.md`. Adding a block: `docs/adding-a-block.md`.
 
@@ -69,7 +70,7 @@ A wireframe has no words, so meaning is carried by **token + height**. Every rol
 | Secondary CTA | `cta-secondary` | `ShapeCta tone="secondary"` (generated: the second action, hero-simple `secondaryAction`; theme panels: `shape.ctaSecondary`) (`data-slot="button"`) | `bg-secondary` | `h-10` (40px, control step) | `w-24`, no text, `aria-hidden`; apart from the heading bars by height |
 | Avatar | `avatar` | `ShapeAvatar` (generated) | `bg-accent` | square `h-16 w-16` + `rounded-full` | accent only for emphasis (avatar, badge) |
 | Badge | `badge` | `Badge` | `bg-accent` | `h-6` (24px), `w-16` | eyebrow / tag; `rounded-full` + `data-slot="badge"` (theme badge radius, unset: pill) |
-| Media | `media` | `Media` | `bg-muted` | `ratio`: `4/3` (default), `video`, `21/9` (full-width rows, e.g. hero media-top) | base64 light / dark hatch (16px diagonal tiles, no stretching at any size), switched by `dark:hidden` / `dark:block`; centred `bg-background` circle; `data-slot="media-frame"` |
+| Media | `media` | `Media` | `bg-muted` | `ratio`: `4/3` (default), `video`, `21/9` (full-width rows, e.g. hero media-top); `fill="half"` (split-simple): `bg-muted rounded-none`, `md:aspect-auto md:h-full`, the picture fills its half | base64 light / dark hatch (16px diagonal tiles, no stretching at any size), switched by `dark:hidden` / `dark:block`; centred `bg-background` circle; `data-slot="media-frame"` |
 | Card surface | `surface` | `Surface` (`data-slot="card"`) | `bg-card` + `border border-border` | content | `p-8`; wraps other shapes, not a content field |
 
 Default tokens (no skin, no palette) are wireframe-tuned in `packages/theme/src/css.ts` (`FALLBACK`): light muted 0.955 / secondary 0.90 / accent oklch(0.82 0.08 255) / primary 0.205; dark muted 0.25 / secondary 0.38 / accent oklch(0.45 0.09 255) / primary 0.922. Skins and custom palettes bring their own values.

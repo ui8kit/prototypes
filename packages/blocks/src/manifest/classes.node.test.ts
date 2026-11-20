@@ -43,7 +43,7 @@ describe("one source: generated/classes.json", () => {
 
   it("the align setting values are the text-align table, all logical", () => {
     assert.deepEqual([...BLOCK_ALIGNS], Object.keys(generated.textAlign));
-    for (const b of BLOCKS) assert.deepEqual(settingValues(b.settings.align!), [...BLOCK_ALIGNS], b.id);
+    for (const b of BLOCKS.filter((x) => x.settings.align)) assert.deepEqual(settingValues(b.settings.align!), [...BLOCK_ALIGNS], b.id);
     assert.deepEqual(Object.values(generated.textAlign), ["text-start", "text-center", "text-end"]);
     assert.equal(layout.textAlign, generated.textAlign);
   });

@@ -86,7 +86,15 @@ describe.runIf(LISTS.length > 0)("list width", () => {
 
 describe("align setting (start | center | end, logical: docs/adr/0002-align-as-setting.md)", () => {
   const ITEMS = { start: "items-start", center: "items-center", end: "items-end" } as const;
-  it.each(BLOCKS.flatMap((b) => b.variants.flatMap((v) => (["start", "center", "end"] as const).map((a) => [b.id, v.id, a] as const))))("%s / %s / %s", (item, variant, align) => {
+  // the blocks with the align setting; split-simple has none: its copy is fixed at the start, a saved align changes nothing
+  const ALIGNED = BLOCKS.filter((b) => b.settings.align);
+  it.each(BLOCKS.filter((b) => !b.settings.align).flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)))("%s / %s: no align setting, the copy at the start", (item, variant) => {
+    for (const a of [undefined, "center", "end"] as const) {
+      const t = wireframe(item, variant, a ? { align: a } : undefined).querySelector('[data-place="title"]')!;
+      expect(t.parentElement!.classList.contains("items-start"), `${a}`).toBe(true);
+    }
+  });
+  it.each(ALIGNED.flatMap((b) => b.variants.flatMap((v) => (["start", "center", "end"] as const).map((a) => [b.id, v.id, a] as const))))("%s / %s / %s", (item, variant, align) => {
     const s = wireframe(item, variant, { align });
     const title = s.querySelector('[data-place="title"]')!;
     expect(title.parentElement!.classList.contains(ITEMS[align]), title.parentElement!.className).toBe(true);
@@ -98,7 +106,7 @@ describe("align setting (start | center | end, logical: docs/adr/0002-align-as-s
 
   // the variant default (contract variants[].settings.align, e.g. a centred composition) is drawn when no align is saved,
   // the contract default (start) otherwise; every saved align overrides it
-  it.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)))("%s / %s: the variant default, then the prop", (item, variant) => {
+  it.each(ALIGNED.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)))("%s / %s: the variant default, then the prop", (item, variant) => {
     const b = BLOCK_BY_ID[item]!;
     const want = variantSettings(b, variant).align ?? "start";
     expect(want).toBe(b.variants.find((v) => v.id === variant)!.settings?.align ?? b.settings.align!.default);
@@ -111,7 +119,7 @@ describe("align setting (start | center | end, logical: docs/adr/0002-align-as-s
   });
 
   it("dir=rtl: the same DOM (start / end are resolved by the browser, not by the block)", () => {
-    for (const b of BLOCKS) for (const align of ["start", "end"] as const) {
+    for (const b of ALIGNED) for (const align of ["start", "end"] as const) {
       const ltr = wireframe(b.id, b.defaultVariant, { align }).outerHTML;
       document.documentElement.setAttribute("dir", "rtl");
       try {

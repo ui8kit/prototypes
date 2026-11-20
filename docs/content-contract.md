@@ -42,6 +42,7 @@ real block from the registry.
 
 - `hero@1`: `badge`, `title` (required), `description`, `image`, `imageAlt`, `imageDark`, `actionLabel`, `actionHref`, `secondaryActionLabel`, `secondaryActionHref` (10 of 10: the second action is the secondary link, drawn only with a label and an address).
   In the clean block the action is a link (`a[href]`) drawn only when both label and href are set.
+- `split@1`: `title` (required), `description`, `image`, `imageAlt`, `imageDark`, `actionLabel`, `actionHref`, `secondaryActionLabel`, `secondaryActionHref` (9 fields; block `split-simple`, category `split`, settings `level`, `padding`, `landmarkLabel`: no `align`, the copy is fixed at the start; video or a sign-in form in place of the picture is a later model version).
 - `team@1`: `title` (required), `description`, `members` (1–12 `SimpleMember`: `id` (required), `avatar`, `title`
   (required), `description`). Members render as `ul` / `li`.
 

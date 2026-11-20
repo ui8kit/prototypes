@@ -25,7 +25,8 @@ export function drawBlock(b: BlockManifest): string {
   const lines: string[] = [];
   for (const v of b.variants)
     for (const padding of PADDINGS) draw(b, v.id, wireframeProps(b, v.id, padding ? { padding } : undefined), padding ?? "unset", lines);
-  for (const v of b.variants)
+  // the align values: only for a block with the align setting (split-simple has none)
+  if (b.settings.align) for (const v of b.variants)
     for (const align of (["start", "center", "end"] as const).filter((a) => a !== (variantSettings(b, v.id).align ?? "start")))
       draw(b, v.id, wireframeProps(b, v.id, { align }), `align-${align}`, lines);
   return lines.join("\n") + "\n";

@@ -156,7 +156,9 @@ describe("settings", () => {
   });
 
   it("align is a setting: start | center | end (the block default is one of them); a variant default is a known setting value; the saved prop wins", () => {
-    for (const b of BLOCKS) {
+    // split-simple has no align setting (its copy is fixed at the start): a saved align is an unknown field there
+    assert.deepEqual(BLOCKS.filter((b) => !b.settings.align).map((b) => b.id), ["split-simple"]);
+    for (const b of BLOCKS.filter((x) => x.settings.align)) {
       assert.deepEqual(settingValues(b.settings.align!), ["start", "center", "end"]);
       // the block default comes from codegen-x (hero-simple start, team-simple center); it is one of the values, never absent
       assert.ok(settingValues(b.settings.align!)!.includes(b.settings.align!.default as never), `${b.id}: align default ${b.settings.align!.default}`);
@@ -176,7 +178,7 @@ describe("settings", () => {
 
   it("splitProps: the contract settings (minus id) are settings, the rest is content", () => {
     for (const b of BLOCKS) {
-      assert.deepEqual(settingKeys(b), ["level", "padding", "align", "landmarkLabel"]);
+      assert.deepEqual(settingKeys(b), ["level", "padding", ...(b.settings.align ? ["align"] : []), "landmarkLabel"]);
       const content = contentOf(b);
       const { settings, content: rest } = splitProps(b, { ...content, level: 3, id: "nope" });
       assert.deepEqual(settings, { level: 3 }, b.id);

@@ -15,6 +15,7 @@ import generated from "../generated/classes.json" with { type: "json" };
 
 export const BLOCK_CATEGORIES = [
   "hero",
+  "split",
   "features",
   "team",
   "cta",
@@ -145,7 +146,8 @@ export function resolveVariant(block: BlockManifest, id: string | undefined): Bl
 export function wireframeProps(block: BlockManifest, variantId: string, props?: BlockSettings): Record<string, unknown> {
   const variant = resolveVariant(block, variantId);
   // the saved align, else the variant's own default (hero-simple mediaTop: center); unset draws the organism default (start)
-  const align = props?.align ?? variant.settings?.align;
+  // a block without the align setting (split-simple: its copy is fixed at the start) takes none
+  const align = block.settings.align ? (props?.align ?? variant.settings?.align) : undefined;
   return {
     ...variant.axes,
     ...(props?.padding ? { padding: props.padding } : {}),
