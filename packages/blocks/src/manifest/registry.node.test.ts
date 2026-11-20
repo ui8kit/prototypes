@@ -155,10 +155,11 @@ describe("settings", () => {
         }
   });
 
-  it("align is a setting: start | center | end (default start); a variant default is a known setting value; the saved prop wins", () => {
+  it("align is a setting: start | center | end (the block default is one of them); a variant default is a known setting value; the saved prop wins", () => {
     for (const b of BLOCKS) {
       assert.deepEqual(settingValues(b.settings.align!), ["start", "center", "end"]);
-      assert.equal(b.settings.align!.default, "start");
+      // the block default comes from codegen-x (hero-simple start, team-simple center); it is one of the values, never absent
+      assert.ok(settingValues(b.settings.align!)!.includes(b.settings.align!.default as never), `${b.id}: align default ${b.settings.align!.default}`);
       for (const v of b.variants) {
         for (const [k, x] of Object.entries(v.settings ?? {})) {
           assert.ok(k in b.settings, `${b.id}/${v.id}: setting ${k}`);

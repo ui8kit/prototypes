@@ -11,7 +11,7 @@ right-to-left pages.
 
 ## Decision
 
-- `align` is a setting next to `level` / `padding` (in `props`, ADR 0001): `start` | `center` | `end`, default `start`,
+- `align` is a setting next to `level` / `padding` (in `props`, ADR 0001): `start` | `center` | `end`, default `start` (the block default of the contract; TeamSimple: `center`, owner decision 2026-11-20: its member grid reads as one composition, start / end stay options),
   one value per block.
 - It renders with logical classes only: `items-start|center|end` on the block's content stack (team: the head, placed with `self-*`, and each member; the
   outer stack stays `items-stretch` so the grid keeps the full width),

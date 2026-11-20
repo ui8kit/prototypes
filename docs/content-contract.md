@@ -26,7 +26,7 @@ This is a block of `@ui8kit/contract` page-spec v2 (`{ id, item, variant, props 
 
 - `props`: the content, valid for the model, plus the contract's `settings` (`docs/adr/0001-settings-in-props.md`):
   `level` (heading level 1–3, default 2; list item titles one level below), `padding` (`compact` py-8 lg:py-16,
-  `standard` py-16 lg:py-32 (default), `spacious` py-24 lg:py-40; a setting, not a variant axis), `align` (`start` (default) | `center` | `end`, logical
+  `standard` py-16 lg:py-32 (default), `spacious` py-24 lg:py-40; a setting, not a variant axis), `align` (`start` (default; team-simple: `center`) | `center` | `end`, logical
   `items-*` / `text-*`, follows `dir`; a variant may carry its own default in `variants[].settings`, hero-simple
   `mediaTop` is `center`; `variantSettings(block, variant)` gives the start values; `docs/adr/0002-align-as-setting.md`) and `landmarkLabel`
   (replaces `aria-labelledby` with `aria-label`). `splitProps()` tells them apart; `validateInstance()` checks a
