@@ -51,7 +51,8 @@ Field budget: 5–10 model paths per model (a list counts one plus its item fiel
 ## Mode
 
 `wireframe` is the only mode: shapes only (`data-shape`), no words, no links, no images, no labelled landmark; lists
-draw `wireframe.items` (3) placeholders. Each shape carries `data-place` (place id) and `data-field` (concrete JSON
+draw one placeholder per column of the variant (`wireItems`: the one whole-number axis, team-simple `cols`: cols2 2, cols3 3,
+cols4 4, cards3 3; no such axis: `wireframe.items`, 3, which is also the default variant's count). Each shape carries `data-place` (place id) and `data-field` (concrete JSON
 pointers, e.g. `/members/1/title`, as `bind()` gives them) for the builder's inspector. That every place of a contract
 has its shape, and the clean blocks themselves (DOM, the action link, the team width), are tested in codegen-x
 `packages/prototypes`.

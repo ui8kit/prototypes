@@ -153,6 +153,20 @@ export function wireframeProps(block: BlockManifest, variantId: string, props?: 
   };
 }
 
+/** The column axis of a contract: the one axis whose values are all whole numbers (team-simple `cols`), else none. */
+export function countAxis(block: Pick<Contract, "axes">): string | undefined {
+  const counts = Object.entries(block.axes).filter(([, vs]) => vs.length > 0 && vs.every((v) => /^[1-9][0-9]?$/.test(v)));
+  return counts.length === 1 ? counts[0]![0] : undefined;
+}
+
+/** How many members a wireframe of the variant draws in a list: one per column of the variant (its count axis), else
+ *  `wireframe.items` (the default variant's count; 3 without a column axis). The generator's rule (codegen-x prototypes). */
+export function wireItems(block: BlockManifest, variantId: string): number {
+  const axis = countAxis(block);
+  const value = axis ? resolveVariant(block, variantId).axes[axis] : undefined;
+  return value ? Number(value) : block.wireframe.items;
+}
+
 /** The settings a variant starts with: the contract defaults, then the variant's own (`settings` of the variant). A saved
  *  block's props override them (`{ ...variantSettings(block, variant), ...splitProps(block, props).settings }`). */
 export function variantSettings(block: BlockManifest, variantId: string): BlockSettings {

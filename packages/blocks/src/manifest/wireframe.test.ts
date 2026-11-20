@@ -6,7 +6,7 @@ import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 import { CATALOG } from "../catalog";
 import { BLOCKS, BLOCK_BY_ID } from "./registry";
-import { bind, variantSettings, wireframeProps, type BlockSettings } from "./types";
+import { bind, variantSettings, wireItems, wireframeProps, type BlockSettings } from "./types";
 
 function wireframe(item: string, variant: string, settings?: BlockSettings): HTMLElement {
   const { container } = render(CATALOG[item]!, { props: wireframeProps(BLOCK_BY_ID[item]!, variant, settings) });
@@ -25,7 +25,7 @@ describe.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)
 
   it("every place of the contract is a shape bound by data-place / data-field", () => {
     const s = wireframe(item, variant);
-    const items = block.wireframe.items;
+    const items = wireItems(block, variant);
     for (const p of block.places)
       for (let i = 0; i < (p.list ? items : 1); i++) {
         const { place, field } = bind(block, p.place, i);
@@ -41,9 +41,20 @@ describe.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)
     const s = wireframe(item, variant);
     expect((s.textContent ?? "").trim()).toBe("");
     expect(all(s, "img, a, button, h1, h2, h3, p")).toHaveLength(0);
-    // a list place is drawn once per wireframe item (block.wireframe.items), in a list
-    for (const p of block.places.filter((x) => x.list)) expect(all(s, `li [data-place="${p.place}"], li[data-place="${p.place}"]`), p.place).toHaveLength(block.wireframe.items);
-    if (block.places.some((x) => x.list)) expect(all(s, "ul > li")).toHaveLength(block.wireframe.items);
+    // a list place is drawn once per column of the variant (wireItems: the count axis, else wireframe.items), in a list
+    const items = wireItems(block, variant);
+    for (const p of block.places.filter((x) => x.list)) expect(all(s, `li [data-place="${p.place}"], li[data-place="${p.place}"]`), p.place).toHaveLength(items);
+    if (block.places.some((x) => x.list)) expect(all(s, "ul > li")).toHaveLength(items);
+  });
+});
+
+describe("wireframe items", () => {
+  it("the default variant draws wireframe.items; a block without a column axis draws wireframe.items in every variant", () => {
+    for (const b of BLOCKS) {
+      expect(wireItems(b, b.defaultVariant), b.id).toBe(b.wireframe.items);
+      if (!Object.values(b.axes).some((vs) => vs.length > 0 && vs.every((v) => /^[1-9][0-9]?$/.test(v))))
+        for (const v of b.variants) expect(wireItems(b, v.id), `${b.id} ${v.id}`).toBe(b.wireframe.items);
+    }
   });
 });
 
