@@ -40,7 +40,7 @@ real block from the registry.
 
 ## Models
 
-- `hero@1`: `badge`, `title` (required), `description`, `image`, `imageAlt`, `imageDark`, `actionLabel`, `actionHref`.
+- `hero@1`: `badge`, `title` (required), `description`, `image`, `imageAlt`, `imageDark`, `actionLabel`, `actionHref`, `secondaryActionLabel`, `secondaryActionHref` (10 of 10: the second action is the secondary link, drawn only with a label and an address).
   In the clean block the action is a link (`a[href]`) drawn only when both label and href are set.
 - `team@1`: `title` (required), `description`, `members` (1–12 `SimpleMember`: `id` (required), `avatar`, `title`
   (required), `description`). Members render as `ul` / `li`.

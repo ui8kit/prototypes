@@ -49,12 +49,16 @@ describe.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)
 
 describe("section padding (theme → padding setting)", () => {
   const PRESETS = { compact: ["py-8", "lg:py-16"], standard: ["py-16", "lg:py-32"], spacious: ["py-24", "lg:py-40"] } as const;
+  // the preset sits on the section, or (a frame whose picture runs to the edge of the screen: split) on the one column of the copy
+  const padded = (s: Element, cls: readonly string[]) => [s, ...all(s, "*")].filter((e) => cls.every((c) => e.classList.contains(c)));
   it.each(BLOCKS.flatMap((b) => b.variants.map((v) => [b.id, v.id] as const)))("%s / %s: every preset", (item, variant) => {
     for (const [padding, cls] of Object.entries(PRESETS)) {
       const s = wireframe(item, variant, { padding: padding as never });
-      for (const c of cls) expect(s.classList.contains(c), `${padding} ${c}`).toBe(true);
+      const on = padded(s, cls);
+      expect(on, `${padding} ${cls.join(" ")}`).toHaveLength(1);
+      if (on[0] !== s) expect(s.getAttribute("class") ?? "", `${padding}: the section of a split frame has no padding of its own`).not.toMatch(/\bpy-/);
     }
-    for (const c of PRESETS.standard) expect(wireframe(item, variant).classList.contains(c)).toBe(true);
+    expect(padded(wireframe(item, variant), PRESETS.standard)).toHaveLength(1);
   });
 });
 

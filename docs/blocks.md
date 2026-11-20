@@ -51,7 +51,7 @@ container padding is `px-4` (16px, an 8px multiple), one value from codegen-x `C
 | Sketch | Block | Content contract | Variants (layout) | Structure |
 | --- | --- | --- | --- | --- |
 | Team row | `TeamSimple` (generated) | `team@1`: title, description, `members: SimpleMember[]` (id, avatar, title, description) | `cols3` / `cols2` / `cols4` / `cards3` (axes `cols`, `surface`) | `section` → container → heading + text → `ul` of `li` (portrait, name, line); the wireframe draws 3 members |
-| Simple hero | `HeroSimple` (generated) | `hero@1`: badge, title, description, image, imageAlt, imageDark, actionLabel, actionHref | `mediaEnd` / `mediaStart` / `mediaTop` (axis `media`) | `section` → container → grid of copy (badge, heading, text, link) and the picture (4:3, 21:9 on top) |
+| Simple hero | `HeroSimple` (generated) | `hero@1`: badge, title, description, image, imageAlt, imageDark, actionLabel, actionHref, secondaryActionLabel, secondaryActionHref | `mediaEnd` / `mediaStart` / `mediaTop` / `splitEnd` / `splitStart` (axes `media`, `frame`: box \| split) | `section` → container → grid of copy (badge, heading, text, a row of up to two links: primary, then secondary) and the picture (4:3, 21:9 on top); split: two halves, the picture to the edge of the screen, the padding on the copy |
 
 The registry (`packages/blocks/src/manifest/registry.ts`, a thin re-export of the generated `src/generated/registry.ts`) is the gallery source. Content contract: `docs/content-contract.md`. Adding a block: `docs/adding-a-block.md`.
 
@@ -66,7 +66,7 @@ A wireframe has no words, so meaning is carried by **token + height**. Every rol
 | Heading | `heading` | `Heading` | `bg-secondary` | `h-4` (16px) | card / item titles |
 | Large heading (H1/H2) | `heading-lg` | `Heading size="lg"` | `bg-secondary` | `h-6` (24px) | section titles |
 | Primary CTA | `cta-primary` | `ShapeCta` (generated; theme panels: `shape.cta`) (`data-slot="button"`) | `bg-primary` | `h-10` (40px, control step) | `w-24`, no text, `aria-hidden` |
-| Secondary CTA | `cta-secondary` | `shape.ctaSecondary` (theme panels only) | `bg-secondary` | `h-10` | `w-24`, no text |
+| Secondary CTA | `cta-secondary` | `ShapeCta tone="secondary"` (generated: the second action, hero-simple `secondaryAction`; theme panels: `shape.ctaSecondary`) (`data-slot="button"`) | `bg-secondary` | `h-10` (40px, control step) | `w-24`, no text, `aria-hidden`; apart from the heading bars by height |
 | Avatar | `avatar` | `ShapeAvatar` (generated) | `bg-accent` | square `h-16 w-16` + `rounded-full` | accent only for emphasis (avatar, badge) |
 | Badge | `badge` | `Badge` | `bg-accent` | `h-6` (24px), `w-16` | eyebrow / tag; `rounded-full` + `data-slot="badge"` (theme badge radius, unset: pill) |
 | Media | `media` | `Media` | `bg-muted` | `ratio`: `4/3` (default), `video`, `21/9` (full-width rows, e.g. hero media-top) | base64 light / dark hatch (16px diagonal tiles, no stretching at any size), switched by `dark:hidden` / `dark:block`; centred `bg-background` circle; `data-slot="media-frame"` |

@@ -50,8 +50,8 @@ export const role = {
   heading: R.heading,
   headingLg: R["heading-lg"],
   ctaPrimary: R["cta-primary"],
-  /** gallery-only: the theme panels' secondary button bar */
-  ctaSecondary: "bg-secondary rounded h-10",
+  /** the second action of a block (generated ShapeCta tone="secondary") and the theme panels' secondary button bar */
+  ctaSecondary: R["cta-secondary"],
   /** accent pill; its corner follows `--radius-badge` (unset: the pill) */
   badge: R.badge,
   media: R.media,

@@ -53,6 +53,7 @@ describe("one source: generated/classes.json", () => {
     assert.equal(role.heading, generated.roles.heading);
     assert.equal(role.headingLg, generated.roles["heading-lg"]);
     assert.equal(role.ctaPrimary, generated.roles["cta-primary"]);
+    assert.equal(role.ctaSecondary, generated.roles["cta-secondary"]);
     assert.equal(role.badge, generated.roles.badge);
     assert.equal(role.media, generated.roles.media);
     assert.equal(role.surface, generated.roles.surface);
