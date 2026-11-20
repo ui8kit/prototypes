@@ -21,6 +21,7 @@ import FooterSimple from "./svelte/blocks/footer-simple.svelte";
 import GalleryHero from "./svelte/blocks/gallery-hero.svelte";
 import HeaderSimple from "./svelte/blocks/header-simple.svelte";
 import HeroSimple from "./svelte/blocks/hero-simple.svelte";
+import HoursSimple from "./svelte/blocks/hours-simple.svelte";
 import IntroSimple from "./svelte/blocks/intro-simple.svelte";
 import LocationsSimple from "./svelte/blocks/locations-simple.svelte";
 import LogosSimple from "./svelte/blocks/logos-simple.svelte";
@@ -36,6 +37,7 @@ import PromoSimple from "./svelte/blocks/promo-simple.svelte";
 import PullQuoteSimple from "./svelte/blocks/pull-quote-simple.svelte";
 import PurchaseSimple from "./svelte/blocks/purchase-simple.svelte";
 import RatingSimple from "./svelte/blocks/rating-simple.svelte";
+import RoomsSimple from "./svelte/blocks/rooms-simple.svelte";
 import SpecsSimple from "./svelte/blocks/specs-simple.svelte";
 import SplitSimple from "./svelte/blocks/split-simple.svelte";
 import StatsSimple from "./svelte/blocks/stats-simple.svelte";
@@ -46,7 +48,7 @@ import TeamSimple from "./svelte/blocks/team-simple.svelte";
 import TestimonialsSimple from "./svelte/blocks/testimonials-simple.svelte";
 import TopicsSimple from "./svelte/blocks/topics-simple.svelte";
 
-export { ArticleLead, ArticleSimple, ChaptersSimple, ChoiceLinks, CollectionsSimple, CompareSimple, ContactsSimple, CourseOutline, CtaSimple, ErrorSimple, EventIntro, FaqSimple, FeatureShowcaseSimple, FeaturesSimple, FigureSimple, FooterSimple, GalleryHero, HeaderSimple, HeroSimple, IntroSimple, LocationsSimple, LogosSimple, MenuSimple, OffersSimple, PhotosSimple, PricingSimple, ProductReviews, ProductSimple, ProductsSimple, ProfileIntro, PromoSimple, PullQuoteSimple, PurchaseSimple, RatingSimple, SpecsSimple, SplitSimple, StatsSimple, StepsSimple, StorePolicies, StoriesSimple, TeamSimple, TestimonialsSimple, TopicsSimple };
+export { ArticleLead, ArticleSimple, ChaptersSimple, ChoiceLinks, CollectionsSimple, CompareSimple, ContactsSimple, CourseOutline, CtaSimple, ErrorSimple, EventIntro, FaqSimple, FeatureShowcaseSimple, FeaturesSimple, FigureSimple, FooterSimple, GalleryHero, HeaderSimple, HeroSimple, HoursSimple, IntroSimple, LocationsSimple, LogosSimple, MenuSimple, OffersSimple, PhotosSimple, PricingSimple, ProductReviews, ProductSimple, ProductsSimple, ProfileIntro, PromoSimple, PullQuoteSimple, PurchaseSimple, RatingSimple, RoomsSimple, SpecsSimple, SplitSimple, StatsSimple, StepsSimple, StorePolicies, StoriesSimple, TeamSimple, TestimonialsSimple, TopicsSimple };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const CATALOG: Record<string, Component<any>> = {
@@ -69,6 +71,7 @@ export const CATALOG: Record<string, Component<any>> = {
   "gallery-hero": GalleryHero,
   "header-simple": HeaderSimple,
   "hero-simple": HeroSimple,
+  "hours-simple": HoursSimple,
   "intro-simple": IntroSimple,
   "locations-simple": LocationsSimple,
   "logos-simple": LogosSimple,
@@ -84,6 +87,7 @@ export const CATALOG: Record<string, Component<any>> = {
   "pull-quote-simple": PullQuoteSimple,
   "purchase-simple": PurchaseSimple,
   "rating-simple": RatingSimple,
+  "rooms-simple": RoomsSimple,
   "specs-simple": SpecsSimple,
   "split-simple": SplitSimple,
   "stats-simple": StatsSimple,
