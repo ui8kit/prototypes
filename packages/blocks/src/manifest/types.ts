@@ -53,6 +53,8 @@ export const BLOCK_CATEGORIES = [
   "reviews",
   "menu",
   "promo",
+  "timeline",
+  "cases",
   "services",
   "guarantees",
   "rooms",

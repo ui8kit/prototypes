@@ -2,6 +2,7 @@
 // The content types of every model.
 export type { ArticleLeadContent } from "./article-lead@1";
 export type { ArticleSection, ArticleContent } from "./article@1";
+export type { CaseStudy, CasesContent } from "./cases@1";
 export type { ChapterItem, ChaptersContent } from "./chapters@1";
 export type { ChoiceItem, ChoicesContent } from "./choices@1";
 export type { CollectionItem, CollectionsContent } from "./collections@1";
@@ -46,4 +47,5 @@ export type { PolicyItem, StorePolicyContent } from "./store-policy@1";
 export type { SimpleStory, StoriesContent } from "./stories@1";
 export type { SimpleMember, TeamContent } from "./team@1";
 export type { SimpleQuote, TestimonialsContent } from "./testimonials@1";
+export type { TimelineStep, TimelineContent } from "./timeline@1";
 export type { TopicItem, TopicsContent } from "./topics@1";

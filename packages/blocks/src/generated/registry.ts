@@ -3,6 +3,7 @@
 // its validate(). No .svelte import: node loads it as is. ui8kit/prototypes re-exports it (src/manifest/registry.ts).
 import articleLead from "./contracts/article-lead/1.json" with { type: "json" };
 import articleSimple from "./contracts/article-simple/1.json" with { type: "json" };
+import casesSimple from "./contracts/cases-simple/1.json" with { type: "json" };
 import chaptersSimple from "./contracts/chapters-simple/1.json" with { type: "json" };
 import choiceLinks from "./contracts/choice-links/1.json" with { type: "json" };
 import collectionsSimple from "./contracts/collections-simple/1.json" with { type: "json" };
@@ -47,9 +48,11 @@ import storePolicies from "./contracts/store-policies/1.json" with { type: "json
 import storiesSimple from "./contracts/stories-simple/1.json" with { type: "json" };
 import teamSimple from "./contracts/team-simple/1.json" with { type: "json" };
 import testimonialsSimple from "./contracts/testimonials-simple/1.json" with { type: "json" };
+import timelineSimple from "./contracts/timeline-simple/1.json" with { type: "json" };
 import topicsSimple from "./contracts/topics-simple/1.json" with { type: "json" };
 import { model as articleLead1, validateArticleLeadContent } from "./models/article-lead@1";
 import { model as article1, validateArticleContent } from "./models/article@1";
+import { model as cases1, validateCasesContent } from "./models/cases@1";
 import { model as chapters1, validateChaptersContent } from "./models/chapters@1";
 import { model as choices1, validateChoicesContent } from "./models/choices@1";
 import { model as collections1, validateCollectionsContent } from "./models/collections@1";
@@ -94,16 +97,18 @@ import { model as storePolicy1, validateStorePolicyContent } from "./models/stor
 import { model as stories1, validateStoriesContent } from "./models/stories@1";
 import { model as team1, validateTeamContent } from "./models/team@1";
 import { model as testimonials1, validateTestimonialsContent } from "./models/testimonials@1";
+import { model as timeline1, validateTimelineContent } from "./models/timeline@1";
 import { model as topics1, validateTopicsContent } from "./models/topics@1";
 import type { Issue, ModelSpec } from "./models/validate";
 
 /** the contracts (out/contracts/<item>/<version>.json), in manifest order */
-export const CONTRACTS: readonly unknown[] = [articleLead, articleSimple, chaptersSimple, choiceLinks, collectionsSimple, compareSimple, contactsSimple, courseOutline, ctaSimple, errorSimple, eventIntro, faqSimple, featureShowcaseSimple, featuresSimple, figureSimple, footerSimple, galleryHero, guaranteesSimple, headerSimple, heroSimple, hoursSimple, introSimple, locationsSimple, logosSimple, menuSimple, offersSimple, photosSimple, pricingSimple, productReviews, productSimple, productsSimple, profileIntro, promoSimple, pullQuoteSimple, purchaseSimple, ratingSimple, roomsSimple, servicesSimple, specsSimple, splitSimple, statsSimple, stepsSimple, storePolicies, storiesSimple, teamSimple, testimonialsSimple, topicsSimple];
+export const CONTRACTS: readonly unknown[] = [articleLead, articleSimple, casesSimple, chaptersSimple, choiceLinks, collectionsSimple, compareSimple, contactsSimple, courseOutline, ctaSimple, errorSimple, eventIntro, faqSimple, featureShowcaseSimple, featuresSimple, figureSimple, footerSimple, galleryHero, guaranteesSimple, headerSimple, heroSimple, hoursSimple, introSimple, locationsSimple, logosSimple, menuSimple, offersSimple, photosSimple, pricingSimple, productReviews, productSimple, productsSimple, profileIntro, promoSimple, pullQuoteSimple, purchaseSimple, ratingSimple, roomsSimple, servicesSimple, specsSimple, splitSimple, statsSimple, stepsSimple, storePolicies, storiesSimple, teamSimple, testimonialsSimple, timelineSimple, topicsSimple];
 
 /** item -> catalog category (the id of its content model) */
 export const CATEGORIES: Readonly<Record<string, string>> = {
   "article-lead": "article-lead",
   "article-simple": "article",
+  "cases-simple": "cases",
   "chapters-simple": "chapters",
   "choice-links": "choices",
   "collections-simple": "collections",
@@ -148,6 +153,7 @@ export const CATEGORIES: Readonly<Record<string, string>> = {
   "stories-simple": "stories",
   "team-simple": "team",
   "testimonials-simple": "testimonials",
+  "timeline-simple": "timeline",
   "topics-simple": "topics",
 };
 
@@ -155,6 +161,7 @@ export const CATEGORIES: Readonly<Record<string, string>> = {
 export const MODELS: Readonly<Record<string, { spec: ModelSpec; validate: (value: unknown) => Issue[] }>> = {
   "article-lead@1": { spec: articleLead1 as unknown as ModelSpec, validate: validateArticleLeadContent },
   "article@1": { spec: article1 as unknown as ModelSpec, validate: validateArticleContent },
+  "cases@1": { spec: cases1 as unknown as ModelSpec, validate: validateCasesContent },
   "chapters@1": { spec: chapters1 as unknown as ModelSpec, validate: validateChaptersContent },
   "choices@1": { spec: choices1 as unknown as ModelSpec, validate: validateChoicesContent },
   "collections@1": { spec: collections1 as unknown as ModelSpec, validate: validateCollectionsContent },
@@ -199,5 +206,6 @@ export const MODELS: Readonly<Record<string, { spec: ModelSpec; validate: (value
   "stories@1": { spec: stories1 as unknown as ModelSpec, validate: validateStoriesContent },
   "team@1": { spec: team1 as unknown as ModelSpec, validate: validateTeamContent },
   "testimonials@1": { spec: testimonials1 as unknown as ModelSpec, validate: validateTestimonialsContent },
+  "timeline@1": { spec: timeline1 as unknown as ModelSpec, validate: validateTimelineContent },
   "topics@1": { spec: topics1 as unknown as ModelSpec, validate: validateTopicsContent },
 };
